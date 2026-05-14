@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { Search, DollarSign, Calculator, ChevronLeft, ChevronRight, Clock, CheckCircle, AlertTriangle, Plus, FileText, CreditCard, ExternalLink, Banknote, Loader2 } from 'lucide-react';
+import { Search, DollarSign, Calculator, ChevronLeft, ChevronRight, Clock, CheckCircle, AlertTriangle, Plus, FileText, CreditCard, ExternalLink, Banknote, Loader2, X } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { 
@@ -88,16 +88,35 @@ function CalculatePayoutModal({
       style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
     >
       <div className="rounded-[4px] max-w-lg w-full shadow-xl flex flex-col max-h-[90vh] border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
-          <h2 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
-            <Calculator className="w-4 h-4" style={{ color: 'var(--primary)' }} />
-            Calculate Pharmacy Payout
-          </h2>
-          <button onClick={handleClose} className="p-0.5" style={{ color: 'var(--outline)' }}>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+        {/* Header — same shell as Distributors modals */}
+        <div
+          className="px-4 py-3 flex items-center justify-between gap-2 shrink-0 border-b"
+          style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div
+              className="w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0"
+              style={{ backgroundColor: 'var(--surface-container-high)' }}
+            >
+              <Calculator className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-sm font-bold leading-tight" style={{ color: 'var(--foreground)' }}>
+                Calculate Pharmacy Payout
+              </h2>
+              <p className="text-xs mt-0.5 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>
+                Select batch and pharmacy, then calculate or create a payment record
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="p-1 rounded-[4px] hover:bg-primary-50/40 cursor-pointer shrink-0"
+            style={{ color: 'var(--outline)' }}
+            aria-label="Close"
+          >
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -206,14 +225,16 @@ function CalculatePayoutModal({
         {/* Footer */}
         <div className="flex justify-end gap-2 px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
           <button
+            type="button"
             onClick={handleClose}
-            className="px-3 py-1.5 text-xs border rounded transition-colors"
+            className="px-3 py-1.5 text-xs border rounded transition-colors cursor-pointer"
             style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)', backgroundColor: 'var(--surface-container-lowest)' }}
           >
             Cancel
           </button>
           {!calculation ? (
             <button
+              type="button"
               onClick={handleCalculate}
               disabled={(() => {
                 const picked = batchPharmacies.find((p) => p.id === pharmacyId);
@@ -225,16 +246,19 @@ function CalculatePayoutModal({
                   !pharmacyEligible(picked)
                 );
               })()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-primary-500 text-white rounded hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer"
+              style={{ backgroundColor: 'var(--primary)', color: 'var(--on-primary)' }}
             >
               <Calculator className={`w-3.5 h-3.5 ${isCalculating ? 'animate-spin' : ''}`} />
               {isCalculating ? 'Calculating...' : 'Calculate Payout'}
             </button>
           ) : (
             <button
+              type="button"
               onClick={onCreatePayment}
               disabled={isCreating}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-primary-500 text-white rounded hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer"
+              style={{ backgroundColor: 'var(--primary)', color: 'var(--on-primary)' }}
             >
               <Plus className={`w-3.5 h-3.5 ${isCreating ? 'animate-spin' : ''}`} />
               {isCreating ? 'Creating...' : 'Create Payment Record'}
@@ -273,11 +297,19 @@ function IssueCheckModal({
   const [returnReferenceNumber, setReturnReferenceNumber] = useState('');
   const [notes, setNotes] = useState('');
 
+  // Reset whenever the modal opens for a different payment (success path only clears parent state).
   useEffect(() => {
-    if (generatedCheckNumber) {
-      setCheckNumber(generatedCheckNumber);
-    }
-  }, [generatedCheckNumber]);
+    if (!isOpen || !payment) return;
+    setCheckNumber('');
+    setPaymentType('ocs');
+    setReturnReferenceNumber('');
+    setNotes('');
+  }, [isOpen, payment?.id]);
+
+  useEffect(() => {
+    if (!isOpen || !payment || !generatedCheckNumber) return;
+    setCheckNumber(generatedCheckNumber);
+  }, [isOpen, payment?.id, generatedCheckNumber]);
 
   const handleClose = () => {
     setCheckNumber('');
@@ -302,16 +334,35 @@ function IssueCheckModal({
   return (
     <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}>
       <div className="rounded-[4px] max-w-lg w-full shadow-xl flex flex-col max-h-[90vh] border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
-          <h2 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
-            <Banknote className="w-4 h-4" style={{ color: 'var(--secondary)' }} />
-            Issue Check Payment
-          </h2>
-          <button onClick={handleClose} className="p-0.5" style={{ color: 'var(--outline)' }}>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+        {/* Header — same shell as Distributors modals */}
+        <div
+          className="px-4 py-3 flex items-center justify-between gap-2 shrink-0 border-b"
+          style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div
+              className="w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0"
+              style={{ backgroundColor: 'var(--surface-container-high)' }}
+            >
+              <Banknote className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-sm font-bold leading-tight" style={{ color: 'var(--foreground)' }}>
+                Issue Check Payment
+              </h2>
+              <p className="text-xs mt-0.5 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>
+                Enter check details, then mark this pharmacy payout as paid
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="p-1 rounded-[4px] hover:bg-primary-50/40 cursor-pointer shrink-0"
+            style={{ color: 'var(--outline)' }}
+            aria-label="Close"
+          >
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -362,9 +413,10 @@ function IssueCheckModal({
                 className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
               />
               <button
+                type="button"
                 onClick={onGenerateCheckNumber}
                 disabled={isGenerating}
-                className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 border border-gray-300 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors whitespace-nowrap"
+                className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 border border-gray-300 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors whitespace-nowrap cursor-pointer disabled:cursor-not-allowed"
               >
                 {isGenerating ? 'Generating...' : 'Auto-Generate'}
               </button>
@@ -432,17 +484,19 @@ function IssueCheckModal({
         {/* Footer */}
         <div className="flex justify-end gap-2 px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
           <button
+            type="button"
             onClick={handleClose}
-            className="px-3 py-1.5 text-xs border rounded transition-colors"
+            className="px-3 py-1.5 text-xs border rounded transition-colors cursor-pointer"
             style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)', backgroundColor: 'var(--surface-container-lowest)' }}
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={!checkNumber.trim() || isIssuing}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-white rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            style={{ backgroundColor: 'var(--secondary)' }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer hover:opacity-90 active:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-[var(--secondary)]"
+            style={{ backgroundColor: 'var(--secondary)', color: 'var(--on-secondary)' }}
           >
             <CheckCircle className={`w-3.5 h-3.5 ${isIssuing ? 'animate-spin' : ''}`} />
             {isIssuing ? 'Issuing Check...' : 'Issue Check & Mark Paid'}
@@ -575,6 +629,7 @@ function PharmacyPaymentsPageContent() {
 
   // Issue Check handlers
   const handleOpenIssueCheckModal = (payment: PharmacyPayment) => {
+    dispatch(clearGeneratedCheckNumber());
     setIssueCheckModal(payment);
   };
 
@@ -815,8 +870,8 @@ function PharmacyPaymentsPageContent() {
                           <button
                             type="button"
                             onClick={() => setViewModal(payment)}
-                            className="px-2 py-1 text-[10px] font-medium border rounded transition-colors"
-                            style={{ color: 'var(--on-primary-container)', backgroundColor: 'var(--primary-container)', borderColor: 'var(--outline-variant)' }}
+                            className="px-2 py-1 text-[10px] font-semibold border rounded transition-colors shadow-sm hover:brightness-110 active:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 cursor-pointer"
+                            style={{ color: 'var(--on-primary)', backgroundColor: 'var(--primary)', borderColor: 'var(--primary)' }}
                           >
                             View
                           </button>
@@ -824,7 +879,7 @@ function PharmacyPaymentsPageContent() {
                             <button
                               type="button"
                               onClick={() => handleStatusUpdate(payment.id, 'processing')}
-                              className="px-4 py-1 text-[10px] font-medium border rounded transition-colors whitespace-nowrap"
+                              className="px-4 py-1 text-[10px] font-semibold border rounded transition-[filter,box-shadow] whitespace-nowrap shadow-sm hover:brightness-[0.9] active:brightness-[0.85] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 cursor-pointer"
                               style={{ color: 'var(--on-tertiary-container)', backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}
                             >
                              Mark as Processing
@@ -834,7 +889,7 @@ function PharmacyPaymentsPageContent() {
                             <button
                               type="button"
                               onClick={() => handleOpenIssueCheckModal(payment)}
-                              className="px-4 py-1 text-[10px] font-medium border rounded transition-colors inline-flex items-center gap-1 whitespace-nowrap"
+                              className="px-4 py-1 text-[10px] font-semibold border rounded transition-[filter,box-shadow] inline-flex items-center gap-1 whitespace-nowrap shadow-sm hover:brightness-[0.9] active:brightness-[0.85] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 cursor-pointer"
                               style={{ color: 'var(--on-secondary-container)', backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}
                             >
                               <Banknote className="w-3 h-3" />
@@ -845,7 +900,7 @@ function PharmacyPaymentsPageContent() {
                             <button
                               type="button"
                               onClick={() => handleStatusUpdate(payment.id, 'paid')}
-                              className="px-2 py-1 text-[10px] font-medium border rounded transition-colors"
+                              className="px-2 py-1 text-[10px] font-medium border rounded transition-colors cursor-pointer"
                               style={{ color: 'var(--on-secondary-container)', backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}
                             >
                               Mark Paid
@@ -856,7 +911,7 @@ function PharmacyPaymentsPageContent() {
                               type="button"
                               onClick={() => handleViewCheckPdf(payment.checkNumber!)}
                               disabled={pdfLoading === payment.checkNumber}
-                              className="px-2 py-1 text-[10px] font-medium border rounded transition-colors inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="px-2 py-1 text-[10px] font-medium border rounded transition-colors inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                               style={{ color: 'var(--on-tertiary-container)', backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}
                             >
                               {pdfLoading === payment.checkNumber ? (
@@ -956,25 +1011,37 @@ function PharmacyPaymentsPageContent() {
               style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
-              <div className="rounded-t-xl px-5 py-3" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-white/20 rounded-[4px]">
-                    <DollarSign className="w-4 h-4 text-white" />
+              {/* Header — same shell as Distributors modals */}
+              <div
+                className="rounded-t-xl px-4 py-3 flex items-center justify-between gap-2 shrink-0 border-b"
+                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className="w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: 'var(--surface-container-high)' }}
+                  >
+                    <DollarSign className="w-4 h-4" style={{ color: 'var(--primary)' }} />
                   </div>
-                  <h2 className="text-sm font-bold text-white">Payment Details</h2>
+                  <div className="min-w-0">
+                    <h2 id="payment-details-title" className="text-sm font-bold leading-tight" style={{ color: 'var(--foreground)' }}>
+                      Payment Details
+                    </h2>
+                    <p className="text-xs mt-0.5 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>
+                      Review payout, check info, and update status
+                    </p>
+                  </div>
                 </div>
-                <button 
-                  onClick={() => setViewModal(null)} 
-                  className="text-white/80 hover:text-white p-0.5 transition-colors cursor-pointer"
+                <button
+                  type="button"
+                  onClick={() => setViewModal(null)}
+                  className="p-1 rounded-[4px] hover:bg-primary-50/40 cursor-pointer shrink-0"
+                  style={{ color: 'var(--outline)' }}
+                  aria-label="Close"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            </div>
 
             {/* Content */}
             <div className="px-5 py-4 overflow-y-auto flex-1 space-y-4">
@@ -1166,18 +1233,20 @@ function PharmacyPaymentsPageContent() {
                 </button>
                 {viewModal.status === 'pending' && (
                   <button
+                    type="button"
                     onClick={() => { handleStatusUpdate(viewModal.id, 'processing'); setViewModal(null); }}
-                    className="px-5 py-2 text-xs text-white rounded-[4px] transition-colors font-medium cursor-pointer"
-                    style={{ backgroundColor: 'var(--primary)' }}
+                    className="px-5 py-2 text-xs rounded-[4px] font-semibold cursor-pointer shadow-sm transition-opacity hover:opacity-90 active:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1"
+                    style={{ backgroundColor: 'var(--primary)', color: 'var(--on-primary)' }}
                   >
                     Mark as Processing
                   </button>
                 )}
                 {viewModal.status === 'processing' && !viewModal.checkNumber && (
                   <button
+                    type="button"
                     onClick={() => { setViewModal(null); handleOpenIssueCheckModal(viewModal); }}
-                    className="inline-flex items-center gap-1.5 px-5 py-2 text-xs text-white rounded-[4px] transition-colors font-medium cursor-pointer"
-                    style={{ backgroundColor: 'var(--secondary)' }}
+                    className="inline-flex items-center gap-1.5 px-5 py-2 text-xs rounded-[4px] font-semibold cursor-pointer shadow-sm transition-opacity hover:opacity-90 active:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1"
+                    style={{ backgroundColor: 'var(--secondary)', color: 'var(--on-secondary)' }}
                   >
                     <Banknote className="w-3.5 h-3.5" />
                     Issue Check
@@ -1185,9 +1254,10 @@ function PharmacyPaymentsPageContent() {
                 )}
                 {viewModal.status === 'processing' && viewModal.checkNumber && (
                   <button
+                    type="button"
                     onClick={() => { handleStatusUpdate(viewModal.id, 'paid'); setViewModal(null); }}
-                    className="px-4 py-2 text-xs text-white rounded-[4px] transition-colors font-medium cursor-pointer"
-                    style={{ backgroundColor: 'var(--secondary)' }}
+                    className="px-4 py-2 text-xs rounded-[4px] font-semibold cursor-pointer shadow-sm transition-opacity hover:opacity-90 active:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1"
+                    style={{ backgroundColor: 'var(--secondary)', color: 'var(--on-secondary)' }}
                   >
                     Mark as Paid
                   </button>

@@ -26,10 +26,12 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react', '@clerk/nextjs'],
   },
   webpack: (config, { dev, isServer }) => {
-    // First compile in dev can take several seconds; default chunk wait may surface as
-    // ChunkLoadError for app/layout. Give the browser longer to receive lazy chunks.
-    if (dev && !isServer && config.output) {
-      config.output.chunkLoadTimeout = 120000
+    // Next.js overrides webpack's default chunkLoadTimeout to a low value in dev.
+    // The first cold compile of app/layout (Clerk + all providers) can take 30-60s,
+    // so give the browser 5 minutes before it gives up and throws ChunkLoadError.
+    if (dev && !isServer) {
+      config.output = config.output ?? {}
+      config.output.chunkLoadTimeout = 300000
     }
     return config
   },

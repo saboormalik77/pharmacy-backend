@@ -262,6 +262,7 @@ export default function BatchWorkflowPage() {
         if (sentCount > 0) {
             addToast(`RA request${sentCount > 1 ? 's' : ''} sent to ${distributorName}`, 'success');
             dispatch(fetchBatchDetail(batchId));
+            dispatch(fetchBatchWorkflow(batchId));
         }
     };
 
@@ -304,6 +305,7 @@ export default function BatchWorkflowPage() {
         if (totalSent > 0) {
             addToast(`${totalSent} RA request${totalSent > 1 ? 's' : ''} sent to all distributors.`, 'success');
             dispatch(fetchBatchDetail(batchId));
+            dispatch(fetchBatchWorkflow(batchId));
         }
     };
 
@@ -402,6 +404,20 @@ export default function BatchWorkflowPage() {
 
             {/* Progress bar */}
             <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow px-5 pt-4 pb-3">
+                {allDone && (
+                    <div
+                        className="mb-3 flex items-center justify-center gap-2 rounded-[4px] border px-3 py-2"
+                        style={{
+                            backgroundColor: 'var(--secondary-container)',
+                            borderColor: 'var(--secondary)',
+                            color: 'var(--on-secondary-container)',
+                        }}
+                    >
+                        <CheckCircle className="w-4 h-4 shrink-0" style={{ color: 'var(--secondary)' }} />
+                        <span className="text-xs font-bold uppercase tracking-wide">Completed</span>
+                        <span className="text-[11px] font-medium">All close-out workflow steps are finished.</span>
+                    </div>
+                )}
                 <div className="flex items-center gap-0">
                     {WORKFLOW_STEPS.map((step, idx) => {
                         const done = isStepComplete(step.key);
@@ -410,9 +426,9 @@ export default function BatchWorkflowPage() {
                             <div key={step.key} className="flex items-center flex-1">
                                 <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold border-2 transition-colors ${
                                     done
-                                        ? 'bg-[var(--secondary)] border-[var(--secondary)] text-white'
+                                        ? 'bg-[var(--secondary)] border-[var(--secondary)] text-[var(--on-secondary)]'
                                         : idx === activeStepIndex
-                                            ? 'bg-[var(--primary)] border-[var(--primary)] text-white'
+                                            ? 'bg-[var(--primary)] border-[var(--primary)] text-[var(--on-primary)]'
                                             : 'bg-[var(--surface-container-lowest)] border-[var(--outline)] text-[var(--outline)]'
                                 }`}>
                                     {done ? <CheckCircle className="w-3.5 h-3.5" /> : idx + 1}
@@ -435,19 +451,22 @@ export default function BatchWorkflowPage() {
             <div className="space-y-3">
                 {WORKFLOW_STEPS.map((step, idx) => {
                     const done = isStepComplete(step.key);
-                    const isActive = idx === activeStepIndex;
-                    const isLocked = idx > activeStepIndex;
+                    const isActive = idx === activeStepIndex && !allDone;
+                    const isLocked = idx > activeStepIndex && !allDone;
                     const Icon = step.icon;
 
                     return (
                         <div
                             key={step.key}
+                            aria-disabled={allDone}
                             className={`bg-[var(--surface-container-lowest)] rounded-[4px] shadow border-2 p-3.5 transition-all ${
-                                done
-                                    ? 'border-[var(--secondary)] bg-[var(--secondary-container)]'
-                                    : isActive
-                                        ? 'border-[var(--primary)] bg-[var(--primary-container)]'
-                                        : 'border-[var(--outline-variant)] bg-[var(--surface-container-low)] opacity-60'
+                                allDone && done
+                                    ? 'border-[var(--secondary)] bg-[var(--secondary-container)] opacity-100 pointer-events-none'
+                                    : done
+                                        ? 'border-[var(--secondary)] bg-[var(--secondary-container)]'
+                                        : isActive
+                                            ? 'border-[var(--primary)] bg-[var(--primary-container)]'
+                                            : 'border-[var(--outline-variant)] bg-[var(--surface-container-low)] opacity-60'
                             }`}
                         >
                             <div className="flex items-start gap-3">
@@ -459,8 +478,8 @@ export default function BatchWorkflowPage() {
                                             : 'bg-[var(--outline-variant)]'
                                 }`}>
                                     {done
-                                        ? <CheckCircle className="w-4 h-4 text-white" />
-                                        : <Icon className="w-4 h-4 text-white" />
+                                        ? <CheckCircle className="w-4 h-4 text-[var(--on-secondary)]" />
+                                        : <Icon className={`w-4 h-4 ${isActive ? 'text-[var(--on-primary)]' : 'text-[var(--on-surface)]'}`} />
                                     }
                                 </div>
 

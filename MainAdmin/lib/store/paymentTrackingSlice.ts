@@ -296,8 +296,16 @@ const paymentTrackingSlice = createSlice({
                 state.isActionLoading = false;
                 const memo = action.payload.memo;
                 state.lastAiAnalysis = action.payload.aiAnalysis;
-                // Remove from unpaid list (both paid and partial with received amount leave the unpaid tab)
+                // Remove from flat unpaid list
                 state.unpaidMemos = state.unpaidMemos.filter(m => m.id !== memo.id);
+                // Remove from grouped unpaid list — remove memo from its return group,
+                // and drop the entire group if it has no remaining memos
+                state.unpaidGroupedReturns = state.unpaidGroupedReturns
+                    .map(group => ({
+                        ...group,
+                        memos: group.memos.filter(m => m.id !== memo.id),
+                    }))
+                    .filter(group => group.memos.length > 0);
                 // Add to paid list so it appears immediately without waiting for a re-fetch
                 if (memo.paymentStatus === 'paid' || memo.paymentStatus === 'partial') {
                     const alreadyInPaid = state.paidMemos.some(m => m.id === memo.id);

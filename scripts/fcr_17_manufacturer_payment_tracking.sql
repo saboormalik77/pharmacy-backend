@@ -399,9 +399,10 @@ $$;
 -- ────────────────────────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION payment_manufacturer_summary(
-  p_search TEXT DEFAULT NULL,
-  p_page   INTEGER DEFAULT 1,
-  p_limit  INTEGER DEFAULT 20
+  p_search          TEXT DEFAULT NULL,
+  p_page            INTEGER DEFAULT 1,
+  p_limit           INTEGER DEFAULT 20,
+  p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
 DECLARE
@@ -411,12 +412,14 @@ DECLARE
 BEGIN
   v_offset := (GREATEST(p_page, 1) - 1) * p_limit;
 
-  SELECT COUNT(DISTINCT labeler_id) INTO v_total
+  SELECT COUNT(DISTINCT d.labeler_id) INTO v_total
   FROM debit_memos d
+  JOIN pharmacy ph ON ph.id = d.pharmacy_id
   WHERE (p_search IS NULL OR (
     LOWER(COALESCE(d.labeler_name, '')) LIKE '%' || LOWER(p_search) || '%'
     OR d.labeler_id LIKE '%' || p_search || '%'
-  ));
+  ))
+  AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
   SELECT COALESCE(jsonb_agg(row_data ORDER BY (row_data->>'outstandingAmount')::decimal DESC), '[]'::jsonb)
   INTO v_rows
@@ -456,10 +459,12 @@ BEGIN
       )
     ) AS row_data
     FROM debit_memos d
+    JOIN pharmacy ph ON ph.id = d.pharmacy_id
     WHERE (p_search IS NULL OR (
       LOWER(COALESCE(d.labeler_name, '')) LIKE '%' || LOWER(p_search) || '%'
       OR d.labeler_id LIKE '%' || p_search || '%'
     ))
+    AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
     GROUP BY d.labeler_id
     ORDER BY SUM(d.amount_requested) - SUM(d.amount_received) DESC
     LIMIT p_limit OFFSET v_offset

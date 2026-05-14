@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev -p 3002 --webpack",
+    "dev": "next dev -p 3002",
+    "dev:webpack": "next dev -p 3002 --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

@@ -283,32 +283,59 @@ BEGIN
   END IF;
 
   -- Create admin record (which represents the buying group)
-  INSERT INTO admin (email, password_hash, name, role, is_active, permissions)
+  INSERT INTO admin (
+    email,
+    password_hash,
+    name,
+    role,
+    is_active,
+    permissions,
+    contact_phone,
+    address,
+    notes,
+    buying_group_id  -- Will be updated to self-reference
+  )
   VALUES (
     v_email,
     p_admin_password_hash,
     v_name,
     'super_admin',
     true,
-    '["dashboard","pharmacies","distributors","marketplace","documents","payments","payout_hub","analytics","settings","admins","processors","policies","ndc_pricing","tbd_items","destruction","warehouse"]'::jsonb
+    '["dashboard","pharmacies","distributors","marketplace","documents","payments","payout_hub","analytics","settings","admins","processors","policies","ndc_pricing","tbd_items","destruction","warehouse"]'::jsonb,
+    p_contact_phone,
+    p_address,
+    p_notes,
+    NULL  -- Will be updated in the next step
   )
   RETURNING id INTO v_admin_id;
 
-  -- Also set the business_name in admin_settings to the group name
-  INSERT INTO admin_settings (id, business_name) 
-  VALUES (1, p_name) 
-  ON CONFLICT (id) DO UPDATE 
-  SET business_name = EXCLUDED.business_name,
-      updated_at = NOW();
+  -- Update the admin record to set buying_group_id to itself (self-referencing)
+  UPDATE admin 
+  SET buying_group_id = v_admin_id 
+  WHERE id = v_admin_id;
+
+  -- Create admin_settings record for this buying group with business_name set to group name
+  INSERT INTO admin_settings (
+    buying_group_id, 
+    business_name,
+    created_at, 
+    updated_at
+  )
+  VALUES (
+    v_admin_id,
+    p_name,
+    NOW(),
+    NOW()
+  );
 
   SELECT jsonb_build_object(
     'id', a.id,
     'name', a.name,
     'contactEmail', a.email,
-    'contactPhone', NULL,
-    'address', NULL,
+    'contactPhone', a.contact_phone,
+    'address', a.address,
     'status', 'active',
-    'notes', NULL,
+    'notes', a.notes,
     'createdAt', a.created_at,
     'role', a.role
   )
@@ -382,7 +409,7 @@ BEGIN
     UPDATE admin_settings
     SET business_name = p_name,
         updated_at = NOW()
-    WHERE id = 1;
+    WHERE buying_group_id = p_group_id;
   END IF;
 
   SELECT jsonb_build_object(

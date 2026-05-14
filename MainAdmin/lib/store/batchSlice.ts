@@ -426,11 +426,18 @@ const batchSlice = createSlice({
             .addCase(createBatch.fulfilled, (state, action) => { state.isActionLoading = false; state.batches = [action.payload, ...state.batches]; })
             .addCase(createBatch.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
 
-            .addCase(fetchBatchDetail.pending, (state) => {
+            .addCase(fetchBatchDetail.pending, (state, action) => {
                 state.isLoading = true;
                 state.error = null;
-                // Avoid showing stale workflow flags from another batch while the next batch loads.
-                state.workflowState = null;
+                const incomingBatchId = action.meta.arg;
+                // Only clear workflow when switching batches (or initial load with no batch yet).
+                // Same-batch refetches (e.g. after RA send) must NOT clear — that briefly made every
+                // isStepComplete() depend only on batch fallbacks and reset the stepper to step 1.
+                const switchingBatch =
+                    state.currentBatch != null && state.currentBatch.id !== incomingBatchId;
+                if (switchingBatch || !state.currentBatch) {
+                    state.workflowState = null;
+                }
             })
             .addCase(fetchBatchDetail.fulfilled, (state, action) => {
                 state.isLoading = false;
