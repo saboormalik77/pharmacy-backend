@@ -45,10 +45,10 @@ Frontend/build/
 # Graphify Architecture Graph (generated locally)
 # Do not commit to git - regenerate with update-graphify.sh
 # ============================================================
-out/graph.html
-out/graph.json
-out/graphify-out/
-out/README.md
-out/graphify-out/cache/
+/graph.html
+/graph.json
+/graphify-out/
+/README.md
+/graphify-out/cache/
 setup-graphify.sh
 update-graphify.sh
