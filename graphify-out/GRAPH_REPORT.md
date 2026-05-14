@@ -1,16 +1,16 @@
 # Graph Report - pharmacy-backend  (2026-05-14)
 
 ## Corpus Check
-- 1572 files · ~5,408,595 words
+- 1577 files · ~5,410,346 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 9437 nodes · 14640 edges · 1212 communities (1023 shown, 189 thin omitted)
+- 9462 nodes · 14652 edges · 1228 communities (1040 shown, 188 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 22 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `df4f20ac`
+- Built from commit: `618b7974`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -435,10 +435,14 @@
 - [[_COMMUNITY_Community 429|Community 429]]
 - [[_COMMUNITY_Community 430|Community 430]]
 - [[_COMMUNITY_Community 431|Community 431]]
+- [[_COMMUNITY_Community 432|Community 432]]
 - [[_COMMUNITY_Community 433|Community 433]]
 - [[_COMMUNITY_Community 434|Community 434]]
 - [[_COMMUNITY_Community 435|Community 435]]
+- [[_COMMUNITY_Community 436|Community 436]]
+- [[_COMMUNITY_Community 437|Community 437]]
 - [[_COMMUNITY_Community 438|Community 438]]
+- [[_COMMUNITY_Community 440|Community 440]]
 - [[_COMMUNITY_Community 443|Community 443]]
 - [[_COMMUNITY_Community 444|Community 444]]
 - [[_COMMUNITY_Community 447|Community 447]]
@@ -447,7 +451,6 @@
 - [[_COMMUNITY_Community 453|Community 453]]
 - [[_COMMUNITY_Community 454|Community 454]]
 - [[_COMMUNITY_Community 455|Community 455]]
-- [[_COMMUNITY_Community 456|Community 456]]
 - [[_COMMUNITY_Community 457|Community 457]]
 - [[_COMMUNITY_Community 458|Community 458]]
 - [[_COMMUNITY_Community 459|Community 459]]
@@ -643,6 +646,8 @@
 10. `DashboardLayout()` - 53 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `BrandingHead()` --calls--> `usePharmacyPortalTenant()`  [INFERRED]
+  admin/components/layout/BrandingHead.tsx → Frontend/lib/hooks/usePharmacyPortalTenant.ts
 - `ToastContainer()` --calls--> `createPortal`  [INFERRED]
   admin/components/ui/Toast.tsx → src/controllers/subscriptionController.ts
 - `ResetPasswordForm()` --calls--> `usePharmacyPortalTenant()`  [INFERRED]
@@ -651,46 +656,44 @@
   admin/app/forgot-password/page.tsx → Frontend/lib/hooks/usePharmacyPortalTenant.ts
 - `TenantGate()` --calls--> `usePharmacyPortalTenant()`  [INFERRED]
   admin/components/auth/TenantGate.tsx → Frontend/lib/hooks/usePharmacyPortalTenant.ts
-- `BrandingHead()` --calls--> `usePharmacyPortalTenant()`  [INFERRED]
-  admin/components/layout/BrandingHead.tsx → Frontend/lib/hooks/usePharmacyPortalTenant.ts
 
-## Communities (1212 total, 189 thin omitted)
+## Communities (1228 total, 188 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.03
-Nodes (131): ASSIGNABLE_PERMISSIONS, roleColors, roleLabels, dashboardStats, recentActivity, DistributorsPage(), DocumentsPage(), COLORS (+123 more)
+Nodes (124): ASSIGNABLE_PERMISSIONS, roleColors, roleLabels, dashboardStats, recentActivity, DistributorsPage(), COLORS, DistributorProductsPage() (+116 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.02
-Nodes (93): mockAnalyticsSummary, mockOptimizationRecommendation, mockClients, mockCredits, getDistributorById(), mockDistributors, mockDocuments, mockListings (+85 more)
+Cohesion: 0.03
+Nodes (81): mockAnalyticsSummary, mockOptimizationRecommendation, mockClients, mockDocuments, mockListings, mockOrders, mockNotifications, mockPriceComparisons (+73 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.08
-Nodes (53): PRODUCT_SORT_OPTIONS, STATUS_LABELS, BarcodeScanner(), BarcodeScannerProps, ChecksTable(), ChecksTableProps, DateRangeFilter(), DateRangeFilterProps (+45 more)
+Cohesion: 0.06
+Nodes (48): DomainNotRecognizedScreen(), TenantGate(), TenantInfoLoadingScreen(), BarcodeScanner(), BarcodeScannerProps, ChecksTable(), ChecksTableProps, DateRangeFilter() (+40 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.05
-Nodes (68): PermissionGate(), DebitMemosPage(), DESTINATION_OPTIONS, formatCurrency(), getPaymentBadge(), PAYMENT_OPTIONS, DestructionPage(), Status (+60 more)
+Nodes (67): PermissionGate(), PermissionGateProps, BatchesPage(), formatBatchMonth(), formatCurrency(), getStatusBadge(), STATUS_OPTIONS, DebitMemosPage() (+59 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.04
-Nodes (64): ApiClient, ApiError, ApiResponse, NewDashboardUI(), NON_RETURNABLE_COLORS, RETURNABLE_COLORS, ReturnDetailResponse, ReturnListItem (+56 more)
+Nodes (65): ApiClient, ApiError, ApiResponse, NewDashboardUI(), NON_RETURNABLE_COLORS, RETURNABLE_COLORS, ReturnDetailResponse, ReturnListItem (+57 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.06
-Nodes (76): AddItemsPage(), DEA_SCHEDULE_OPTIONS, EMPTY_FORM, Field(), FormState, parseStrength(), PolicyCheckResult, PolicyDetail() (+68 more)
+Nodes (75): AddItemsPage(), DEA_SCHEDULE_OPTIONS, EMPTY_FORM, Field(), FormState, parseStrength(), PolicyCheckResult, PolicyDetail() (+67 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.05
-Nodes (43): ApiError, getApiUrl(), decodeJwtExp(), ProtectedRoute(), PUBLIC_PAGES, emailTypeConfig, statusConfig, EmailHealthPage() (+35 more)
+Cohesion: 0.03
+Nodes (72): decodeJwtExp(), ProtectedRoute(), PUBLIC_PAGES, emailTypeConfig, statusConfig, EmailHealthPage(), getHealthStatus(), validatePassword() (+64 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.11
 Nodes (40): DESTINATION_OPTIONS, effectiveRaStatus(), formatCurrency(), getRAStatusBadge(), isOverdue(), ModalType, RA_STATUS_OPTIONS, RATrackingPage() (+32 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.05
-Nodes (61): generateMultipleBarcodesHandler, generateSingleBarcode, generateSpecificTrackingBarcode, generateTrackingBarcodes, cancelShipmentHandler, createShipmentHandler, downloadLabelHandler, ensureAdmin() (+53 more)
+Cohesion: 0.12
+Nodes (25): cancelShipmentHandler, createShipmentHandler, downloadLabelHandler, ensureAdmin(), getLabelsHandler, getPharmacyAddress(), getReturnTransaction(), getWarehouseAddress() (+17 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.09
@@ -701,24 +704,24 @@ Cohesion: 0.06
 Nodes (46): ApiClient, DashboardPage(), ModalMode, useWarehouseStats(), WarehouseStats, CalculatePayoutModal(), CalculatePayoutModalProps, IssueCheckModalProps (+38 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.05
-Nodes (43): AnalyticsPage(), COLORS, ReturnsValueChart(), data, emailTabs, NavbarProps, formatCurrency(), formatDateTime() (+35 more)
+Cohesion: 0.07
+Nodes (27): AnalyticsPage(), COLORS, ReturnsValueChart(), data, emailTabs, InventoryPage(), formatCurrency(), formatNumber() (+19 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.06
-Nodes (41): CheckoutContent(), OrderDetailPage(), CartDrawer(), DealCard(), DealCardProps, DealHero(), DealModal(), DealModalProps (+33 more)
+Cohesion: 0.09
+Nodes (27): CheckoutContent(), OrderDetailPage(), OrdersPage(), STATUS_OPTIONS, AddToCartRequest, AddToCartResponseItem, CartItem, CartResponse (+19 more)
 
 ### Community 13 - "Community 13"
 Cohesion: 0.08
 Nodes (24): **API Complexity:**, 🛠 **API Endpoints Breakdown**, **APIs with Direct Database Access (No RPC):**, **Architecture Health:**, 📈 **Architecture Patterns**, **Areas of Focus:**, **By Functional Area:**, **By HTTP Method:** (+16 more)
 
 ### Community 14 - "Community 14"
-Cohesion: 0.06
-Nodes (73): BatchesPage(), formatBatchMonth(), formatCurrency(), getStatusBadge(), STATUS_OPTIONS, ActiveTab, BatchDetailPage(), cardinalPillStyle() (+65 more)
+Cohesion: 0.08
+Nodes (48): ActiveTab, QrScannerModal, VerificationSessionPage(), VerificationTablePagination(), WarehouseVerificationPage(), formatDateTime(), isValidReceivingTab(), QrScannerModal (+40 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.07
-Nodes (41): PermissionGateProps, validatePassword(), usePermissions(), adminSidebarLinks, payoutSubRoutes, processorSidebarLinks, sidebarLinks, SidebarProps (+33 more)
+Cohesion: 0.22
+Nodes (16): checkAndSurfaceReady, fetchWineCellarItems, FetchWineCellarParams, fetchWineCellarStats, initialState, markWineCellarReturned, updateWineCellarItem, wineCellarSlice (+8 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.01
@@ -765,16 +768,16 @@ Cohesion: 0.07
 Nodes (36): createDistributorHandler(), deleteDistributorHandler(), getDistributorByIdHandler(), getDistributorProductsHandler(), getDistributorsHandler(), listReverseDistributorsHandler(), updateDistributorHandler(), updateDistributorStatusHandler() (+28 more)
 
 ### Community 27 - "Community 27"
-Cohesion: 0.13
-Nodes (25): cancelInviteHandler(), createPharmacyHandler(), getPendingInvitesHandler(), getPharmaciesHandler(), getPharmacyByIdHandler(), getPharmacyStoreSettingsHandler(), updatePharmacyHandler(), updatePharmacyStatusHandler() (+17 more)
+Cohesion: 0.05
+Nodes (67): cancelInviteHandler(), createPharmacyHandler(), getPendingInvitesHandler(), getPharmaciesHandler(), getPharmacyByIdHandler(), getPharmacyStoreSettingsHandler(), updatePharmacyHandler(), updatePharmacyStatusHandler() (+59 more)
 
 ### Community 28 - "Community 28"
 Cohesion: 0.14
 Nodes (38): ConfirmModal(), destBadge(), Modal(), ModalField(), ModalFooter(), PolicyDetailPage(), Row(), INITIAL_PARTIAL_POLICY (+30 more)
 
 ### Community 29 - "Community 29"
-Cohesion: 0.05
-Nodes (34): DestructionRecord, DestructionStats, Toast, AnalysisItem, AnalysisResponse, AnalysisSummary, DistributorLocation, RecommendedDistributor (+26 more)
+Cohesion: 0.04
+Nodes (66): PRODUCT_SORT_OPTIONS, STATUS_LABELS, DestructionRecord, DestructionStats, Toast, ReturnTransaction, ReturnTransactionItem, Counts (+58 more)
 
 ### Community 30 - "Community 30"
 Cohesion: 0.05
@@ -789,16 +792,16 @@ Cohesion: 0.06
 Nodes (25): AdminRequest, createMarketplaceDealHandler, deleteMarketplaceDealHandler, FeaturedDealType, getAllFeaturedDealsInfoHandler, getDealOfTheDayInfoHandler, getMarketplaceCategoriesHandler, getMarketplaceDealByIdHandler (+17 more)
 
 ### Community 33 - "Community 33"
-Cohesion: 0.09
-Nodes (39): assignReturnsToBatchHandler, closeBatchHandler, completeBatchWorkflowStepHandler, createBatchHandler, deleteBatchHandler, downloadAllPharmacyReturnsHandler, downloadCardinalInvoiceHandler, downloadPharmacyItemizedReturnHandler (+31 more)
+Cohesion: 0.17
+Nodes (20): BatchData, CardinalInvoiceRow, CardinalInvoiceSettings, DebitMemoData, DEFAULT_SETTINGS, ensureAdmin(), formatDate(), generateAllPharmacyReturnXlsx() (+12 more)
 
 ### Community 34 - "Community 34"
-Cohesion: 0.09
-Nodes (29): createHandler, getHandler, listHandler, pendingHandler, statsHandler, updateHandler, controlledSubstanceHandler, destructionControlsHandler (+21 more)
+Cohesion: 0.08
+Nodes (31): createHandler, getHandler, listHandler, pendingHandler, statsHandler, updateHandler, controlledSubstanceHandler, destructionControlsHandler (+23 more)
 
 ### Community 35 - "Community 35"
 Cohesion: 0.06
-Nodes (43): createHandler, getHandler, listHandler, pendingHandler, statsHandler, updateHandler, activateProcessorHandler, assignStoresHandler (+35 more)
+Nodes (46): adminForgotPasswordHandler, adminResetPasswordHandler, adminVerifyResetTokenHandler, loginHandler, AdminRequest, createAdminHandler, deleteAdminHandler, getAdminByIdHandler (+38 more)
 
 ### Community 36 - "Community 36"
 Cohesion: 0.05
@@ -813,8 +816,8 @@ Cohesion: 0.05
 Nodes (39): 1. Database Protection (`scripts/fcr_29b_legacy_returns_locking.sql`), 2. Backend Service Updates, 3. Frontend Protection, API Endpoints, Backend, Backend API, code:block1 (FCR System:     in_progress → completed → finalized → receiv), code:sql (CREATE OR REPLACE FUNCTION is_legacy_return_locked(p_status ) (+31 more)
 
 ### Community 39 - "Community 39"
-Cohesion: 0.09
-Nodes (35): deleteHandler, getByNdcHandler, importHandler, intelligenceHandler, resolveHandler, searchHandler, upsertHandler, authenticateAny() (+27 more)
+Cohesion: 0.14
+Nodes (21): deleteHandler, getByNdcHandler, importHandler, intelligenceHandler, resolveHandler, searchHandler, upsertHandler, router (+13 more)
 
 ### Community 40 - "Community 40"
 Cohesion: 0.1
@@ -849,8 +852,8 @@ Cohesion: 0.12
 Nodes (15): DestructionFooter(), DestructionItemsTable(), DestructionSignatureBlock(), ReturnCodeLegend(), formatDeaColumn(), formatExp(), formatFull(), formatPartial() (+7 more)
 
 ### Community 48 - "Community 48"
-Cohesion: 0.13
-Nodes (23): CreateBranchModal(), CreateBranchModalProps, BranchesPage(), US_STATES, BranchDetailPage(), RoleDetailPage(), CreateRoleModal(), CreateRoleModalProps (+15 more)
+Cohesion: 0.14
+Nodes (23): CreateBranchModal(), CreateBranchModalProps, BranchesPage(), BranchDetailPage(), RoleDetailPage(), BranchBanner(), CreateRoleModal(), CreateRoleModalProps (+15 more)
 
 ### Community 49 - "Community 49"
 Cohesion: 0.06
@@ -937,8 +940,8 @@ Cohesion: 0.15
 Nodes (24): cancel, changePlan, createCheckout, createPortal, getPlanById, getPlans, getSubscription, reactivate (+16 more)
 
 ### Community 70 - "Community 70"
-Cohesion: 0.11
-Nodes (20): getEarningsEstimationHandler, addProductListItemHandler, clearAllProductListItemsHandler, getProductListItemsHandler, removeItemHandler, updateProductListItemHandler, router, router (+12 more)
+Cohesion: 0.09
+Nodes (25): getPaymentByIdHandler, getPaymentsListHandler, addProductListItemHandler, clearAllProductListItemsHandler, getProductListItemsHandler, removeItemHandler, updateProductListItemHandler, router (+17 more)
 
 ### Community 71 - "Community 71"
 Cohesion: 0.11
@@ -949,8 +952,8 @@ Cohesion: 0.15
 Nodes (23): DESTINATIONS, EMPTY_FORM, estimatedStoreFromCurrent(), ndcFromScan(), NDCPricingPage(), PRICE_SOURCES, productNameFromScan(), QrScannerModal (+15 more)
 
 ### Community 73 - "Community 73"
-Cohesion: 0.08
-Nodes (23): DomainNotRecognizedScreen(), TenantGate(), TenantInfoLoadingScreen(), ForgotPasswordPage(), AdminTenantInfo, isLocalHostname(), TenantState, useAdminPortalTenant() (+15 more)
+Cohesion: 0.14
+Nodes (14): manrope, metadata, newsreader, RootLayout(), AdminTenantInfo, isLocalHostname(), TenantState, useAdminPortalTenant() (+6 more)
 
 ### Community 74 - "Community 74"
 Cohesion: 0.18
@@ -958,7 +961,7 @@ Nodes (11): 10. `_rti_to_json`, 1. `_debit_memo_to_json`, 2. `_get_debit_memo_re
 
 ### Community 75 - "Community 75"
 Cohesion: 0.05
-Nodes (22): supabase, changePasswordHandler, getSettings, getStoreSettings, updateSettings, updateStoreSettings, uploadDocument, documentUpload (+14 more)
+Nodes (12): supabase, createAdminAccount(), CreateAdminParams, main(), args, AdminListResponse, AdminRole, AdminStats (+4 more)
 
 ### Community 76 - "Community 76"
 Cohesion: 0.13
@@ -989,24 +992,24 @@ Cohesion: 0.08
 Nodes (24): 1. Admin Creates Pharmacy, 1. Run SQL Migration, 2. Deploy Edge Function, 2. Email Invitation, 3. Environment Variables, 3. Pharmacy Setup, 4. Login & Verify, Admin Endpoints (Authenticated) (+16 more)
 
 ### Community 83 - "Community 83"
-Cohesion: 0.17
-Nodes (22): AI, GS1ParsedData, gtinToNdc10(), ndc10ToNdc11Candidates(), parseAIsFromString(), parseDigitalLink(), parseElementString(), parseGS1() (+14 more)
+Cohesion: 0.32
+Nodes (13): addItem(), AddItemData, checkReturnLockStatus(), deleteItem(), ensureAdmin(), getItem(), handleRpcError(), ItemsListResponse (+5 more)
 
 ### Community 84 - "Community 84"
 Cohesion: 0.08
 Nodes (25): code:bash (npm run cron:expiring-products), code:bash (ts-node src/scripts/runExpiringProductsCheck.ts), code:bash (# First build the project), code:bash (# Edit crontab), code:bash (# Install PM2), code:dockerfile (# Add to Dockerfile), code:typescript (import { checkExpiringProductsAndNotify } from '../services/), code:env (SUPABASE_URL=your-supabase-url) (+17 more)
 
 ### Community 85 - "Community 85"
-Cohesion: 0.14
-Nodes (22): createBuyingGroupHandler, deleteBuyingGroupDomainHandler, deleteBuyingGroupHandler, getBuyingGroupByIdHandler, getBuyingGroupDomainsHandler, getBuyingGroupsHandler, mainAdminLoginHandler, updateBuyingGroupHandler (+14 more)
+Cohesion: 0.08
+Nodes (42): createBuyingGroupHandler, deleteBuyingGroupDomainHandler, deleteBuyingGroupHandler, getBuyingGroupByIdHandler, getBuyingGroupDomainsHandler, getBuyingGroupsHandler, mainAdminLoginHandler, updateBuyingGroupHandler (+34 more)
 
 ### Community 86 - "Community 86"
 Cohesion: 0.1
 Nodes (18): AdminRequest, getAdminProfileHandler, getAdminSettingsHandler, getLanguagesHandler, getTimezonesHandler, logoUpload, resetPasswordHandler, updateAdminSettingsHandler (+10 more)
 
 ### Community 87 - "Community 87"
-Cohesion: 0.12
-Nodes (18): usePharmacyPermissions(), AdminBranding, Sidebar(), NewServiceRequestPage(), DetailModal(), getStatusBadge(), OnSiteServicePage(), SORT_OPTIONS (+10 more)
+Cohesion: 0.08
+Nodes (24): usePharmacyPermissions(), AdminBranding, Sidebar(), NewServiceRequestPage(), DetailModal(), getStatusBadge(), OnSiteServicePage(), SORT_OPTIONS (+16 more)
 
 ### Community 88 - "Community 88"
 Cohesion: 0.08
@@ -1029,8 +1032,8 @@ Cohesion: 0.08
 Nodes (23): code:env (SUPABASE_URL=your_supabase_url), code:bash (npm run import-excel), code:bash (node scripts/import_excel_to_supabase.js), code:block4 (🚀 Starting Excel to Supabase Import...), code:sql (-- Check counts), Data Mapping, Error: "relation 'ndc_products' does not exist", Error: "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set" (+15 more)
 
 ### Community 93 - "Community 93"
-Cohesion: 0.19
-Nodes (20): AuthResponse, generateJwtAccessToken(), generateRefreshToken(), googleSignin(), hashToken(), loginAsBranch(), logout(), logoutAll() (+12 more)
+Cohesion: 0.12
+Nodes (29): getBranchDetailHandler(), getPendingBranchInvitesHandler(), getPharmacyContextHandler(), listBranchesHandler(), switchToBranchHandler(), updateBranchStatusHandler(), router, AuthResponse (+21 more)
 
 ### Community 94 - "Community 94"
 Cohesion: 0.13
@@ -1041,8 +1044,8 @@ Cohesion: 0.09
 Nodes (22): 1. Store Configuration (`lib/store/store.ts`), 2. Typed Hooks (`lib/store/hooks.ts`), 3. API Client (`lib/api/apiClient.ts`), 4. Auth Slice (`lib/store/authSlice.ts`), API Client Usage, Best Practices, code:block1 (lib/), code:typescript ('use client';) (+14 more)
 
 ### Community 96 - "Community 96"
-Cohesion: 0.36
-Nodes (6): manrope, metadata, newsreader, RootLayout(), hasValidClerkPublishableKey(), RootProviders()
+Cohesion: 0.11
+Nodes (34): ApiError, getApiUrl(), BatchDetailPage(), cardinalPillStyle(), formatBatchMonth(), formatCurrency(), getStatusBadge(), returnTransactionStatusBadgeVariant() (+26 more)
 
 ### Community 97 - "Community 97"
 Cohesion: 0.09
@@ -1057,8 +1060,8 @@ Cohesion: 0.09
 Nodes (22): ✅ **1. Processor Side - Commented Out Button**, **2.1 Added Imports & Types**, **2.2 Added State Variables**, **2.3 Added Handler Functions**, **2.4 Added Wine Cellar Items Button**, **2.5 Added Wine Cellar Modal**, ✅ **2. MainAdmin Side - Added Full Functionality**, **Add Items to Return** (+14 more)
 
 ### Community 100 - "Community 100"
-Cohesion: 0.17
-Nodes (19): createInventoryItemHandler, deleteInventoryItemHandler, getInventoryItemByIdHandler, getInventoryItemsHandler, getInventoryMetricsHandler, updateInventoryItemHandler, verifyPharmacyStatus(), router (+11 more)
+Cohesion: 0.16
+Nodes (21): createInventoryItemHandler, deleteInventoryItemHandler, getInventoryItemByIdHandler, getInventoryItemsHandler, getInventoryMetricsHandler, updateInventoryItemHandler, verifyPharmacyStatus(), router (+13 more)
 
 ### Community 101 - "Community 101"
 Cohesion: 0.09
@@ -1077,8 +1080,8 @@ Cohesion: 0.09
 Nodes (21): Admin (Super Admin, Manager, Reviewer, Support), First Class Returns (FCR) — System Overview, Module 10: Monthly Batch & Close-Out, Module 11: RA Request & Tracking, Module 12: Manufacturer Payment Tracking, Module 13: Pharmacy & GPO Payout, Module 14: Reporting & Analytics, Module 1: Store Setup & Master Data (+13 more)
 
 ### Community 105 - "Community 105"
-Cohesion: 0.15
-Nodes (20): acceptInviteHandler, createSubMainAdminHandler, deleteSubMainAdminHandler, getPermissionsListHandler, getSubMainAdminByIdHandler, getSubMainAdminsHandler, resendInviteHandler, updateSubMainAdminHandler (+12 more)
+Cohesion: 0.18
+Nodes (19): assignReturnsToBatchHandler, closeBatchHandler, completeBatchWorkflowStepHandler, createBatchHandler, deleteBatchHandler, downloadAllPharmacyReturnsHandler, downloadCardinalInvoiceHandler, downloadPharmacyItemizedReturnHandler (+11 more)
 
 ### Community 106 - "Community 106"
 Cohesion: 0.1
@@ -1094,15 +1097,15 @@ Nodes (18): 1. Table Schema, 2. Data Import Scripts, 3. Generator Script, code:b
 
 ### Community 109 - "Community 109"
 Cohesion: 0.16
-Nodes (17): checkLockStatusHandler, createReturnHandler, deleteReturnHandler, getReturnByIdHandler, getReturnsHandler, updateReturnHandler, router, checkReturnLockStatus() (+9 more)
+Nodes (15): checkLockStatusHandler, createReturnHandler, deleteReturnHandler, getReturnByIdHandler, getReturnsHandler, updateReturnHandler, router, checkReturnLockStatus() (+7 more)
 
 ### Community 110 - "Community 110"
-Cohesion: 0.14
-Nodes (21): completeBranchSetupHandler, completeSetupHandler, forgotPasswordHandler, googleSigninHandler, logoutAllHandler, logoutHandler, refreshTokenHandler, resetPasswordHandler (+13 more)
+Cohesion: 0.16
+Nodes (19): completeBranchSetupHandler, completeSetupHandler, forgotPasswordHandler, googleSigninHandler, logoutAllHandler, logoutHandler, refreshTokenHandler, resetPasswordHandler (+11 more)
 
 ### Community 111 - "Community 111"
-Cohesion: 0.14
-Nodes (13): router, main(), runCronJob(), initializeFirebase(), sendPushNotification(), checkExpiringProductsAndNotify(), dismissNotification(), ExpiringItem (+5 more)
+Cohesion: 0.15
+Nodes (12): router, main(), runCronJob(), initializeFirebase(), sendPushNotification(), checkExpiringProductsAndNotify(), dismissNotification(), ExpiringItem (+4 more)
 
 ### Community 112 - "Community 112"
 Cohesion: 0.14
@@ -1121,8 +1124,8 @@ Cohesion: 0.22
 Nodes (18): ensureAdmin(), getControlledSubstanceReport(), getDestructionControls(), getDestructionNonControls(), getReturnPacket(), ItemizedReport, listPharmacyReportReturns(), ManufacturerCreditGroup (+10 more)
 
 ### Community 116 - "Community 116"
-Cohesion: 0.17
-Nodes (19): analyzeCreditMemoPdf(), buildTableGrid(), ColumnRole, CreditMemoAnalysisResult, DiCell, DiTable, extractManufacturerFromKvPairs(), extractTotalFromKvPairs() (+11 more)
+Cohesion: 0.16
+Nodes (20): analyzeCreditMemoPdf(), buildTableGrid(), ColumnRole, CreditMemoAnalysisResult, CreditMemoLineItem, DiCell, DiTable, extractManufacturerFromKvPairs() (+12 more)
 
 ### Community 117 - "Community 117"
 Cohesion: 0.1
@@ -1201,12 +1204,12 @@ Cohesion: 0.26
 Nodes (12): client, allProductNdcFormats(), extractPackageSize(), extractPackageSizeFromDescription(), formatNdc532(), formatNdc541(), lookupNDC(), lookupNDCFromCandidates() (+4 more)
 
 ### Community 136 - "Community 136"
-Cohesion: 0.17
-Nodes (14): deleteDocumentHandler, downloadDocumentHandler, getDocumentByIdHandler, getDocumentsHandler, viewDocumentHandler, router, createDocument(), CreateDocumentInput (+6 more)
+Cohesion: 0.1
+Nodes (21): deleteDocumentHandler, downloadDocumentHandler, getDocumentByIdHandler, getDocumentsHandler, viewDocumentHandler, getEarningsEstimationHandler, router, router (+13 more)
 
 ### Community 137 - "Community 137"
-Cohesion: 0.22
-Nodes (17): activateProcessor(), AssignedStore, assignStoresToProcessor(), createProcessor(), CreateProcessorData, deactivateProcessor(), ensureAdmin(), getMyStores() (+9 more)
+Cohesion: 0.14
+Nodes (10): AdminRequest, createWarehouseHandler, deleteWarehouseHandler, getDefaultWarehouseHandler, getWarehousesHandler, updateWarehouseHandler, router, CreateWarehouseData (+2 more)
 
 ### Community 138 - "Community 138"
 Cohesion: 0.22
@@ -1241,8 +1244,8 @@ Cohesion: 0.12
 Nodes (15): 1. Test RA Request (should work now), 2. Check Logs, 3. Verify Email Delivery, code:block1 (Attempting to send RA email for memo DM-XXXX to manufacturer), code:bash (RESEND_API_KEY=re_ZFmTK6Lz_Artk8WoVcUbbmCbxBdp1wsh3), code:bash (curl -X POST http://localhost:3000/api/admin/emails/test \), Environment Requirements, If still getting errors: (+7 more)
 
 ### Community 146 - "Community 146"
-Cohesion: 0.23
-Nodes (13): Request, resolveTenantMiddleware(), deleteBuyingGroupDomain(), upsertBuyingGroupDomain(), createCheckoutSession(), generateEmailHtml(), cache, clearTenantCache() (+5 more)
+Cohesion: 0.19
+Nodes (16): createBranchHandler(), resendBranchInviteHandler(), Request, resolveTenantMiddleware(), deleteBuyingGroupDomain(), upsertBuyingGroupDomain(), createCheckoutSession(), generateEmailHtml() (+8 more)
 
 ### Community 147 - "Community 147"
 Cohesion: 0.17
@@ -1277,16 +1280,16 @@ Cohesion: 0.13
 Nodes (14): ✅ **1. Added New Icons**, ✅ **2. Added Three New Dashboard Cards**, ✅ **3. Updated Grid Layout**, Benefits, Changes Made, code:typescript (import {), **Destruction**, Existing Pages Confirmed (+6 more)
 
 ### Community 155 - "Community 155"
-Cohesion: 0.33
-Nodes (12): createShipmentGroup(), createShipmentGroupFedexShipment(), CreateShipmentGroupRequest, ensureAdmin(), getShipmentGroupDetails(), handleRpcError(), listMemosForGroupShipping(), listShippedShipmentGroups() (+4 more)
+Cohesion: 0.27
+Nodes (14): createShipmentGroup(), createShipmentGroupFedexShipment(), CreateShipmentGroupRequest, ensureAdmin(), getShipmentGroupDetails(), handleRpcError(), listMemosForGroupShipping(), listShippedShipmentGroups() (+6 more)
 
 ### Community 156 - "Community 156"
 Cohesion: 0.27
 Nodes (11): listNotificationsHandler, markAllNotificationsReadHandler, markNotificationReadHandler, router, ensureAdmin(), listProcessorNotifications(), ListProcessorNotificationsResponse, mapRpcError() (+3 more)
 
 ### Community 157 - "Community 157"
-Cohesion: 0.07
-Nodes (28): adminForgotPasswordHandler, adminResetPasswordHandler, adminVerifyResetTokenHandler, loginHandler, AdminRequest, createAdminHandler, deleteAdminHandler, getAdminByIdHandler (+20 more)
+Cohesion: 0.17
+Nodes (10): mockCredits, getDistributorById(), mockDistributors, PaymentsPage(), Credit, PaymentItem, ReverseDistributor, SupplierPayment (+2 more)
 
 ### Community 158 - "Community 158"
 Cohesion: 0.26
@@ -1329,8 +1332,8 @@ Cohesion: 0.27
 Nodes (11): listNotificationsHandler, markAllNotificationsReadHandler, markNotificationReadHandler, router, ensureAdmin(), listPharmacyNotifications(), ListPharmacyNotificationsResponse, mapRpcError() (+3 more)
 
 ### Community 168 - "Community 168"
-Cohesion: 0.19
-Nodes (11): getPaymentByIdHandler, getPaymentsListHandler, router, getPaymentById(), getPaymentsList(), PaginationInfo, PaymentDetails, PaymentDetailsResponse (+3 more)
+Cohesion: 0.18
+Nodes (11): INITIAL_CREATE_FORM, US_STATES, cancelInvite, createPharmacy, fetchPendingInvites, FetchPharmaciesParams, initialState, pharmaciesSlice (+3 more)
 
 ### Community 169 - "Community 169"
 Cohesion: 0.2
@@ -1341,8 +1344,8 @@ Cohesion: 0.2
 Nodes (13): buildNewRequestHtml(), buildPharmacyActionHtml(), buildTransporter(), email, formatDate(), fromEmail, fromName, getEnv() (+5 more)
 
 ### Community 171 - "Community 171"
-Cohesion: 0.44
-Nodes (11): ensureAdmin(), getAgingInventory(), getAskVsReceived(), getGpoSummary(), getOutstandingRA(), getPharmacyDashboard(), getPharmacyPerformance(), getPriceAudit() (+3 more)
+Cohesion: 0.21
+Nodes (11): generateMultipleBarcodesHandler, generateSingleBarcode, generateSpecificTrackingBarcode, generateTrackingBarcodes, router, BarcodeOptions, BarcodeResult, generateBarcode() (+3 more)
 
 ### Community 172 - "Community 172"
 Cohesion: 0.2
@@ -1409,8 +1412,8 @@ Cohesion: 0.21
 Nodes (11): { createClient }, importData(), insertBatch(), packageFile, path, productFile, supabase, transformPackageRow() (+3 more)
 
 ### Community 188 - "Community 188"
-Cohesion: 0.33
-Nodes (9): createBranchHandler(), getBranchDetailHandler(), getPendingBranchInvitesHandler(), getPharmacyContextHandler(), listBranchesHandler(), resendBranchInviteHandler(), switchToBranchHandler(), updateBranchStatusHandler() (+1 more)
+Cohesion: 0.23
+Nodes (12): activateProcessorHandler, assignStoresHandler, createProcessorHandler, deleteProcessorHandler, getMyStoresHandler, getProcessorByIdHandler, getProcessorsHandler, getProcessorStoresHandler (+4 more)
 
 ### Community 189 - "Community 189"
 Cohesion: 0.2
@@ -1462,7 +1465,7 @@ Nodes (10): 8. Frontend Redux Integration, 9. Complete End-to-End Flow, Async Th
 
 ### Community 201 - "Community 201"
 Cohesion: 0.07
-Nodes (30): getAdminDashboardHandler, getEmailHealthHandler, getEmailLogHandler, getEmailStatsByTypeHandler, getEmailStatsHandler, listEmailLogsHandler, resolveEmailHandler, retryEmailHandler (+22 more)
+Nodes (37): getAdminDashboardHandler, getEmailHealthHandler, getEmailLogHandler, getEmailStatsByTypeHandler, getEmailStatsHandler, listEmailLogsHandler, resolveEmailHandler, retryEmailHandler (+29 more)
 
 ### Community 202 - "Community 202"
 Cohesion: 0.25
@@ -1993,8 +1996,8 @@ Cohesion: 0.5
 Nodes (4): 2. Where This Fits — System Decision, App Responsibilities, code:block1 (ADMIN APP (admin/)), Decision: Extend Existing Apps (NOT separate system)
 
 ### Community 340 - "Community 340"
-Cohesion: 0.15
-Nodes (20): ASSIGNABLE_PERMISSIONS, getInitials(), ProcessorsPage(), activateProcessor, assignStoresToProcessor, createProcessor, deactivateProcessor, fetchProcessors (+12 more)
+Cohesion: 0.16
+Nodes (19): ASSIGNABLE_PERMISSIONS, getInitials(), ProcessorsPage(), activateProcessor, assignStoresToProcessor, createProcessor, deactivateProcessor, fetchProcessors (+11 more)
 
 ### Community 342 - "Community 342"
 Cohesion: 0.5
@@ -2200,6 +2203,10 @@ Nodes (3): Step, StepIndicatorProps, StepStatus
 Cohesion: 0.18
 Nodes (18): addSurplusHandler, completeVerificationHandler, listAllSurplusHandler, listDiscrepanciesHandler, listSurplusHandler, pendingHandler, receivedHandler, receiveHandler (+10 more)
 
+### Community 425 - "Community 425"
+Cohesion: 0.23
+Nodes (13): DeaFormData, DeaFormItem, drawItemsTable(), escapeHtml(), fmt$(), fmtDate(), generateDeaForm222Pdf(), generateManifestHtml() (+5 more)
+
 ### Community 426 - "Community 426"
 Cohesion: 0.2
 Nodes (12): assign_returns_to_batch(), close_batch(), create_batch(), debit_memo_items, debit_memos, get_batch(), get_debit_memo(), list_batches() (+4 more)
@@ -2220,6 +2227,10 @@ Nodes (4): list_pharmacy_notifications(), list_processor_notifications(), pharma
 Cohesion: 0.21
 Nodes (7): admin, buying_group_domains, get_buying_group_domains(), processors, public.buying_group_domains, upsert_buying_group_domain(), validate_admin_tenant_access()
 
+### Community 432 - "Community 432"
+Cohesion: 0.29
+Nodes (12): deleteNDCPricing(), ensureAdmin(), getNDCPricingByNdc(), handleRpcResult(), importFromReports(), NDCPricingRecord, PriceResolution, resolveNDCPrice() (+4 more)
+
 ### Community 433 - "Community 433"
 Cohesion: 0.26
 Nodes (9): return_transaction_items, return_transactions, warehouse_discrepancies, warehouse_list_discrepancies(), warehouse_list_pending(), warehouse_list_received(), warehouse_report_discrepancy(), warehouse_verify_item() (+1 more)
@@ -2232,9 +2243,21 @@ Nodes (10): debit_memos, ra_list_outbound_shipments(), ra_list_outstanding(), ra
 Cohesion: 0.27
 Nodes (10): return_transaction_items, return_transactions, warehouse_add_surplus(), warehouse_complete_verification(), warehouse_get_verification_summary(), warehouse_list_all_surplus(), warehouse_list_surplus(), warehouse_start_verification() (+2 more)
 
+### Community 436 - "Community 436"
+Cohesion: 0.24
+Nodes (9): allShippingLabelsHandler, generateJobSheetHandler, printJobSheetHandler, shippingLabelHandler, generateJobSheetHTML(), generateShippingLabelHTML(), getJobSheetData(), JobSheetData (+1 more)
+
+### Community 437 - "Community 437"
+Cohesion: 0.39
+Nodes (6): WineCellarFilters, WineCellarItem, WineCellarListResponse, wineCellarService, WineCellarStats, STATUS_OPTIONS
+
 ### Community 438 - "Community 438"
 Cohesion: 0.39
 Nodes (10): admin_reassign_service_request(), cancel_pharmacy_service_request(), claim_service_request(), create_service_request(), get_service_request_detail(), list_admin_service_requests(), list_pharmacy_service_requests(), list_processor_service_requests() (+2 more)
+
+### Community 440 - "Community 440"
+Cohesion: 0.33
+Nodes (3): LoadingOverlayProps, sizeMap, SpinnerProps
 
 ### Community 443 - "Community 443"
 Cohesion: 0.33
@@ -2267,10 +2290,6 @@ Nodes (3): get_shipment_group_details(), ship_memo_group(), shipment_groups
 ### Community 455 - "Community 455"
 Cohesion: 0.31
 Nodes (5): close_batch(), debit_memo_items, generate_debit_memos_for_batch(), return_transaction_items, warehouse_verify_item_v2()
-
-### Community 456 - "Community 456"
-Cohesion: 0.22
-Nodes (8): AnalyticsParams, analyticsService, CreditsSummary, PharmacyDashboardData, PharmacyDashboardOverview, RecentReturn, ReturnsTrendItem, TopProduct
 
 ### Community 457 - "Community 457"
 Cohesion: 0.39
@@ -2359,22 +2378,22 @@ Nodes (3): complete_branch_setup(), pharmacy_branch_invites, public.pharmacy_adm
 ## Knowledge Gaps
 - **3123 isolated node(s):** `warehouse_discrepancies`, `public.debit_memos`, `{ createClient }`, `dotenv`, `public.debit_memos` (+3118 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **189 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **188 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `AppError` connect `Community 8` to `Community 133`, `Community 136`, `Community 9`, `Community 137`, `Community 141`, `Community 142`, `Community 17`, `Community 146`, `Community 147`, `Community 19`, `Community 148`, `Community 23`, `Community 26`, `Community 27`, `Community 156`, `Community 157`, `Community 158`, `Community 155`, `Community 32`, `Community 33`, `Community 34`, `Community 35`, `Community 166`, `Community 167`, `Community 168`, `Community 41`, `Community 39`, `Community 171`, `Community 44`, `Community 40`, `Community 424`, `Community 51`, `Community 179`, `Community 185`, `Community 60`, `Community 61`, `Community 62`, `Community 63`, `Community 188`, `Community 68`, `Community 69`, `Community 70`, `Community 201`, `Community 75`, `Community 76`, `Community 77`, `Community 80`, `Community 83`, `Community 85`, `Community 86`, `Community 93`, `Community 94`, `Community 228`, `Community 100`, `Community 105`, `Community 109`, `Community 110`, `Community 111`, `Community 113`, `Community 115`, `Community 116`, `Community 117`, `Community 122`, `Community 125`?**
-  _High betweenness centrality (0.045) - this node is a cross-community bridge._
+- **Why does `AppError` connect `Community 136` to `Community 133`, `Community 8`, `Community 137`, `Community 9`, `Community 141`, `Community 142`, `Community 17`, `Community 146`, `Community 147`, `Community 19`, `Community 148`, `Community 23`, `Community 26`, `Community 27`, `Community 156`, `Community 155`, `Community 158`, `Community 32`, `Community 33`, `Community 34`, `Community 35`, `Community 166`, `Community 167`, `Community 39`, `Community 41`, `Community 40`, `Community 171`, `Community 44`, `Community 424`, `Community 432`, `Community 51`, `Community 436`, `Community 179`, `Community 185`, `Community 60`, `Community 61`, `Community 62`, `Community 63`, `Community 188`, `Community 68`, `Community 69`, `Community 70`, `Community 201`, `Community 75`, `Community 76`, `Community 77`, `Community 80`, `Community 83`, `Community 85`, `Community 86`, `Community 93`, `Community 94`, `Community 228`, `Community 100`, `Community 105`, `Community 109`, `Community 110`, `Community 111`, `Community 113`, `Community 115`, `Community 116`, `Community 117`, `Community 122`, `Community 125`?**
+  _High betweenness centrality (0.042) - this node is a cross-community bridge._
 - **Why does `isValidNonReturnableReason()` connect `Community 5` to `Community 424`, `Community 201`, `Community 14`?**
-  _High betweenness centrality (0.039) - this node is a cross-community bridge._
-- **Why does `ToastContainer()` connect `Community 3` to `Community 0`, `Community 4`, `Community 5`, `Community 165`, `Community 7`, `Community 72`, `Community 71`, `Community 69`, `Community 14`, `Community 15`, `Community 48`, `Community 112`, `Community 340`, `Community 28`, `Community 29`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+  _High betweenness centrality (0.040) - this node is a cross-community bridge._
+- **Why does `Button` connect `Community 2` to `Community 0`, `Community 1`, `Community 3`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 10`, `Community 11`, `Community 14`, `Community 15`, `Community 28`, `Community 157`, `Community 29`, `Community 428`, `Community 48`, `Community 437`, `Community 72`, `Community 340`, `Community 87`, `Community 96`, `Community 232`, `Community 236`, `Community 112`?**
+  _High betweenness centrality (0.019) - this node is a cross-community bridge._
 - **What connects `warehouse_discrepancies`, `public.debit_memos`, `{ createClient }` to the rest of the system?**
   _3123 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.03 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.02 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.03 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06 - nodes in this community are weakly interconnected._

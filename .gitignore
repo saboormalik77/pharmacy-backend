@@ -41,6 +41,5 @@ Frontend/build/
 # TypeScript build info
 *.tsbuildinfo
 
-# graphify: commit graphify-out/ for the team, but omit machine-local files
-graphify-out/manifest.json
-graphify-out/cost.json
+# graphify output
+graphify-out/
