@@ -1,9 +1,10 @@
 -- Function : _debit_memo_to_json
 -- Arguments: d debit_memos
 -- Type     : FUNCTION
+-- NOTE     : pharmacyName is intentionally empty — backend enriches it from BG Admin DB
 -- =============================================================
 
-DROP FUNCTION IF EXISTS public._debit_memo_to_json(d debit_memos) CASCADE;
+DROP FUNCTION IF EXISTS public._debit_memo_to_json(debit_memos) CASCADE;
 
 CREATE OR REPLACE FUNCTION public._debit_memo_to_json(d debit_memos)
  RETURNS jsonb
@@ -16,7 +17,7 @@ AS $function$
     'batchName',           (SELECT b.batch_name  FROM return_batches b WHERE b.id = $1.batch_id),
     'batchMonth',          (SELECT b.batch_month FROM return_batches b WHERE b.id = $1.batch_id),
     'pharmacyId',          $1.pharmacy_id,
-    'pharmacyName',        COALESCE((SELECT pharmacy_name FROM pharmacy WHERE id = $1.pharmacy_id), ''),
+    'pharmacyName',        '',
     'memoNumber',          $1.memo_number,
     'destination',         $1.destination,
     'labelerId',           $1.labeler_id,

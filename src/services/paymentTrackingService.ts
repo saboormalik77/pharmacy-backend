@@ -1,5 +1,13 @@
 import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../utils/appError';
+import {
+  getPharmacyNames,
+  getPharmacyIdsForSearch,
+  injectPharmacyNames,
+  injectPharmacyNamesGrouped,
+  collectPharmacyIds,
+  collectPharmacyIdsGrouped,
+} from '../utils/pharmacyEnricher';
 
 function ensureAdmin() {
   if (!supabaseAdmin) throw new AppError('Supabase admin client not configured', 500);
@@ -119,7 +127,12 @@ export const recordPayment = async (
     p_credit_memo_url: creditMemoUrl || null,
   });
   handleRpcError(data, error, 'Failed to record payment');
-  return data.data;
+  const memo = data.data;
+  if (memo?.pharmacyId) {
+    const names = await getPharmacyNames([memo.pharmacyId]);
+    memo.pharmacyName = names[memo.pharmacyId] ?? '';
+  }
+  return memo;
 };
 
 // ============================================================
@@ -160,16 +173,21 @@ export const listUnpaid = async (filters: {
   limit?: number;
 }): Promise<{ data: UnpaidMemo[]; pagination: any; summary: UnpaidSummary }> => {
   const sb = ensureAdmin();
+  const pharmacyIds = filters.search ? await getPharmacyIdsForSearch(filters.search) : null;
   const { data, error } = await sb.rpc('payment_list_unpaid', {
     p_manufacturer: filters.manufacturer || null,
     p_destination: filters.destination || null,
     p_search: filters.search || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 20,
+    p_pharmacy_ids: pharmacyIds,
   });
   handleRpcError(data, error, 'Failed to list unpaid debit memos');
+  const memos = data.data as UnpaidMemo[];
+  const ids = collectPharmacyIds(memos);
+  const names = await getPharmacyNames(ids);
   return {
-    data: data.data as UnpaidMemo[],
+    data: injectPharmacyNames(memos, names) as UnpaidMemo[],
     pagination: data.pagination,
     summary: data.summary as UnpaidSummary,
   };
@@ -312,16 +330,21 @@ export const listUnpaidGroupedByReturn = async (filters: {
   limit?: number;
 }): Promise<{ data: ReturnWithUnpaidMemos[]; pagination: any; summary: UnpaidSummary }> => {
   const sb = ensureAdmin();
+  const pharmacyIds = filters.search ? await getPharmacyIdsForSearch(filters.search) : null;
   const { data, error } = await sb.rpc('payment_list_unpaid_grouped_by_return', {
     p_manufacturer: filters.manufacturer || null,
     p_destination: filters.destination || null,
     p_search: filters.search || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 10,
+    p_pharmacy_ids: pharmacyIds,
   });
   handleRpcError(data, error, 'Failed to list unpaid debit memos grouped by return');
+  const groups = data.data as ReturnWithUnpaidMemos[];
+  const ids = collectPharmacyIdsGrouped(groups);
+  const names = await getPharmacyNames(ids);
   return {
-    data: data.data as ReturnWithUnpaidMemos[],
+    data: injectPharmacyNamesGrouped(groups, names) as ReturnWithUnpaidMemos[],
     pagination: data.pagination,
     summary: data.summary as UnpaidSummary,
   };
@@ -352,15 +375,20 @@ export const listPaidGroupedByReturn = async (filters: {
   limit?: number;
 }): Promise<{ data: ReturnWithPaidMemos[]; pagination: any }> => {
   const sb = ensureAdmin();
+  const pharmacyIds = filters.search ? await getPharmacyIdsForSearch(filters.search) : null;
   const { data, error } = await sb.rpc('payment_list_paid_grouped_by_return', {
     p_destination: filters.destination || null,
     p_search: filters.search || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 10,
+    p_pharmacy_ids: pharmacyIds,
   });
   handleRpcError(data, error, 'Failed to list paid debit memos grouped by return');
+  const groups = data.data as ReturnWithPaidMemos[];
+  const ids = collectPharmacyIdsGrouped(groups);
+  const names = await getPharmacyNames(ids);
   return {
-    data: data.data as ReturnWithPaidMemos[],
+    data: injectPharmacyNamesGrouped(groups, names) as ReturnWithPaidMemos[],
     pagination: data.pagination,
   };
 };

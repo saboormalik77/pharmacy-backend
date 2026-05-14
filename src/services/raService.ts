@@ -1,6 +1,14 @@
 import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../utils/appError';
 import type { RARequestData, RAReminderData } from './nodemailerService';
+import {
+  getPharmacyNames,
+  getPharmacyIdsForSearch,
+  injectPharmacyNames,
+  injectPharmacyNamesGrouped,
+  collectPharmacyIds,
+  collectPharmacyIdsGrouped,
+} from '../utils/pharmacyEnricher';
 
 function ensureAdmin() {
   if (!supabaseAdmin) throw new AppError('Supabase admin client not configured', 500);
@@ -120,6 +128,10 @@ export const sendRARequest = async (
   handleRpcError(data, error, 'Failed to create RA request');
 
   const result = data.data as { memo: any; request: RARequest };
+  if (result.memo?.pharmacyId) {
+    const names = await getPharmacyNames([result.memo.pharmacyId]);
+    result.memo.pharmacyName = names[result.memo.pharmacyId] ?? '';
+  }
 
   let emailTemplate: RAEmailTemplate;
   try {
@@ -196,7 +208,12 @@ export const receiveRA = async (
     p_pdf_url: pdfUrl || null,
   });
   handleRpcError(data, error, 'Failed to record RA received');
-  return data.data;
+  const memo = data.data;
+  if (memo?.pharmacyId) {
+    const names = await getPharmacyNames([memo.pharmacyId]);
+    memo.pharmacyName = names[memo.pharmacyId] ?? '';
+  }
+  return memo;
 };
 
 export const resendRARequest = async (
@@ -214,6 +231,10 @@ export const resendRARequest = async (
   handleRpcError(data, error, 'Failed to create RA resend request');
 
   const result = data.data as { memo: any; request: RARequest };
+  if (result.memo?.pharmacyId) {
+    const names = await getPharmacyNames([result.memo.pharmacyId]);
+    result.memo.pharmacyName = names[result.memo.pharmacyId] ?? '';
+  }
 
   let reminderTemplate: RAReminderTemplate;
   try {
@@ -326,6 +347,7 @@ export const listRATracking = async (filters: {
   limit?: number;
 }): Promise<{ data: any[]; pagination: any; summary: RATrackingSummary }> => {
   const sb = ensureAdmin();
+  const pharmacyIds = filters.search ? await getPharmacyIdsForSearch(filters.search) : null;
   const { data, error } = await sb.rpc('ra_list_tracking', {
     p_ra_status: filters.raStatus || null,
     p_destination: filters.destination || null,
@@ -334,10 +356,14 @@ export const listRATracking = async (filters: {
     p_search: filters.search || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 20,
+    p_pharmacy_ids: pharmacyIds,
   });
   handleRpcError(data, error, 'Failed to list RA tracking');
+  const memos = data.data as any[];
+  const ids = collectPharmacyIds(memos);
+  const names = await getPharmacyNames(ids);
   return {
-    data: data.data,
+    data: injectPharmacyNames(memos, names),
     pagination: data.pagination,
     summary: data.summary as RATrackingSummary,
   };
@@ -349,13 +375,18 @@ export const listOutstandingRAs = async (
   limit?: number
 ): Promise<{ data: any[]; pagination: any }> => {
   const sb = ensureAdmin();
+  const pharmacyIds = search ? await getPharmacyIdsForSearch(search) : null;
   const { data, error } = await sb.rpc('ra_list_outstanding', {
     p_search: search || null,
     p_page: page || 1,
     p_limit: limit || 20,
+    p_pharmacy_ids: pharmacyIds,
   });
   handleRpcError(data, error, 'Failed to list outstanding RAs');
-  return { data: data.data, pagination: data.pagination };
+  const memos = data.data as any[];
+  const ids = collectPharmacyIds(memos);
+  const names = await getPharmacyNames(ids);
+  return { data: injectPharmacyNames(memos, names), pagination: data.pagination };
 };
 
 export const listOverdueRAs = async (
@@ -364,13 +395,18 @@ export const listOverdueRAs = async (
   limit?: number
 ): Promise<{ data: any[]; pagination: any }> => {
   const sb = ensureAdmin();
+  const pharmacyIds = search ? await getPharmacyIdsForSearch(search) : null;
   const { data, error } = await sb.rpc('ra_list_overdue', {
     p_search: search || null,
     p_page: page || 1,
     p_limit: limit || 20,
+    p_pharmacy_ids: pharmacyIds,
   });
   handleRpcError(data, error, 'Failed to list overdue RAs');
-  return { data: data.data, pagination: data.pagination };
+  const memos = data.data as any[];
+  const ids = collectPharmacyIds(memos);
+  const names = await getPharmacyNames(ids);
+  return { data: injectPharmacyNames(memos, names), pagination: data.pagination };
 };
 
 // ============================================================
@@ -389,7 +425,12 @@ export const shipDebitMemo = async (
     p_shipped_at: shippedAt || new Date().toISOString(),
   });
   handleRpcError(data, error, 'Failed to record shipment');
-  return data.data;
+  const memo = data.data;
+  if (memo?.pharmacyId) {
+    const names = await getPharmacyNames([memo.pharmacyId]);
+    memo.pharmacyName = names[memo.pharmacyId] ?? '';
+  }
+  return memo;
 };
 
 export const listOutboundShipments = async (
@@ -398,13 +439,18 @@ export const listOutboundShipments = async (
   limit?: number
 ): Promise<{ data: any[]; pagination: any }> => {
   const sb = ensureAdmin();
+  const pharmacyIds = search ? await getPharmacyIdsForSearch(search) : null;
   const { data, error } = await sb.rpc('ra_list_outbound_shipments', {
     p_search: search || null,
     p_page: page || 1,
     p_limit: limit || 20,
+    p_pharmacy_ids: pharmacyIds,
   });
   handleRpcError(data, error, 'Failed to list outbound shipments');
-  return { data: data.data, pagination: data.pagination };
+  const memos = data.data as any[];
+  const ids = collectPharmacyIds(memos);
+  const names = await getPharmacyNames(ids);
+  return { data: injectPharmacyNames(memos, names), pagination: data.pagination };
 };
 
 // ============================================================
@@ -464,6 +510,7 @@ export const listRATrackingGroupedByReturn = async (filters: {
   limit?: number;
 }): Promise<{ data: ReturnWithMemosRA[]; pagination: any; summary: RATrackingSummary }> => {
   const sb = ensureAdmin();
+  const pharmacyIds = filters.search ? await getPharmacyIdsForSearch(filters.search) : null;
   const { data, error } = await sb.rpc('ra_list_tracking_grouped_by_return', {
     p_ra_status: filters.raStatus || null,
     p_destination: filters.destination || null,
@@ -472,10 +519,14 @@ export const listRATrackingGroupedByReturn = async (filters: {
     p_search: filters.search || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 10,
+    p_pharmacy_ids: pharmacyIds,
   });
   handleRpcError(data, error, 'Failed to list RA tracking grouped by return');
+  const groups = data.data as ReturnWithMemosRA[];
+  const ids = collectPharmacyIdsGrouped(groups);
+  const names = await getPharmacyNames(ids);
   return {
-    data: data.data as ReturnWithMemosRA[],
+    data: injectPharmacyNamesGrouped(groups, names) as ReturnWithMemosRA[],
     pagination: data.pagination,
     summary: data.summary as RATrackingSummary,
   };

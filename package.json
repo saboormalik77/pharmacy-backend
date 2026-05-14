@@ -19,7 +19,10 @@
     "email:health": "curl -X GET \"http://localhost:3000/api/admin/emails/health\"",
     "email-monitor:10s": "ts-node src/scripts/emailMonitor10s.ts",
     "email:check-once": "curl -X POST \"https://mxdzmfgkjktbvjeonwiq.supabase.co/functions/v1/read-ra-emails\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14ZHptZmdramt0YnZqZW9ud2lxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzU0MTMwMSwiZXhwIjoyMDc5MTE3MzAxfQ.JoQDOPgEN0J81ZiS55wa-hbTev9LVM0vPvLqFtEhQ7A\" -H \"Content-Type: application/json\" -d '{\"maxEmails\": 50, \"markAsRead\": true}'",
-    "email:test-only": "curl -X POST \"https://mxdzmfgkjktbvjeonwiq.supabase.co/functions/v1/read-ra-emails\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14ZHptZmdramt0YnZqZW9ud2lxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzU0MTMwMSwiZXhwIjoyMDc5MTE3MzAxfQ.JoQDOPgEN0J81ZiS55wa-hbTev9LVM0vPvLqFtEhQ7A\" -H \"Content-Type: application/json\" -d '{\"maxEmails\": 10, \"markAsRead\": false}'"
+    "email:test-only": "curl -X POST \"https://mxdzmfgkjktbvjeonwiq.supabase.co/functions/v1/read-ra-emails\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14ZHptZmdramt0YnZqZW9ud2lxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzU0MTMwMSwiZXhwIjoyMDc5MTE3MzAxfQ.JoQDOPgEN0J81ZiS55wa-hbTev9LVM0vPvLqFtEhQ7A\" -H \"Content-Type: application/json\" -d '{\"maxEmails\": 10, \"markAsRead\": false}'",
+    "graphify:update": "graphify update .",
+    "graphify:hooks": "graphify hook status",
+    "graphify:callflow": "graphify export callflow-html"
   },
   "keywords": [],
   "author": "",

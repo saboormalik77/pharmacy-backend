@@ -1,0 +1,306 @@
+# RPC Helper Function Consumption Map
+
+This document maps each cross-DB helper function to the API endpoints that consume it.
+
+---
+
+## Section 1: Private Helper Functions
+
+### Excluded from MAIN ADMIN (need BG Admin tables)
+
+#### 1. `_debit_memo_to_json` 
+**Needs:** pharmacy (BG), debit_memos (Main)
+
+**Consuming APIs (21):**
+- `list_debit_memos`
+- `get_debit_memo`
+- `get_batch`
+- `find_debit_memo_by_credit_filename`
+- `update_debit_memo__p_id_uuid_p_ra_number_text_p_ra_requested_at_timestamp_with_time_zone_p_ra_received_at_timestamp_with_time_zone_p_tickler_date_date_p_baggie_manifest_text_p_outbound_tracking_text`
+- `record_debit_memo_item_payments__p_debit_memo_id_uuid_p_items_jsonb_p_payment_date_timestamp_with_time_zone_p_reference_text_p_notes_text_p_credit_memo_url_text`
+- `ra_ship_debit_memo`
+- `ra_send_request`
+- `ra_receive`
+- `ra_resend_request`
+- `ra_list_tracking`
+- `ra_list_outstanding`
+- `ra_list_overdue`
+- `ra_list_outbound_shipments`
+- `pharmacy_payment_get`
+- `payment_record__p_debit_memo_id_uuid_p_amount_received_numeric_p_payment_date_timestamp_with_time_zone_p_reference_text_p_notes_text_p_credit_memo_url_text`
+- `payment_record__p_debit_memo_id_uuid_p_amount_received_numeric_p_payment_date_timestamp_with_time_zone_p_reference_text_p_notes_text`
+- `payment_list_unpaid`
+- `list_shipped_shipment_groups`
+- `list_memos_for_group_shipping`
+- `get_shipment_group_details`
+
+---
+
+#### 2. `_get_debit_memo_return_id`
+**Needs:** return_transaction_items (BG), debit_memo_items (Main)
+
+**Consuming APIs:** 
+- **NONE** - appears to be unused/dead code
+
+---
+
+#### 3. `_get_manufacturer_credits`
+**Needs:** pharmacy_payments (BG)
+
+**Consuming APIs (2):**
+- `pharmacy_payment_my_payments__p_pharmacy_id_uuid_p_status_text_p_date_range_text_p_start_date_date_p_end_date_date_p_page_integer_p_limit_integer`
+- `pharmacy_payment_check_pdf_data`
+
+---
+
+#### 4. `_pharmacy_payment_to_json`
+**Needs:** pharmacy_payments (BG), return_batches (Main)
+
+**Consuming APIs (6):**
+- `pharmacy_payment_my_payments__p_pharmacy_id_uuid_p_status_text_p_page_integer_p_limit_integer`
+- `pharmacy_payment_update__p_payment_id_uuid_p_status_text_p_payment_method_text_p_payment_reference_text_p_paid_at_timestamp_with_time_zone_p_notes_text_p_company_fee_numeric_p_company_fee_pct_numeric_`
+- `pharmacy_payment_list`
+- `pharmacy_payment_get`
+- `pharmacy_payment_create`
+- `pharmacy_payment_check_pdf_data`
+
+---
+
+#### 5. `_pharmacy_reports_find_txn`
+**Needs:** return_transactions (BG)
+
+**Consuming APIs (4):**
+- `get_pharmacy_return_packet`
+- `get_pharmacy_destruction_non_controls`
+- `get_pharmacy_controlled_substance_report`
+- `get_pharmacy_destruction_controls`
+
+---
+
+#### 6. `_pharmacy_reports_header`
+**Needs:** pharmacy (BG), processors (BG)
+
+**Consuming APIs (4):**
+- `get_pharmacy_return_packet`
+- `get_pharmacy_destruction_non_controls`
+- `get_pharmacy_controlled_substance_report`
+- `get_pharmacy_destruction_controls`
+
+---
+
+#### 7. `_pharmacy_reports_processor`
+**Needs:** processors (BG)
+
+**Consuming APIs (4):**
+- `get_pharmacy_return_packet`
+- `get_pharmacy_destruction_non_controls`
+- `get_pharmacy_controlled_substance_report`
+- `get_pharmacy_destruction_controls`
+
+---
+
+#### 8. `_resolve_pharmacy_name`
+**Needs:** pharmacy (BG)
+
+**Consuming APIs:**
+- **NONE** - appears to be unused/dead code
+
+---
+
+#### 9. `_rt_to_json`
+**Needs:** return_transactions (BG)
+
+**Consuming APIs (18):**
+- `warehouse_verify_return`
+- `warehouse_receive_return`
+- `warehouse_scan_box`
+- `warehouse_start_verification`
+- `warehouse_list_pending`
+- `warehouse_list_received`
+- `warehouse_get_verification_summary`
+- `warehouse_complete_verification`
+- `update_return_transaction`
+- `update_finalize_steps`
+- `save_fedex_shipment_data`
+- `save_fedex_pickup_confirmation`
+- `list_return_transactions`
+- `get_return_transaction_by_id`
+- `get_batch`
+- `finalize_return_transaction`
+- `create_return_transaction`
+- `change_return_transaction_status`
+
+---
+
+#### 10. `_rti_to_json`
+**Needs:** return_transaction_items (BG)
+
+**Consuming APIs (16):**
+- `update_return_transaction_item`
+- `list_return_transaction_items__p_transaction_id_uuid_p_return_status_text_p_search_text`
+- `list_return_transaction_items__p_transaction_id_uuid_p_return_status_text_p_search_text_p_page_integer_p_limit_integer`
+- `get_return_transaction_item`
+- `get_pharmacy_return_packet`
+- `get_pharmacy_destruction_non_controls`
+- `get_pharmacy_controlled_substance_report`
+- `get_pharmacy_destruction_controls`
+- `admin_set_item_standard_price`
+- `add_return_transaction_item`
+- `pharmacy_reports_find_txn` (via scripts)
+- `pharmacy_reports_header` (via scripts)
+- Multiple internal scripts
+
+---
+
+### Excluded from BG Admin (need Main Admin tables)
+
+#### 11. `_batch_to_json`
+**Needs:** return_batches (Main)
+
+**Consuming APIs (9):**
+- `submit_cardinal`
+- `list_batches__p_status_text_p_page_integer_p_limit_integer_p_all_debit_memos_shipped_boolean_p_exclude_if_no_remaining_pharmacy_payout_boolean_p_all_debit_memos_paid_or_partial_boolean`
+- `list_batches__p_status_text_p_page_integer_p_limit_integer`
+- `get_batch`
+- `generate_debit_memos_for_batch`
+- `create_batch`
+- `close_batch`
+- `assign_returns_to_batch`
+- Internal scripts
+
+---
+
+#### 12. `_ndc_pricing_to_json`
+**Needs:** ndc_pricing (Main)
+
+**Consuming APIs (4):**
+- `upsert_ndc_pricing`
+- `search_ndc_pricing_book`
+- `get_ndc_pricing_intelligence`
+- `get_ndc_pricing`
+
+---
+
+#### 13. `_ndc_reliability_label`
+**Needs:** ndc_pricing (Main)
+
+**Consuming APIs (2):**
+- `recompute_ndc_pricing_intelligence`
+- `get_ndc_pricing_intelligence` (via script)
+
+---
+
+#### 14. `_ra_request_to_json`
+**Needs:** ra_requests (Main)
+
+**Consuming APIs (3):**
+- `ra_send_request`
+- `ra_resend_request`
+- Internal scripts (fcr_17, fcr_34, fcr_16)
+
+---
+
+#### 15. `_shipment_group_to_json`
+**Needs:** shipment_groups (Main)
+
+**Consuming APIs (5):**
+- `ship_memo_group`
+- `list_shipped_shipment_groups`
+- `get_shipment_group_details`
+- `create_shipment_group`
+- Internal scripts
+
+---
+
+#### 16. `_wc_to_json`
+**Needs:** wine_cellar (Main)
+
+**Consuming APIs (2):**
+- `list_wine_cellar_items`
+- `check_and_surface_ready_items`
+
+---
+
+#### 17. `_normalize_dea_schedule`
+**Needs:** None (pure text transformation function)
+
+**Consuming APIs (3):**
+- `get_pharmacy_destruction_non_controls`
+- `get_pharmacy_controlled_substance_report`
+- `get_pharmacy_destruction_controls`
+
+**Purpose:** Normalizes DEA schedule values (e.g., "CII", "C III", "2", "3") to consistent format ("C2", "C3", etc.)
+
+---
+
+#### 18. `_ensure_pharmacy_name`
+**Needs:** pharmacy (BG/Main) - Trigger function
+
+**Consuming APIs:**
+- **NONE** - This is a trigger function that automatically ensures pharmacy names are populated on insert/update, not consumed by API endpoints directly
+
+**Purpose:** Automatically populates pharmacy names via database trigger (FCR pharmacy name fix)
+
+---
+
+## Section 2: RPC Functions in Main Admin that reference BG Admin tables
+
+These 11 RPC functions directly query `return_transactions` or `return_transaction_items` tables from BG Admin:
+
+| RPC Function | BG Table(s) Accessed |
+|--------------|---------------------|
+| `warehouse_scan_box` | return_transactions |
+| `warehouse_receive_return` | return_transactions |
+| `warehouse_verify_return` | return_transactions |
+| `warehouse_verify_item_v2` | return_transactions |
+| `warehouse_start_verification` | return_transactions |
+| `warehouse_complete_verification` | return_transactions |
+| `warehouse_get_verification_summary` | return_transactions |
+| `assign_returns_to_batch` | return_transactions |
+| `create_destruction_record_for_transaction_item` | return_transaction_items |
+| `save_fedex_shipment_data` | return_transactions |
+| `save_fedex_pickup_confirmation` | return_transactions |
+
+---
+
+## Summary
+
+- **Total Cross-DB Helpers:** 18 private functions + 11 direct RPCs = 29 total
+- **Unused/Dead Code:** 2 helpers (`_get_debit_memo_return_id`, `_resolve_pharmacy_name`)
+- **Trigger Functions:** 1 (`_ensure_pharmacy_name` - not consumed by APIs, runs automatically)
+- **Heaviest Used Helpers:**
+  - `_debit_memo_to_json` (21 APIs)
+  - `_rt_to_json` (18 APIs)
+  - `_rti_to_json` (16 APIs)
+  - `_batch_to_json` (9 APIs)
+  - `_pharmacy_payment_to_json` (6 APIs)
+
+---
+
+## Deep Analysis: API Consumption Patterns
+
+### By Database Context
+
+| Helper Function | Context | API Count |
+|-----------------|---------|-----------|
+| `_debit_memo_to_json` | BG Admin → Main | 21 |
+| `_rt_to_json` | BG Admin → Main | 18 |
+| `_rti_to_json` | BG Admin → Main | 16 |
+| `_batch_to_json` | Main Only | 9 |
+| `_pharmacy_reports_*` | BG Admin → Main | 4 each |
+| `_pharmacy_payment_to_json` | BG Admin → Main | 6 |
+| `_shipment_group_to_json` | Main Only | 5 |
+| `_get_manufacturer_credits` | BG Admin | 2 |
+| `_ndc_pricing_to_json` | Main Only | 4 |
+| `_ra_request_to_json` | Main Only | 3 |
+| `_wc_to_json` | Main Only | 2 |
+| `_ndc_reliability_label` | Main Only | 2 |
+| `_normalize_dea_schedule` | BG Admin → Main | 3 |
+
+### Key Observations
+
+1. **Most Cross-DB Traffic:** `_debit_memo_to_json`, `_rt_to_json`, `_rti_to_json` - these bridge BG Admin and Main Admin databases
+2. **Heaviest Consumer:** Payment/RA workflow uses `_debit_memo_to_json` most extensively (21 APIs)
+3. **Warehouse Operations:** Use `_rt_to_json` heavily (18 APIs) for return transaction serialization
+4. **Report Generation:** Multiple report APIs use `_rti_to_json` and `_pharmacy_reports_*` helpers
+5. **Trigger Functions:** `_ensure_pharmacy_name` runs automatically but is not consumed by any API directly

@@ -1,5 +1,13 @@
-import { supabaseAdmin } from '../config/supabase';
+import { supabaseAdmin, bgSupabaseAdmin } from '../config/supabase';
 import { AppError } from '../utils/appError';
+import {
+  getPharmacyNames,
+  getPharmacyIdsForSearch,
+  injectPharmacyNames,
+  injectPharmacyNamesGrouped,
+  collectPharmacyIds,
+  collectPharmacyIdsGrouped,
+} from '../utils/pharmacyEnricher';
 
 function ensureAdmin() {
   if (!supabaseAdmin) throw new AppError('Supabase admin client not configured', 500);
@@ -140,7 +148,13 @@ export const getBatch = async (
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('get_batch', { p_id: batchId });
   handleRpcError(data, error, 'Failed to get batch');
-  return data.data as { batch: ReturnBatch; debitMemos: DebitMemo[]; returns: any[] };
+  const result = data.data as { batch: ReturnBatch; debitMemos: DebitMemo[]; returns: any[] };
+  if (result.debitMemos?.length) {
+    const ids = collectPharmacyIds(result.debitMemos);
+    const names = await getPharmacyNames(ids);
+    injectPharmacyNames(result.debitMemos, names);
+  }
+  return result;
 };
 
 export const assignReturnsToBatch = async (
@@ -344,6 +358,7 @@ export const listDebitMemos = async (filters: {
   limit?: number;
 }): Promise<{ data: DebitMemo[]; pagination: any }> => {
   const sb = ensureAdmin();
+  const pharmacyIds = filters.search ? await getPharmacyIdsForSearch(filters.search) : null;
   const { data, error } = await sb.rpc('list_debit_memos', {
     p_batch_id: filters.batchId || null,
     p_pharmacy_id: filters.pharmacyId || null,
@@ -352,9 +367,13 @@ export const listDebitMemos = async (filters: {
     p_search: filters.search || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 20,
+    p_pharmacy_ids: pharmacyIds,
   });
   handleRpcError(data, error, 'Failed to list debit memos');
-  return { data: data.data as DebitMemo[], pagination: data.pagination };
+  const memos = data.data as DebitMemo[];
+  const ids = collectPharmacyIds(memos);
+  const names = await getPharmacyNames(ids);
+  return { data: injectPharmacyNames(memos, names), pagination: data.pagination };
 };
 
 export interface ReturnWithMemos {
@@ -378,15 +397,20 @@ export const listDebitMemosGroupedByReturn = async (filters: {
   limit?: number;
 }): Promise<{ data: ReturnWithMemos[]; pagination: any }> => {
   const sb = ensureAdmin();
+  const pharmacyIds = filters.search ? await getPharmacyIdsForSearch(filters.search) : null;
   const { data, error } = await sb.rpc('list_debit_memos_grouped_by_return', {
     p_destination: filters.destination || null,
     p_payment_status: filters.paymentStatus || null,
     p_search: filters.search || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 10,
+    p_pharmacy_ids: pharmacyIds,
   });
   handleRpcError(data, error, 'Failed to list debit memos grouped by return');
-  return { data: data.data as ReturnWithMemos[], pagination: data.pagination };
+  const groups = data.data as ReturnWithMemos[];
+  const ids = collectPharmacyIdsGrouped(groups);
+  const names = await getPharmacyNames(ids);
+  return { data: injectPharmacyNamesGrouped(groups, names) as ReturnWithMemos[], pagination: data.pagination };
 };
 
 export const getDebitMemo = async (
@@ -395,7 +419,12 @@ export const getDebitMemo = async (
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('get_debit_memo', { p_id: memoId });
   handleRpcError(data, error, 'Failed to get debit memo');
-  return data.data as { memo: DebitMemo; items: DebitMemoItem[] };
+  const result = data.data as { memo: DebitMemo; items: DebitMemoItem[] };
+  if (result.memo?.pharmacyId) {
+    const names = await getPharmacyNames([result.memo.pharmacyId]);
+    result.memo.pharmacyName = names[result.memo.pharmacyId] ?? '';
+  }
+  return result;
 };
 
 export const updateDebitMemo = async (
@@ -428,18 +457,24 @@ export const updateDebitMemo = async (
     p_amount_received: updates.amountReceived ?? null,
   });
   handleRpcError(data, error, 'Failed to update debit memo');
-  return data.data as DebitMemo;
+  const memo = data.data as DebitMemo;
+  if (memo?.pharmacyId) {
+    const names = await getPharmacyNames([memo.pharmacyId]);
+    memo.pharmacyName = names[memo.pharmacyId] ?? '';
+  }
+  return memo;
 };
 
 export const getDebitMemoPdfData = async (memoId: string): Promise<any> => {
   const sb = ensureAdmin();
+  const bgSb = bgSupabaseAdmin;
 
   // Get debit memo with items
   const memoResult = await getDebitMemo(memoId);
   const { memo, items } = memoResult;
 
-  // Get pharmacy details including primary wholesaler (physical_address is a JSONB column)
-  const { data: pharmacyData, error: pharmacyError } = await sb
+  // Get pharmacy details from BG Admin DB
+  const { data: pharmacyData, error: pharmacyError } = await bgSb!
     .from('pharmacy')
     .select('id, name, physical_address, phone, fax_number, dea_number, dea_expiration_date, primary_wholesaler, wholesaler_account_number')
     .eq('id', memo.pharmacyId)
@@ -447,7 +482,7 @@ export const getDebitMemoPdfData = async (memoId: string): Promise<any> => {
 
   if (pharmacyError) throw new AppError(`Failed to get pharmacy: ${pharmacyError.message}`, 400);
 
-  // Get warehouse address from warehouses table (for top header)
+  // Get warehouse address from MAIN Admin DB warehouses table (for top header)
   const { data: warehouseData, error: warehouseError } = await sb
     .from('warehouses')
     .select('name, contact_name, phone, street, city, state, zip')
@@ -458,10 +493,10 @@ export const getDebitMemoPdfData = async (memoId: string): Promise<any> => {
     console.warn('Failed to get warehouse address:', warehouseError.message);
   }
 
-  // Get primary wholesaler/processor details (from processors table)
+  // Get primary wholesaler/processor details from BG Admin DB
   let wholesalerInfo: any = null;
   if (pharmacyData.primary_wholesaler) {
-    const { data: processorData, error: processorError } = await sb
+    const { data: processorData, error: processorError } = await bgSb!
       .from('processors')
       .select('id, name, address, city, state, zip_code, phone, fax')
       .eq('name', pharmacyData.primary_wholesaler)
@@ -472,7 +507,7 @@ export const getDebitMemoPdfData = async (memoId: string): Promise<any> => {
     }
   }
 
-  // Get labeler details from manufacturer_policies table
+  // Get labeler details from MAIN Admin DB manufacturer_policies table
   const { data: labelerData, error: labelerError } = await sb
     .from('manufacturer_policies')
     .select('labeler_id, manufacturer_name, address_1, city, state, zip, main_phone, fax')
@@ -491,12 +526,12 @@ export const getDebitMemoPdfData = async (memoId: string): Promise<any> => {
     fax: null,
   };
 
-  // Get return transaction items for full/partial quantities and package size
+  // Get return transaction items from BG Admin DB
   const itemIds = items.map(item => item.transactionItemId).filter(Boolean);
   let transactionItems: any[] = [];
-  
+
   if (itemIds.length > 0) {
-    const { data: transactionItemsData, error: transactionItemsError } = await sb
+    const { data: transactionItemsData, error: transactionItemsError } = await bgSb!
       .from('return_transaction_items')
       .select('id, ndc, full_package_size, proprietary_name, generic_name')
       .in('id', itemIds);
@@ -625,9 +660,10 @@ export const getDebitMemoSummaryData = async (
   batchId: string
 ): Promise<DebitMemoSummaryData> => {
   const sb = ensureAdmin();
+  const bgSb = bgSupabaseAdmin;
 
-  // 1. Get return transaction details
-  const { data: returnTx, error: returnError } = await sb
+  // 1. Get return transaction details from BG Admin DB
+  const { data: returnTx, error: returnError } = await bgSb!
     .from('return_transactions')
     .select('id, license_plate, pharmacy_id, processor_id, created_at, finalized_at, batch_id')
     .eq('id', returnTransactionId)
@@ -635,8 +671,8 @@ export const getDebitMemoSummaryData = async (
 
   if (returnError) throw new AppError(`Failed to get return transaction: ${returnError.message}`, 400);
 
-  // 2. Get pharmacy details
-  const { data: pharmacyData, error: pharmacyError } = await sb
+  // 2. Get pharmacy details from BG Admin DB
+  const { data: pharmacyData, error: pharmacyError } = await bgSb!
     .from('pharmacy')
     .select('id, name, pharmacy_name, physical_address, phone, contact_phone, dea_number, email')
     .eq('id', returnTx.pharmacy_id)
@@ -644,10 +680,10 @@ export const getDebitMemoSummaryData = async (
 
   if (pharmacyError) throw new AppError(`Failed to get pharmacy: ${pharmacyError.message}`, 400);
 
-  // 3. Get processor name
+  // 3. Get processor name from BG Admin DB
   let processorName: string | null = null;
   if (returnTx.processor_id) {
-    const { data: processorData } = await sb
+    const { data: processorData } = await bgSb!
       .from('processors')
       .select('name')
       .eq('id', returnTx.processor_id)
@@ -693,7 +729,7 @@ export const getDebitMemoSummaryData = async (
 
     if (txItemIds.length === 0) continue;
 
-    const { data: matchingItems } = await sb
+    const { data: matchingItems } = await bgSb!
       .from('return_transaction_items')
       .select('id')
       .in('id', txItemIds)

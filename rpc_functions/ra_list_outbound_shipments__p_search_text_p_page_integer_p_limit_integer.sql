@@ -1,11 +1,13 @@
 -- Function : ra_list_outbound_shipments
--- Arguments: p_search text, p_page integer, p_limit integer
+-- Arguments: p_search text, p_page integer, p_limit integer, p_pharmacy_ids uuid[]
 -- Type     : FUNCTION
+-- NOTE     : p_pharmacy_ids is passed by backend (pre-resolved from BG Admin) for pharmacy name search
 -- =============================================================
 
-DROP FUNCTION IF EXISTS public.ra_list_outbound_shipments(p_search text, p_page integer, p_limit integer) CASCADE;
+DROP FUNCTION IF EXISTS public.ra_list_outbound_shipments(text, integer, integer) CASCADE;
+DROP FUNCTION IF EXISTS public.ra_list_outbound_shipments(text, integer, integer, uuid[]) CASCADE;
 
-CREATE OR REPLACE FUNCTION public.ra_list_outbound_shipments(p_search text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 20)
+CREATE OR REPLACE FUNCTION public.ra_list_outbound_shipments(p_search text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 20, p_pharmacy_ids uuid[] DEFAULT NULL::uuid[])
  RETURNS jsonb
  LANGUAGE plpgsql
  STABLE SECURITY DEFINER
@@ -24,7 +26,7 @@ BEGIN
       LOWER(d.memo_number) LIKE '%' || LOWER(p_search) || '%'
       OR LOWER(COALESCE(d.outbound_tracking, '')) LIKE '%' || LOWER(p_search) || '%'
       OR LOWER(COALESCE(d.labeler_name, '')) LIKE '%' || LOWER(p_search) || '%'
-      OR LOWER(COALESCE((SELECT pharmacy_name FROM pharmacy WHERE id = d.pharmacy_id), '')) LIKE '%' || LOWER(p_search) || '%'
+      OR (p_pharmacy_ids IS NOT NULL AND d.pharmacy_id = ANY(p_pharmacy_ids))
     ));
 
   SELECT COALESCE(jsonb_agg(_debit_memo_to_json(d) ORDER BY d.shipped_at DESC), '[]'::jsonb)
@@ -37,7 +39,7 @@ BEGIN
         LOWER(d.memo_number) LIKE '%' || LOWER(p_search) || '%'
         OR LOWER(COALESCE(d.outbound_tracking, '')) LIKE '%' || LOWER(p_search) || '%'
         OR LOWER(COALESCE(d.labeler_name, '')) LIKE '%' || LOWER(p_search) || '%'
-        OR LOWER(COALESCE((SELECT pharmacy_name FROM pharmacy WHERE id = d.pharmacy_id), '')) LIKE '%' || LOWER(p_search) || '%'
+        OR (p_pharmacy_ids IS NOT NULL AND d.pharmacy_id = ANY(p_pharmacy_ids))
       ))
     ORDER BY d.shipped_at DESC
     LIMIT p_limit OFFSET v_offset

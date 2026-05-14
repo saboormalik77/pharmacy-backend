@@ -1,11 +1,13 @@
 -- Function : list_debit_memos
--- Arguments: p_batch_id uuid, p_pharmacy_id uuid, p_destination text, p_payment_status text, p_search text, p_page integer, p_limit integer
+-- Arguments: p_batch_id uuid, p_pharmacy_id uuid, p_destination text, p_payment_status text, p_search text, p_page integer, p_limit integer, p_pharmacy_ids uuid[]
 -- Type     : FUNCTION
+-- NOTE     : p_pharmacy_ids is passed by backend (pre-resolved from BG Admin) for pharmacy name search
 -- =============================================================
 
-DROP FUNCTION IF EXISTS public.list_debit_memos(p_batch_id uuid, p_pharmacy_id uuid, p_destination text, p_payment_status text, p_search text, p_page integer, p_limit integer) CASCADE;
+DROP FUNCTION IF EXISTS public.list_debit_memos(uuid, uuid, text, text, text, integer, integer) CASCADE;
+DROP FUNCTION IF EXISTS public.list_debit_memos(uuid, uuid, text, text, text, integer, integer, uuid[]) CASCADE;
 
-CREATE OR REPLACE FUNCTION public.list_debit_memos(p_batch_id uuid DEFAULT NULL::uuid, p_pharmacy_id uuid DEFAULT NULL::uuid, p_destination text DEFAULT NULL::text, p_payment_status text DEFAULT NULL::text, p_search text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 20)
+CREATE OR REPLACE FUNCTION public.list_debit_memos(p_batch_id uuid DEFAULT NULL::uuid, p_pharmacy_id uuid DEFAULT NULL::uuid, p_destination text DEFAULT NULL::text, p_payment_status text DEFAULT NULL::text, p_search text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 20, p_pharmacy_ids uuid[] DEFAULT NULL::uuid[])
  RETURNS jsonb
  LANGUAGE plpgsql
  STABLE SECURITY DEFINER
@@ -18,7 +20,6 @@ DECLARE
 BEGIN
   v_offset := (GREATEST(p_page, 1) - 1) * p_limit;
 
-  -- Support comma-separated statuses, e.g. 'paid,partial'
   IF p_payment_status IS NOT NULL THEN
     v_statuses := string_to_array(p_payment_status, ',');
   END IF;
@@ -34,11 +35,7 @@ BEGIN
        OR dm.memo_number  ILIKE '%' || p_search || '%'
        OR dm.labeler_name ILIKE '%' || p_search || '%'
        OR dm.ra_number    ILIKE '%' || p_search || '%'
-       OR EXISTS (
-         SELECT 1 FROM pharmacy p
-          WHERE p.id = dm.pharmacy_id
-            AND p.pharmacy_name ILIKE '%' || p_search || '%'
-       )
+       OR (p_pharmacy_ids IS NOT NULL AND dm.pharmacy_id = ANY(p_pharmacy_ids))
      );
 
   SELECT COALESCE(jsonb_agg(row_json ORDER BY created_at DESC), '[]'::jsonb)
@@ -55,11 +52,7 @@ BEGIN
            OR dm.memo_number  ILIKE '%' || p_search || '%'
            OR dm.labeler_name ILIKE '%' || p_search || '%'
            OR dm.ra_number    ILIKE '%' || p_search || '%'
-           OR EXISTS (
-             SELECT 1 FROM pharmacy p
-              WHERE p.id = dm.pharmacy_id
-                AND p.pharmacy_name ILIKE '%' || p_search || '%'
-           )
+           OR (p_pharmacy_ids IS NOT NULL AND dm.pharmacy_id = ANY(p_pharmacy_ids))
          )
        ORDER BY dm.created_at DESC
        LIMIT p_limit OFFSET v_offset

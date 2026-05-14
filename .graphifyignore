@@ -1,0 +1,88 @@
+# Node.js dependencies and build artifacts
+node_modules/
+dist/
+build/
+# Next.js / framework output (source is under app/, components/, lib/)
+.next/
+out/
+.vercel/
+.turbo/
+*.log
+*.log.*
+
+# Git and version control
+.git/
+.gitignore
+
+# IDE and editor files
+.vscode/
+.cursor/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary and cache files
+*.tmp
+*.temp
+.cache/
+.temp/
+
+# Package manager files
+package-lock.json
+yarn.lock
+.pnpm-lock.yaml
+
+# Environment and config files with sensitive data
+.env
+.env.*
+config/production.json
+config/staging.json
+
+# Generated documentation
+docs/build/
+documentation/build/
+
+# Test coverage reports
+coverage/
+.nyc_output/
+*.lcov
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Compiled files
+*.tsbuildinfo
+
+# Large media files (unless specifically needed for analysis)
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.mp3
+*.wav
+*.flac
+
+# Archive files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# graphify output (never index the graph as source)
+graphify-out/
+
+# Optional: skip very large ad-hoc dumps (uncomment if graph gets huge)
+# ll.txt
+# rpc_consumption_by_helper.md

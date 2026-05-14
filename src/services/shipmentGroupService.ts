@@ -1,6 +1,13 @@
 import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../utils/appError';
 import { getWarehouseAddressFromTable } from '../utils/warehouseAddress';
+import {
+  getPharmacyNames,
+  injectPharmacyNames,
+  injectPharmacyNamesGrouped,
+  collectPharmacyIds,
+  collectPharmacyIdsGrouped,
+} from '../utils/pharmacyEnricher';
 
 function ensureAdmin() {
   if (!supabaseAdmin) throw new AppError('Supabase admin client not configured', 500);
@@ -55,7 +62,10 @@ export const listMemosForGroupShipping = async (destination?: string): Promise<a
     p_destination: dest,
   });
   handleRpcError(data, error, 'Failed to list memos for group shipping');
-  return data.data;
+  const memos = data.data as any[];
+  const ids = collectPharmacyIds(memos);
+  const names = await getPharmacyNames(ids);
+  return injectPharmacyNames(memos, names);
 };
 
 export const createShipmentGroup = async (request: CreateShipmentGroupRequest): Promise<{
@@ -104,7 +114,13 @@ export const getShipmentGroupDetails = async (groupId: string): Promise<{
     p_group_id: groupId,
   });
   handleRpcError(data, error, 'Failed to get shipment group details');
-  return data.data;
+  const result = data.data as { group: ShipmentGroup; memos: any[] };
+  if (result.memos?.length) {
+    const ids = collectPharmacyIds(result.memos);
+    const names = await getPharmacyNames(ids);
+    injectPharmacyNames(result.memos, names);
+  }
+  return result;
 };
 
 export const listShippedShipmentGroups = async (
@@ -120,7 +136,10 @@ export const listShippedShipmentGroups = async (
     p_destination: dest,
   });
   handleRpcError(data, error, 'Failed to list shipped shipment groups');
-  return { data: data.data || [], pagination: data.pagination };
+  const groups = data.data || [];
+  const ids = collectPharmacyIdsGrouped(groups);
+  const names = await getPharmacyNames(ids);
+  return { data: injectPharmacyNamesGrouped(groups, names), pagination: data.pagination };
 };
 
 export const createShipmentGroupFedexShipment = async (
