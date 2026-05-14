@@ -1,13 +1,11 @@
 -- Function : list_debit_memos_grouped_by_return
--- Arguments: p_destination text, p_payment_status text, p_search text, p_page integer, p_limit integer, p_pharmacy_ids uuid[]
+-- Arguments: p_destination text, p_payment_status text, p_search text, p_page integer, p_limit integer
 -- Type     : FUNCTION
--- NOTE     : pharmacyName fields are empty — backend enriches from BG Admin DB
 -- =============================================================
 
-DROP FUNCTION IF EXISTS public.list_debit_memos_grouped_by_return(text, text, text, integer, integer) CASCADE;
-DROP FUNCTION IF EXISTS public.list_debit_memos_grouped_by_return(text, text, text, integer, integer, uuid[]) CASCADE;
+DROP FUNCTION IF EXISTS public.list_debit_memos_grouped_by_return(p_destination text, p_payment_status text, p_search text, p_page integer, p_limit integer) CASCADE;
 
-CREATE OR REPLACE FUNCTION public.list_debit_memos_grouped_by_return(p_destination text DEFAULT NULL::text, p_payment_status text DEFAULT NULL::text, p_search text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 10, p_pharmacy_ids uuid[] DEFAULT NULL::uuid[])
+CREATE OR REPLACE FUNCTION public.list_debit_memos_grouped_by_return(p_destination text DEFAULT NULL::text, p_payment_status text DEFAULT NULL::text, p_search text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 10)
  RETURNS jsonb
  LANGUAGE plpgsql
  STABLE SECURITY DEFINER
@@ -20,10 +18,12 @@ DECLARE
 BEGIN
   v_offset := (GREATEST(p_page, 1) - 1) * p_limit;
 
+  -- Support comma-separated statuses
   IF p_payment_status IS NOT NULL THEN
     v_statuses := string_to_array(p_payment_status, ',');
   END IF;
 
+  -- Count distinct returns that have matching debit memos
   SELECT COUNT(DISTINCT rt.id) INTO v_total
     FROM return_transactions rt
     JOIN debit_memo_items dmi ON dmi.transaction_item_id IN (
@@ -34,22 +34,27 @@ BEGIN
      AND (v_statuses IS NULL    OR dm.payment_status = ANY(v_statuses))
      AND (
        p_search IS NULL
-       OR dm.memo_number   ILIKE '%' || p_search || '%'
-       OR dm.labeler_name  ILIKE '%' || p_search || '%'
-       OR dm.ra_number     ILIKE '%' || p_search || '%'
+       OR dm.memo_number  ILIKE '%' || p_search || '%'
+       OR dm.labeler_name ILIKE '%' || p_search || '%'
+       OR dm.ra_number    ILIKE '%' || p_search || '%'
        OR rt.license_plate ILIKE '%' || p_search || '%'
-       OR (p_pharmacy_ids IS NOT NULL AND rt.pharmacy_id = ANY(p_pharmacy_ids))
+       OR EXISTS (
+         SELECT 1 FROM pharmacy p
+          WHERE p.id = rt.pharmacy_id
+            AND p.pharmacy_name ILIKE '%' || p_search || '%'
+       )
      );
 
+  -- Build the grouped result
   SELECT COALESCE(jsonb_agg(return_group ORDER BY return_created DESC), '[]'::jsonb)
     INTO v_results
     FROM (
-      SELECT
+      SELECT 
         jsonb_build_object(
           'returnId',       rt.id,
           'licensePlate',   rt.license_plate,
           'pharmacyId',     rt.pharmacy_id,
-          'pharmacyName',   '',
+          'pharmacyName',   COALESCE((SELECT pharmacy_name FROM pharmacy WHERE id = rt.pharmacy_id), ''),
           'status',         rt.status,
           'returnCreatedAt', rt.created_at,
           'totalMemos',     COUNT(DISTINCT dm.id),
@@ -61,7 +66,7 @@ BEGIN
                 'id',                dm.id,
                 'batchId',           dm.batch_id,
                 'pharmacyId',        dm.pharmacy_id,
-                'pharmacyName',      '',
+                'pharmacyName',      COALESCE((SELECT pharmacy_name FROM pharmacy WHERE id = dm.pharmacy_id), ''),
                 'memoNumber',        dm.memo_number,
                 'destination',       dm.destination,
                 'labelerId',         dm.labeler_id,
@@ -100,11 +105,15 @@ BEGIN
        AND (v_statuses IS NULL    OR dm.payment_status = ANY(v_statuses))
        AND (
          p_search IS NULL
-         OR dm.memo_number   ILIKE '%' || p_search || '%'
-         OR dm.labeler_name  ILIKE '%' || p_search || '%'
-         OR dm.ra_number     ILIKE '%' || p_search || '%'
+         OR dm.memo_number  ILIKE '%' || p_search || '%'
+         OR dm.labeler_name ILIKE '%' || p_search || '%'
+         OR dm.ra_number    ILIKE '%' || p_search || '%'
          OR rt.license_plate ILIKE '%' || p_search || '%'
-         OR (p_pharmacy_ids IS NOT NULL AND rt.pharmacy_id = ANY(p_pharmacy_ids))
+         OR EXISTS (
+           SELECT 1 FROM pharmacy p
+            WHERE p.id = rt.pharmacy_id
+              AND p.pharmacy_name ILIKE '%' || p_search || '%'
+         )
        )
      GROUP BY rt.id, rt.license_plate, rt.pharmacy_id, rt.status, rt.created_at
      ORDER BY rt.created_at DESC

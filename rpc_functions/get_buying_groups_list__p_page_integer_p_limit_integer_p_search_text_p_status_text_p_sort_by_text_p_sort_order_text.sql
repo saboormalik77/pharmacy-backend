@@ -27,7 +27,7 @@ BEGIN
   )
   INTO v_stats
   FROM admin a
-  WHERE a.role = 'super_admin';
+  WHERE a.role = 'super_admin' AND a.buying_group_id = a.id;
 
   -- Count
   SELECT COUNT(*)::INTEGER
@@ -35,6 +35,7 @@ BEGIN
   FROM admin a
   WHERE
     a.role = 'super_admin'
+    AND a.buying_group_id = a.id
     AND (p_search IS NULL OR p_search = '' OR
       a.name ILIKE '%' || p_search || '%' OR
       a.email ILIKE '%' || p_search || '%')
@@ -56,13 +57,22 @@ BEGIN
       'notes', a.notes,
       'createdAt', a.created_at,
       'updatedAt', a.updated_at,
-      'adminCount', 1,
+      'adminCount', (
+        SELECT COUNT(*)::INTEGER 
+        FROM admin a2 
+        WHERE a2.buying_group_id = a.id AND a2.role != 'super_admin'
+      ),
       'role', a.role,
-      'lastLoginAt', a.last_login_at
+      'lastLoginAt', a.last_login_at,
+      'supabaseUrl', a.supabase_url,
+      'supabaseAnonKey', a.supabase_anon_key,
+      'supabaseServiceRoleKey', a.supabase_service_role_key,
+      'supabaseEnabled', a.supabase_enabled
     ) AS row_data
     FROM admin a
     WHERE
       a.role = 'super_admin'
+      AND a.buying_group_id = a.id
       AND (p_search IS NULL OR p_search = '' OR
         a.name ILIKE '%' || p_search || '%' OR
         a.email ILIKE '%' || p_search || '%')

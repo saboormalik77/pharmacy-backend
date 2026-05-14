@@ -1,11 +1,11 @@
 -- Function : analytics_aging_inventory
--- Arguments: p_pharmacy_id uuid, p_status text, p_page integer, p_limit integer
+-- Arguments: p_pharmacy_id uuid, p_status text, p_page integer, p_limit integer, p_buying_group_id uuid
 -- Type     : FUNCTION
 -- =============================================================
 
-DROP FUNCTION IF EXISTS public.analytics_aging_inventory(p_pharmacy_id uuid, p_status text, p_page integer, p_limit integer) CASCADE;
+DROP FUNCTION IF EXISTS public.analytics_aging_inventory(p_pharmacy_id uuid, p_status text, p_page integer, p_limit integer, p_buying_group_id uuid) CASCADE;
 
-CREATE OR REPLACE FUNCTION public.analytics_aging_inventory(p_pharmacy_id uuid DEFAULT NULL::uuid, p_status text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 20)
+CREATE OR REPLACE FUNCTION public.analytics_aging_inventory(p_pharmacy_id uuid DEFAULT NULL::uuid, p_status text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 20, p_buying_group_id uuid DEFAULT NULL::uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
  STABLE SECURITY DEFINER
@@ -35,8 +35,10 @@ BEGIN
   )
   INTO v_summary
   FROM wine_cellar wc
+  JOIN pharmacy ph ON ph.id = wc.pharmacy_id
   WHERE (p_pharmacy_id IS NULL OR wc.pharmacy_id = p_pharmacy_id)
-    AND (p_status IS NULL OR wc.status = p_status);
+    AND (p_status IS NULL OR wc.status = p_status)
+    AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
   -- Aging buckets (for shelved items only)
   SELECT jsonb_build_object(
@@ -59,14 +61,18 @@ BEGIN
   )
   INTO v_aging
   FROM wine_cellar wc
+  JOIN pharmacy ph ON ph.id = wc.pharmacy_id
   WHERE wc.status = 'shelved'
-    AND (p_pharmacy_id IS NULL OR wc.pharmacy_id = p_pharmacy_id);
+    AND (p_pharmacy_id IS NULL OR wc.pharmacy_id = p_pharmacy_id)
+    AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
   -- Count for pagination
   SELECT COUNT(*) INTO v_total
   FROM wine_cellar wc
+  JOIN pharmacy ph ON ph.id = wc.pharmacy_id
   WHERE (p_pharmacy_id IS NULL OR wc.pharmacy_id = p_pharmacy_id)
-    AND (p_status IS NULL OR wc.status = p_status);
+    AND (p_status IS NULL OR wc.status = p_status)
+    AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
   -- Data rows
   SELECT COALESCE(jsonb_agg(row_data ORDER BY days_shelved DESC), '[]'::jsonb)
@@ -95,6 +101,7 @@ BEGIN
     LEFT JOIN pharmacy ph ON ph.id = wc.pharmacy_id
     WHERE (p_pharmacy_id IS NULL OR wc.pharmacy_id = p_pharmacy_id)
       AND (p_status IS NULL OR wc.status = p_status)
+      AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
     ORDER BY wc.date_shelved ASC
     LIMIT p_limit OFFSET v_offset
   ) sub;

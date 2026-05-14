@@ -1,11 +1,11 @@
 -- Function : analytics_price_audit
--- Arguments: p_ndc text, p_source text, p_search text, p_page integer, p_limit integer
+-- Arguments: p_ndc text, p_source text, p_search text, p_page integer, p_limit integer, p_buying_group_id uuid
 -- Type     : FUNCTION
 -- =============================================================
 
-DROP FUNCTION IF EXISTS public.analytics_price_audit(p_ndc text, p_source text, p_search text, p_page integer, p_limit integer) CASCADE;
+DROP FUNCTION IF EXISTS public.analytics_price_audit(p_ndc text, p_source text, p_search text, p_page integer, p_limit integer, p_buying_group_id uuid) CASCADE;
 
-CREATE OR REPLACE FUNCTION public.analytics_price_audit(p_ndc text DEFAULT NULL::text, p_source text DEFAULT NULL::text, p_search text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 50)
+CREATE OR REPLACE FUNCTION public.analytics_price_audit(p_ndc text DEFAULT NULL::text, p_source text DEFAULT NULL::text, p_search text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 50, p_buying_group_id uuid DEFAULT NULL::uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
  STABLE SECURITY DEFINER

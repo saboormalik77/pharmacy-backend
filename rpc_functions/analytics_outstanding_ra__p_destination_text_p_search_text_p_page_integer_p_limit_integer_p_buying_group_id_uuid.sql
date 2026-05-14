@@ -1,11 +1,11 @@
 -- Function : analytics_outstanding_ra
--- Arguments: p_destination text, p_search text, p_page integer, p_limit integer
+-- Arguments: p_destination text, p_search text, p_page integer, p_limit integer, p_buying_group_id uuid
 -- Type     : FUNCTION
 -- =============================================================
 
-DROP FUNCTION IF EXISTS public.analytics_outstanding_ra(p_destination text, p_search text, p_page integer, p_limit integer) CASCADE;
+DROP FUNCTION IF EXISTS public.analytics_outstanding_ra(p_destination text, p_search text, p_page integer, p_limit integer, p_buying_group_id uuid) CASCADE;
 
-CREATE OR REPLACE FUNCTION public.analytics_outstanding_ra(p_destination text DEFAULT NULL::text, p_search text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 20)
+CREATE OR REPLACE FUNCTION public.analytics_outstanding_ra(p_destination text DEFAULT NULL::text, p_search text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 20, p_buying_group_id uuid DEFAULT NULL::uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
  STABLE SECURITY DEFINER
@@ -30,13 +30,15 @@ BEGIN
   )
   INTO v_summary
   FROM debit_memos dm
+  JOIN pharmacy ph ON ph.id = dm.pharmacy_id
   WHERE dm.ra_requested_at IS NOT NULL
     AND dm.ra_received_at IS NULL
     AND (p_destination IS NULL OR dm.destination = p_destination)
     AND (p_search IS NULL OR (
       LOWER(COALESCE(dm.labeler_name, '')) LIKE '%' || LOWER(p_search) || '%'
       OR LOWER(dm.memo_number) LIKE '%' || LOWER(p_search) || '%'
-    ));
+    ))
+    AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
   -- Aging buckets
   SELECT jsonb_build_object(
@@ -59,24 +61,28 @@ BEGIN
   )
   INTO v_aging
   FROM debit_memos dm
+  JOIN pharmacy ph ON ph.id = dm.pharmacy_id
   WHERE dm.ra_requested_at IS NOT NULL
     AND dm.ra_received_at IS NULL
     AND (p_destination IS NULL OR dm.destination = p_destination)
     AND (p_search IS NULL OR (
       LOWER(COALESCE(dm.labeler_name, '')) LIKE '%' || LOWER(p_search) || '%'
       OR LOWER(dm.memo_number) LIKE '%' || LOWER(p_search) || '%'
-    ));
+    ))
+    AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
   -- Count
   SELECT COUNT(*) INTO v_total
   FROM debit_memos dm
+  JOIN pharmacy ph ON ph.id = dm.pharmacy_id
   WHERE dm.ra_requested_at IS NOT NULL
     AND dm.ra_received_at IS NULL
     AND (p_destination IS NULL OR dm.destination = p_destination)
     AND (p_search IS NULL OR (
       LOWER(COALESCE(dm.labeler_name, '')) LIKE '%' || LOWER(p_search) || '%'
       OR LOWER(dm.memo_number) LIKE '%' || LOWER(p_search) || '%'
-    ));
+    ))
+    AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
   -- Data rows
   SELECT COALESCE(jsonb_agg(row_data ORDER BY days_waiting DESC), '[]'::jsonb)
@@ -98,7 +104,7 @@ BEGIN
     ) AS row_data,
     EXTRACT(DAY FROM (NOW() - dm.ra_requested_at))::integer AS days_waiting
     FROM debit_memos dm
-    LEFT JOIN pharmacy ph ON ph.id = dm.pharmacy_id
+    JOIN pharmacy ph ON ph.id = dm.pharmacy_id
     LEFT JOIN return_batches rb ON rb.id = dm.batch_id
     WHERE dm.ra_requested_at IS NOT NULL
       AND dm.ra_received_at IS NULL
@@ -107,6 +113,7 @@ BEGIN
         LOWER(COALESCE(dm.labeler_name, '')) LIKE '%' || LOWER(p_search) || '%'
         OR LOWER(dm.memo_number) LIKE '%' || LOWER(p_search) || '%'
       ))
+      AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
     ORDER BY dm.ra_requested_at ASC
     LIMIT p_limit OFFSET v_offset
   ) sub;

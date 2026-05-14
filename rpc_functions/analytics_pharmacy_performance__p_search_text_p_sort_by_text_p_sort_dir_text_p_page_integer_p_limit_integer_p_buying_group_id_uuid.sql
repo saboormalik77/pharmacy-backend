@@ -1,11 +1,11 @@
 -- Function : analytics_pharmacy_performance
--- Arguments: p_search text, p_sort_by text, p_sort_dir text, p_page integer, p_limit integer
+-- Arguments: p_search text, p_sort_by text, p_sort_dir text, p_page integer, p_limit integer, p_buying_group_id uuid
 -- Type     : FUNCTION
 -- =============================================================
 
-DROP FUNCTION IF EXISTS public.analytics_pharmacy_performance(p_search text, p_sort_by text, p_sort_dir text, p_page integer, p_limit integer) CASCADE;
+DROP FUNCTION IF EXISTS public.analytics_pharmacy_performance(p_search text, p_sort_by text, p_sort_dir text, p_page integer, p_limit integer, p_buying_group_id uuid) CASCADE;
 
-CREATE OR REPLACE FUNCTION public.analytics_pharmacy_performance(p_search text DEFAULT NULL::text, p_sort_by text DEFAULT 'totalValue'::text, p_sort_dir text DEFAULT 'desc'::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 20)
+CREATE OR REPLACE FUNCTION public.analytics_pharmacy_performance(p_search text DEFAULT NULL::text, p_sort_by text DEFAULT 'totalValue'::text, p_sort_dir text DEFAULT 'desc'::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 20, p_buying_group_id uuid DEFAULT NULL::uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
  STABLE SECURITY DEFINER
@@ -25,11 +25,17 @@ BEGIN
     'totalReturnableValue', COALESCE(SUM(rt.total_returnable_value), 0),
     'totalItems',           COALESCE(SUM(rt.total_items), 0),
     'totalPayout',          COALESCE((
-      SELECT SUM(pp.pharmacy_payout) FROM pharmacy_payments pp WHERE pp.status = 'paid'
+      SELECT SUM(pp.pharmacy_payout)
+      FROM pharmacy_payments pp
+      JOIN pharmacy ph2 ON ph2.id = pp.pharmacy_id
+      WHERE pp.status = 'paid'
+        AND (p_buying_group_id IS NULL OR ph2.created_by = p_buying_group_id)
     ), 0)
   )
   INTO v_overall
-  FROM return_transactions rt;
+  FROM return_transactions rt
+  JOIN pharmacy ph ON ph.id = rt.pharmacy_id
+  WHERE (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
   -- Count pharmacies with returns
   SELECT COUNT(DISTINCT sub.pharmacy_id) INTO v_total
@@ -37,10 +43,11 @@ BEGIN
     SELECT rt.pharmacy_id
     FROM return_transactions rt
     JOIN pharmacy ph ON ph.id = rt.pharmacy_id
-    WHERE p_search IS NULL OR (
+    WHERE (p_search IS NULL OR (
       LOWER(ph.pharmacy_name) LIKE '%' || LOWER(p_search) || '%'
       OR ph.store_number = p_search
-    )
+    ))
+      AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
     GROUP BY rt.pharmacy_id
   ) sub;
 
@@ -91,10 +98,11 @@ BEGIN
         MIN(rt.created_at) AS first_return_date
       FROM return_transactions rt
       JOIN pharmacy ph ON ph.id = rt.pharmacy_id
-      WHERE p_search IS NULL OR (
+      WHERE (p_search IS NULL OR (
         LOWER(ph.pharmacy_name) LIKE '%' || LOWER(p_search) || '%'
         OR ph.store_number = p_search
-      )
+      ))
+        AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
       GROUP BY rt.pharmacy_id
     ) agg
     ORDER BY

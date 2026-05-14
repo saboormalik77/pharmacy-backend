@@ -1,11 +1,11 @@
 -- Function : analytics_returns_summary
--- Arguments: p_period_start date, p_period_end date, p_pharmacy_id uuid, p_group_by text
+-- Arguments: p_period_start date, p_period_end date, p_pharmacy_id uuid, p_group_by text, p_buying_group_id uuid
 -- Type     : FUNCTION
 -- =============================================================
 
-DROP FUNCTION IF EXISTS public.analytics_returns_summary(p_period_start date, p_period_end date, p_pharmacy_id uuid, p_group_by text) CASCADE;
+DROP FUNCTION IF EXISTS public.analytics_returns_summary(p_period_start date, p_period_end date, p_pharmacy_id uuid, p_group_by text, p_buying_group_id uuid) CASCADE;
 
-CREATE OR REPLACE FUNCTION public.analytics_returns_summary(p_period_start date DEFAULT NULL::date, p_period_end date DEFAULT NULL::date, p_pharmacy_id uuid DEFAULT NULL::uuid, p_group_by text DEFAULT 'month'::text)
+CREATE OR REPLACE FUNCTION public.analytics_returns_summary(p_period_start date DEFAULT NULL::date, p_period_end date DEFAULT NULL::date, p_pharmacy_id uuid DEFAULT NULL::uuid, p_group_by text DEFAULT 'month'::text, p_buying_group_id uuid DEFAULT NULL::uuid)
  RETURNS jsonb
  LANGUAGE plpgsql
  STABLE SECURITY DEFINER
@@ -32,8 +32,10 @@ BEGIN
   )
   INTO v_overall
   FROM return_transactions rt
+  JOIN pharmacy ph ON ph.id = rt.pharmacy_id
   WHERE rt.created_at::date BETWEEN v_start AND v_end
-    AND (p_pharmacy_id IS NULL OR rt.pharmacy_id = p_pharmacy_id);
+    AND (p_pharmacy_id IS NULL OR rt.pharmacy_id = p_pharmacy_id)
+    AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
   -- By status
   SELECT COALESCE(jsonb_agg(
@@ -50,8 +52,10 @@ BEGIN
       COUNT(*) AS count_data,
       COALESCE(SUM(rt.total_returnable_value), 0) AS total_value_data
     FROM return_transactions rt
+    JOIN pharmacy ph ON ph.id = rt.pharmacy_id
     WHERE rt.created_at::date BETWEEN v_start AND v_end
       AND (p_pharmacy_id IS NULL OR rt.pharmacy_id = p_pharmacy_id)
+      AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
     GROUP BY rt.status
   ) status_summary;
 
@@ -75,12 +79,13 @@ BEGIN
         COALESCE(SUM(rt.total_returnable_value), 0) AS total_value_data,
         COALESCE(SUM(rt.total_items), 0) AS total_items_data
       FROM return_transactions rt
+      JOIN pharmacy ph ON ph.id = rt.pharmacy_id
       WHERE rt.created_at::date BETWEEN v_start AND v_end
         AND (p_pharmacy_id IS NULL OR rt.pharmacy_id = p_pharmacy_id)
+        AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
       GROUP BY DATE_TRUNC('week', rt.created_at)
     ) trend_data;
   ELSIF p_group_by = 'status' THEN
-    -- Already handled above
     v_trend := v_by_status;
   ELSIF p_group_by = 'service_type' THEN
     SELECT COALESCE(jsonb_agg(
@@ -99,8 +104,10 @@ BEGIN
         COALESCE(SUM(rt.total_returnable_value), 0) AS total_value_data,
         COALESCE(SUM(rt.total_items), 0) AS total_items_data
       FROM return_transactions rt
+      JOIN pharmacy ph ON ph.id = rt.pharmacy_id
       WHERE rt.created_at::date BETWEEN v_start AND v_end
         AND (p_pharmacy_id IS NULL OR rt.pharmacy_id = p_pharmacy_id)
+        AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
       GROUP BY rt.service_type
     ) trend_data;
   ELSE
@@ -123,8 +130,10 @@ BEGIN
         COALESCE(SUM(rt.total_returnable_value), 0) AS total_value_data,
         COALESCE(SUM(rt.total_items), 0) AS total_items_data
       FROM return_transactions rt
+      JOIN pharmacy ph ON ph.id = rt.pharmacy_id
       WHERE rt.created_at::date BETWEEN v_start AND v_end
         AND (p_pharmacy_id IS NULL OR rt.pharmacy_id = p_pharmacy_id)
+        AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
       GROUP BY DATE_TRUNC('month', rt.created_at)
     ) trend_data;
   END IF;

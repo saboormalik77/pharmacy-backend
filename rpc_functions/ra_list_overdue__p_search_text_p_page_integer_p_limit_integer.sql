@@ -1,11 +1,10 @@
 -- Function : ra_list_overdue
--- Arguments: p_search text, p_page integer, p_limit integer, p_pharmacy_ids uuid[]
+-- Arguments: p_search text, p_page integer, p_limit integer
 -- Type     : FUNCTION
--- NOTE     : p_pharmacy_ids is passed by backend (pre-resolved from BG Admin) for pharmacy name search
 -- =============================================================
 
-DROP FUNCTION IF EXISTS public.ra_list_overdue(text, integer, integer) CASCADE;
-DROP FUNCTION IF EXISTS public.ra_list_overdue(text, integer, integer, uuid[]) CASCADE;
+DROP FUNCTION IF EXISTS public.ra_list_overdue(p_search text, p_page integer, p_limit integer) CASCADE;
+DROP FUNCTION IF EXISTS public.ra_list_overdue(p_search text, p_page integer, p_limit integer, uuid[]) CASCADE;
 
 CREATE OR REPLACE FUNCTION public.ra_list_overdue(p_search text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 20, p_pharmacy_ids uuid[] DEFAULT NULL::uuid[])
  RETURNS jsonb

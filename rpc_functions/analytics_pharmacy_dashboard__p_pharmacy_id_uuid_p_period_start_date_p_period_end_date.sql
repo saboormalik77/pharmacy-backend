@@ -19,7 +19,6 @@ DECLARE
   v_top_products jsonb;
   v_recent_returns jsonb;
 BEGIN
-  -- Validate pharmacy exists
   IF NOT EXISTS (SELECT 1 FROM pharmacy WHERE id = p_pharmacy_id) THEN
     RETURN jsonb_build_object('error', true, 'code', 404, 'message', 'Pharmacy not found');
   END IF;
@@ -27,7 +26,6 @@ BEGIN
   v_start := COALESCE(p_period_start, CURRENT_DATE - INTERVAL '12 months');
   v_end   := COALESCE(p_period_end,   CURRENT_DATE);
 
-  -- Overview metrics
   SELECT jsonb_build_object(
     'totalReturns',          COUNT(*),
     'totalItems',            COALESCE(SUM(rt.total_items), 0),
@@ -42,7 +40,6 @@ BEGIN
   WHERE rt.pharmacy_id = p_pharmacy_id
     AND rt.created_at::date BETWEEN v_start AND v_end;
 
-  -- Returns trend (monthly)
   SELECT COALESCE(jsonb_agg(row_data ORDER BY period_key), '[]'::jsonb)
   INTO v_returns_trend
   FROM (
@@ -60,7 +57,6 @@ BEGIN
     GROUP BY DATE_TRUNC('month', rt.created_at)
   ) sub;
 
-  -- Credits summary
   SELECT jsonb_build_object(
     'totalCreditsReceived',  COALESCE(SUM(pp.total_credit_received), 0),
     'totalCompanyFee',       COALESCE(SUM(pp.company_fee), 0),
@@ -99,7 +95,6 @@ BEGIN
   FROM pharmacy_payments pp
   WHERE pp.pharmacy_id = p_pharmacy_id;
 
-  -- Top returned products (by value)
   SELECT COALESCE(jsonb_agg(row_data ORDER BY total_value DESC), '[]'::jsonb)
   INTO v_top_products
   FROM (
@@ -121,7 +116,6 @@ BEGIN
     LIMIT 10
   ) sub;
 
-  -- Recent returns (last 5)
   SELECT COALESCE(jsonb_agg(row_data ORDER BY created_at DESC), '[]'::jsonb)
   INTO v_recent_returns
   FROM (

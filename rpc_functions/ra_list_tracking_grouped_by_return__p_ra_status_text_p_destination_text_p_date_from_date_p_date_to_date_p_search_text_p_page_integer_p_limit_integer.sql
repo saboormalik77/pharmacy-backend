@@ -1,11 +1,10 @@
 -- Function : ra_list_tracking_grouped_by_return
--- Arguments: p_ra_status text, p_destination text, p_date_from date, p_date_to date, p_search text, p_page integer, p_limit integer, p_pharmacy_ids uuid[]
+-- Arguments: p_ra_status text, p_destination text, p_date_from date, p_date_to date, p_search text, p_page integer, p_limit integer
 -- Type     : FUNCTION
--- NOTE     : pharmacyName fields are empty — backend enriches from BG Admin DB
 -- =============================================================
 
-DROP FUNCTION IF EXISTS public.ra_list_tracking_grouped_by_return(text, text, date, date, text, integer, integer) CASCADE;
-DROP FUNCTION IF EXISTS public.ra_list_tracking_grouped_by_return(text, text, date, date, text, integer, integer, uuid[]) CASCADE;
+DROP FUNCTION IF EXISTS public.ra_list_tracking_grouped_by_return(p_ra_status text, p_destination text, p_date_from date, p_date_to date, p_search text, p_page integer, p_limit integer) CASCADE;
+DROP FUNCTION IF EXISTS public.ra_list_tracking_grouped_by_return(p_ra_status text, p_destination text, p_date_from date, p_date_to date, p_search text, p_page integer, p_limit integer, uuid[]) CASCADE;
 
 CREATE OR REPLACE FUNCTION public.ra_list_tracking_grouped_by_return(p_ra_status text DEFAULT NULL::text, p_destination text DEFAULT NULL::text, p_date_from date DEFAULT NULL::date, p_date_to date DEFAULT NULL::date, p_search text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 10, p_pharmacy_ids uuid[] DEFAULT NULL::uuid[])
  RETURNS jsonb
@@ -20,6 +19,7 @@ DECLARE
 BEGIN
   v_offset := (GREATEST(p_page, 1) - 1) * p_limit;
 
+  -- Count distinct returns that have matching debit memos
   SELECT COUNT(DISTINCT rt.id) INTO v_total
     FROM return_transactions rt
     JOIN debit_memo_items dmi ON dmi.transaction_item_id IN (
@@ -39,6 +39,7 @@ BEGIN
        OR (p_pharmacy_ids IS NOT NULL AND rt.pharmacy_id = ANY(p_pharmacy_ids))
      );
 
+  -- Build summary (across all matching memos, not just current page)
   SELECT jsonb_build_object(
     'pending',   COUNT(*) FILTER (WHERE dm.ra_status = 'pending'),
     'requested', COUNT(*) FILTER (WHERE dm.ra_status = 'requested'),
@@ -64,10 +65,11 @@ BEGIN
        OR (p_pharmacy_ids IS NOT NULL AND rt.pharmacy_id = ANY(p_pharmacy_ids))
      );
 
+  -- Build the grouped result
   SELECT COALESCE(jsonb_agg(return_group ORDER BY return_created DESC), '[]'::jsonb)
     INTO v_results
     FROM (
-      SELECT
+      SELECT 
         jsonb_build_object(
           'returnId',       rt.id,
           'licensePlate',   rt.license_plate,
