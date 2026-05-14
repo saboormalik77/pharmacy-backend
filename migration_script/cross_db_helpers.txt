@@ -1,0 +1,81 @@
+================================================================================
+  CROSS-DB FUNCTIONS (27 total)
+  These functions reference tables from the OPPOSITE database.
+  They cannot work in either split DB and are excluded from migration.
+  They only work in the original single source database.
+================================================================================
+
+── Section 1: Private helper functions (16) ────────────────────────────────────
+  Excluded from MAIN ADMIN (need BG Admin tables):
+
+  _debit_memo_to_json           needs: pharmacy (BG), debit_memos (Main)
+  _get_debit_memo_return_id     needs: return_transaction_items (BG), debit_memo_items (Main)
+  _get_manufacturer_credits     needs: pharmacy_payments (BG)
+  _pharmacy_payment_to_json     needs: pharmacy_payments (BG), return_batches (Main)
+  _pharmacy_reports_find_txn    needs: return_transactions (BG)
+  _pharmacy_reports_header      needs: pharmacy (BG), processors (BG)
+  _pharmacy_reports_processor   needs: processors (BG)
+  _resolve_pharmacy_name        needs: pharmacy (BG)
+  _rt_to_json                   needs: return_transactions (BG)
+  _rti_to_json                  needs: return_transaction_items (BG)
+
+  Excluded from BG ADMIN (need Main Admin tables):
+
+  _batch_to_json                needs: return_batches (Main)
+  _ndc_pricing_to_json          needs: ndc_pricing (Main)
+  _ndc_reliability_label        needs: ndc_pricing (Main)
+  _ra_request_to_json           needs: ra_requests (Main)
+  _shipment_group_to_json       needs: shipment_groups (Main)
+  _wc_to_json                   needs: wine_cellar (Main)
+
+── Section 2: RPC functions in Main Admin that reference BG Admin tables (11) ──
+  These are real RPC endpoints but internally they JOIN on return_transactions
+  or return_transaction_items which live in BG Admin DB:
+
+  warehouse_scan_box                            needs: return_transactions (BG)
+  warehouse_receive_return                      needs: return_transactions (BG)
+  warehouse_verify_return                       needs: return_transactions (BG)
+  warehouse_verify_item_v2                      needs: return_transactions (BG)
+  warehouse_start_verification                  needs: return_transactions (BG)
+  warehouse_complete_verification               needs: return_transactions (BG)
+  warehouse_get_verification_summary            needs: return_transactions (BG)
+  assign_returns_to_batch                       needs: return_transactions (BG)
+  create_destruction_record_for_transaction_item needs: return_transaction_items (BG)
+  save_fedex_shipment_data                      needs: return_transactions (BG)
+  save_fedex_pickup_confirmation                needs: return_transactions (BG)
+
+================================================================================
+  ROOT CAUSE
+================================================================================
+
+  The warehouse and batch operations (Main Admin) need to look up transaction
+  data that lives in the BG Admin database. This is a genuine cross-DB
+  dependency that exists in the original monolithic design.
+
+  Key dependency: return_transactions + return_transaction_items (BG Admin)
+                  are referenced by warehouse, batch, FedEx, and destruction
+                  functions (Main Admin).
+
+================================================================================
+  OPTIONS TO FIX
+================================================================================
+
+  Option 1 — Move return_transactions to Main Admin DB
+             Pros: All warehouse/batch functions work immediately
+             Cons: BG Admin (pharmacy/processor) also needs these tables
+
+  Option 2 — Duplicate the tables in both DBs and sync them
+             Pros: Both DBs work independently
+             Cons: Data sync complexity, risk of inconsistency
+
+  Option 3 — Refactor these 11 RPC functions to accept transaction data
+             as input parameters instead of querying return_transactions
+             Pros: Clean separation, no cross-DB dependency
+             Cons: Requires code changes in backend
+
+  Option 4 — Keep these 11 functions only in the source DB and route
+             warehouse/batch API calls to source DB for these endpoints
+             Pros: No code changes needed
+             Cons: Source DB still needed in production
+
+================================================================================

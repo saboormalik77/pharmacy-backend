@@ -1,0 +1,51 @@
+MAIN ADMIN DB — 35 Tables
+db.qkktjmynqjreimeazclm.supabase.co
+
+Category	Tables
+Core Admin
+main_admin, sub_main_admin, buying_group_domains, admin, admin_recent_activity
+Warehouse
+warehouses, warehouse_discrepancies, warehouse_surplus_items, warehouse_packages, warehouse_package_items, warehouse_orders, warehouse_order_packages
+Batches & Debit Memos
+return_batches, batch_workflow_steps, debit_memos, debit_memo_items, credits, credit_memo_analysis
+RA & Shipments
+ra_requests, shipment_groups, shipments
+Wine Cellar
+wine_cellar
+Destruction
+destruction_records
+Distributors
+reverse_distributors
+Manufacturer
+manufacturer_policies, manufacturer_return_policies, manufacturer_policy_notes, non_returnable_products
+NDC Pricing
+ndc_pricing, ndc_pricing_index, ndc_products, ndc_packages, ndc_price_history, ndc_payment_history, payment_manufacturer_credits
+BG ADMIN DB — 45 Tables
+db.kxmdzduhjmgvdikaewfo.supabase.co
+
+Category	Tables
+Admin Settings
+admin_settings, admin_recent_activity, notifications
+Pharmacy
+pharmacy, pharmacy_invites, pharmacy_branch_invites, pharmacy_branch_role_assignments, pharmacy_roles, pharmacy_permissions, pharmacy_role_permissions, pharmacy_notifications, pharmacy_inventory_items, pharmacy_inventory_uploads, pharmacy_payments, pharmacy_cart, pharmacy_cart_items
+Processors
+processors, processor_store_assignments, processor_notifications
+Returns
+return_transactions, return_transaction_items, returns, return_items, return_reports
+Service Requests
+service_requests, service_request_assignments
+Marketplace
+marketplace_deals, marketplace_listings, marketplace_orders, marketplace_order_items
+Inventory & Products
+inventory_items, inventory_reminders, products, product_lists, product_list_items, pricing_data
+Packages
+custom_packages, custom_package_items
+Subscriptions
+subscriptions, subscription_plans
+Documents & Tokens
+uploaded_documents, refresh_tokens
+Orders
+orders
+Email & Logs
+email_logs, processed_inbox_emails
+Note: admin_recent_activity appears in both lists — it exists in the source DB and is relevant to both databases.
