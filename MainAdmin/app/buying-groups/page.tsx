@@ -641,7 +641,7 @@ export default function BuyingGroupsPage() {
                   <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Name</th>
                   <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Contact Email</th>
                   <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Phone</th>
-                  <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Admins</th>
+                  {/* <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Admins</th> */}
                   <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status</th>
                   <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">Created</th>
                   <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
@@ -653,7 +653,7 @@ export default function BuyingGroupsPage() {
                     <td className="px-3 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{group.name}</td>
                     <td className="px-3 py-3 text-sm hidden md:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{group.contactEmail || '-'}</td>
                     <td className="px-3 py-3 text-sm hidden lg:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{group.contactPhone || '-'}</td>
-                    <td className="px-3 py-3 text-sm text-center" style={{ color: 'var(--on-surface-variant)' }}>{group.adminCount}</td>
+                    {/* <td className="px-3 py-3 text-sm text-center" style={{ color: 'var(--on-surface-variant)' }}>{group.adminCount}</td> */}
                     <td className="px-3 py-3 text-sm text-center">{statusBadge(group.status)}</td>
                     <td className="px-3 py-3 text-sm hidden sm:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{formatDate(group.createdAt)}</td>
                     <td className="px-3 py-3 text-sm">
