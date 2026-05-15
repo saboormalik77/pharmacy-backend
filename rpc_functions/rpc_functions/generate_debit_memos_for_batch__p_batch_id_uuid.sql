@@ -38,21 +38,25 @@ BEGIN
   -- Delete existing memos (idempotent re-run)
   DELETE FROM debit_memos WHERE batch_id = p_batch_id;
 
+  -- Group by labeler_id (NDC prefix) instead of free-text manufacturer name
+  -- to prevent duplicate memos when the same manufacturer has name variations
   FOR v_group IN
     SELECT
       rt.pharmacy_id,
       rti.destination,
-      COALESCE(NULLIF(TRIM(rti.manufacturer), ''), 'Unknown Manufacturer') AS manufacturer_name,
+      COALESCE(SUBSTRING(rti.ndc FROM 1 FOR 5), 'UNKWN') AS primary_labeler_id,
+      MODE() WITHIN GROUP (
+        ORDER BY COALESCE(NULLIF(TRIM(rti.manufacturer), ''), 'Unknown Manufacturer')
+      )                                                   AS manufacturer_name,
       COUNT(*)                                            AS item_count,
-      COALESCE(SUM(rti.estimated_value), 0)               AS ask_value,
-      MODE() WITHIN GROUP (ORDER BY COALESCE(SUBSTRING(rti.ndc FROM 1 FOR 5), 'UNKWN')) AS primary_labeler_id
+      COALESCE(SUM(rti.estimated_value), 0)               AS ask_value
     FROM return_transaction_items rti
     JOIN return_transactions rt ON rt.id = rti.transaction_id
     WHERE rt.batch_id = p_batch_id
       AND rti.return_status = 'returnable'
     GROUP BY rt.pharmacy_id, rti.destination,
-             COALESCE(NULLIF(TRIM(rti.manufacturer), ''), 'Unknown Manufacturer')
-    ORDER BY rt.pharmacy_id, rti.destination, manufacturer_name
+             COALESCE(SUBSTRING(rti.ndc FROM 1 FOR 5), 'UNKWN')
+    ORDER BY rt.pharmacy_id, rti.destination, primary_labeler_id
   LOOP
     v_labeler_id := v_group.primary_labeler_id;
 
@@ -93,7 +97,7 @@ BEGIN
       AND rt.pharmacy_id = v_group.pharmacy_id
       AND rti.return_status = 'returnable'
       AND COALESCE(rti.destination, '') = COALESCE(v_group.destination, '')
-      AND COALESCE(NULLIF(TRIM(rti.manufacturer), ''), 'Unknown Manufacturer') = v_group.manufacturer_name;
+      AND COALESCE(SUBSTRING(rti.ndc FROM 1 FOR 5), 'UNKWN') = v_group.primary_labeler_id;
 
     v_memo_count  := v_memo_count + 1;
     v_total_value := v_total_value + v_group.ask_value;
