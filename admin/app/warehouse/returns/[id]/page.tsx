@@ -6,7 +6,7 @@ import {
     ArrowLeft, Loader2, AlertCircle, X, Play, CheckCircle, Lock,
     Trash2, Edit, ClipboardList, Building2, UserCog, Package, Truck, Clock,
     Plus, Search, ScanLine, Archive, FileText, Download, AlertTriangle, Printer, QrCode,
-    ChevronLeft, ChevronRight,
+    ChevronLeft, ChevronRight, DollarSign,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -1031,6 +1031,37 @@ export default function ReturnDetailPage() {
                             </div>
                         </dl>
                     </div> */}
+                </div>
+            )}
+
+            {/* ── Debit Memos Summary ─────────────────────────── */}
+            {((tx.paidMemoCount ?? 0) + (tx.unpaidMemoCount ?? 0)) > 0 && (
+                <div className="bg-white rounded-[4px] shadow px-4 py-3">
+                    <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <DollarSign className="w-3.5 h-3.5" /> Debit Memos
+                    </h2>
+                    <dl className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div>
+                            <dt className="text-[11px] text-gray-500">Paid Memos</dt>
+                            <dd className="text-sm font-semibold text-green-700">{tx.paidMemoCount ?? 0}</dd>
+                        </div>
+                        <div>
+                            <dt className="text-[11px] text-gray-500">Unpaid Memos</dt>
+                            <dd className="text-sm font-semibold text-red-600">{tx.unpaidMemoCount ?? 0}</dd>
+                        </div>
+                        {(tx.totalAskValue ?? 0) > 0 && (
+                            <div>
+                                <dt className="text-[11px] text-gray-500">Total Ask</dt>
+                                <dd className="text-sm font-semibold text-gray-900">{formatCurrency(tx.totalAskValue ?? 0)}</dd>
+                            </div>
+                        )}
+                        {(tx.totalReceivedValue ?? 0) > 0 && (
+                            <div>
+                                <dt className="text-[11px] text-gray-500">Total Received</dt>
+                                <dd className="text-sm font-semibold text-green-700">{formatCurrency(tx.totalReceivedValue ?? 0)}</dd>
+                            </div>
+                        )}
+                    </dl>
                 </div>
             )}
 

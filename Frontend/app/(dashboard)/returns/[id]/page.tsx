@@ -8,7 +8,7 @@ import {
     ArrowLeft, Loader2, AlertCircle, X, Play, CheckCircle, Lock,
     Trash2, Edit, ClipboardList, Building2, Package, Truck,
     Plus, Search, ScanLine, FileText, Download, AlertTriangle, Printer, QrCode,
-    ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
+    ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, DollarSign,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -37,6 +37,10 @@ interface ReturnTransaction {
     totalReturnableValue: number;
     totalNonReturnableValue: number;
     hasCiiItems?: boolean; // For DEA Form 222 availability
+    paidMemoCount?: number;
+    unpaidMemoCount?: number;
+    totalAskValue?: number;
+    totalReceivedValue?: number;
     fedexTracking?: string;
     fedexPickupConfirmation?: string;
     notes?: string;
@@ -991,6 +995,38 @@ export default function ReturnDetailPage() {
                             )}
                         </dl>
                     </div>
+
+                    {/* Debit Memos Summary */}
+                    {((tx.paidMemoCount ?? 0) + (tx.unpaidMemoCount ?? 0)) > 0 && (
+                        <div className="bg-white rounded-[4px] shadow p-4 col-span-full">
+                            <h2 className="text-sm font-semibold text-[#000000] mb-3 flex items-center gap-2">
+                                <DollarSign className="w-4 h-4 text-[#6b7280]" />
+                                Debit Memos
+                            </h2>
+                            <dl className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div>
+                                    <dt className="text-xs text-[#6b7280]">Paid Memos</dt>
+                                    <dd className="text-sm font-semibold text-green-700">{tx.paidMemoCount ?? 0}</dd>
+                                </div>
+                                <div>
+                                    <dt className="text-xs text-[#6b7280]">Unpaid Memos</dt>
+                                    <dd className="text-sm font-semibold text-red-600">{tx.unpaidMemoCount ?? 0}</dd>
+                                </div>
+                                {(tx.totalAskValue ?? 0) > 0 && (
+                                    <div>
+                                        <dt className="text-xs text-[#6b7280]">Total Ask</dt>
+                                        <dd className="text-sm font-semibold text-[#000000]">{formatCurrency(tx.totalAskValue ?? 0)}</dd>
+                                    </div>
+                                )}
+                                {(tx.totalReceivedValue ?? 0) > 0 && (
+                                    <div>
+                                        <dt className="text-xs text-[#6b7280]">Total Received</dt>
+                                        <dd className="text-sm font-semibold text-[#516057]">{formatCurrency(tx.totalReceivedValue ?? 0)}</dd>
+                                    </div>
+                                )}
+                            </dl>
+                        </div>
+                    )}
 
                     {/* Items & Values */}
                     {/* <div className="bg-white rounded-[4px] shadow p-4">

@@ -651,6 +651,8 @@ export interface ReturnTransaction {
     verificationStatus?: 'not_started' | 'in_progress' | 'completed' | null;
     paidMemoCount?: number;
     unpaidMemoCount?: number;
+    totalAskValue?: number;
+    totalReceivedValue?: number;
     createdAt: string;
     updatedAt: string;
 }

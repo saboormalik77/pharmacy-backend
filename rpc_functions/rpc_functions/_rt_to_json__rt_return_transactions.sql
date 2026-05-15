@@ -110,6 +110,22 @@ BEGIN
                                         )
                                         ELSE 0
                                      END,
+        'totalAskValue',             CASE
+                                        WHEN rt.batch_id IS NOT NULL THEN (
+                                            SELECT COALESCE(SUM(dm.total_ask_value), 0) FROM debit_memos dm
+                                            WHERE dm.batch_id = rt.batch_id
+                                              AND dm.pharmacy_id = rt.pharmacy_id
+                                        )
+                                        ELSE 0
+                                     END,
+        'totalReceivedValue',        CASE
+                                        WHEN rt.batch_id IS NOT NULL THEN (
+                                            SELECT COALESCE(SUM(dm.total_received_value), 0) FROM debit_memos dm
+                                            WHERE dm.batch_id = rt.batch_id
+                                              AND dm.pharmacy_id = rt.pharmacy_id
+                                        )
+                                        ELSE 0
+                                     END,
         'fedexTracking',             rt.fedex_tracking,
         'fedexPickupConfirmation',   rt.fedex_pickup_confirmation,
         'totalItems',                rt.total_items,

@@ -38,6 +38,8 @@ interface ReturnTransaction {
     hasCiiItems?: boolean; // For DEA Form 222 availability
     paidMemoCount?: number;
     unpaidMemoCount?: number;
+    totalAskValue?: number;
+    totalReceivedValue?: number;
     notes: string | null;
     finalizedAt: string | null;
     createdAt: string;
@@ -579,6 +581,33 @@ export default function ReturnsPage() {
                                     </div>
                                 ))}
                             </div>
+                            {((viewModal.paidMemoCount ?? 0) + (viewModal.unpaidMemoCount ?? 0)) > 0 && (
+                                <div className="border-t border-[#e2e2e2] pt-2">
+                                    <p className="text-[10px] font-medium text-[#9ca3af] mb-1.5 uppercase">Debit Memos</p>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <p className="text-[10px] text-[#9ca3af]">Paid Memos</p>
+                                            <p className="text-xs font-medium text-green-700">{viewModal.paidMemoCount ?? 0}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] text-[#9ca3af]">Unpaid Memos</p>
+                                            <p className="text-xs font-medium text-red-600">{viewModal.unpaidMemoCount ?? 0}</p>
+                                        </div>
+                                        {(viewModal.totalAskValue ?? 0) > 0 && (
+                                            <div>
+                                                <p className="text-[10px] text-[#9ca3af]">Total Ask</p>
+                                                <p className="text-xs font-medium text-[#000000]">{formatCurrency(viewModal.totalAskValue ?? 0)}</p>
+                                            </div>
+                                        )}
+                                        {(viewModal.totalReceivedValue ?? 0) > 0 && (
+                                            <div>
+                                                <p className="text-[10px] text-[#9ca3af]">Total Received</p>
+                                                <p className="text-xs font-medium text-[#516057]">{formatCurrency(viewModal.totalReceivedValue ?? 0)}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                             {(viewModal.fedexTracking || viewModal.fedexPickupConfirmation) && (
                                 <div className="border-t border-[#e2e2e2] pt-2">
                                     <p className="text-[10px] font-medium text-[#9ca3af] mb-1.5 uppercase">Shipping Details</p>
