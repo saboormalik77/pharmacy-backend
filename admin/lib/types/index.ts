@@ -619,7 +619,7 @@ export interface ReturnTransaction {
     processorId: string | null;
     processorName: string | null;
     serviceType: string;
-    status: 'in_progress' | 'paused' | 'completed' | 'finalized' | 'received' | 'verified' | 'closed' | 'closed_out';
+    status: 'in_progress' | 'paused' | 'completed' | 'finalized' | 'received' | 'verified' | 'closed' | 'closed_out' | 'paid' | 'partially_paid';
     fedexTracking: string | null;
     fedexPickupConfirmation: string | null;
     totalItems: number;
@@ -649,6 +649,8 @@ export interface ReturnTransaction {
     verificationCompletedAt?: string | null;
     /** FCR-49: derived in _rt_to_json for warehouse verification UI tabs */
     verificationStatus?: 'not_started' | 'in_progress' | 'completed' | null;
+    paidMemoCount?: number;
+    unpaidMemoCount?: number;
     createdAt: string;
     updatedAt: string;
 }

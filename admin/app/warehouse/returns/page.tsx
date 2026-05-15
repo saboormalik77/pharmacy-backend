@@ -43,6 +43,8 @@ function getStatusBadge(status: string): { variant: 'success' | 'warning' | 'dan
         case 'paused': return { variant: 'warning', label: 'Paused' };
         case 'completed': return { variant: 'success', label: 'Completed' };
         case 'verified': return { variant: 'success', label: 'Verified' };
+        case 'paid': return { variant: 'success', label: 'Paid' };
+        case 'partially_paid': return { variant: 'warning', label: 'Partially Paid' };
         case 'finalized': return { variant: 'default', label: 'Finalized' };
         case 'received': return { variant: 'success', label: 'Received' };
         case 'closed_out': return { variant: 'default', label: 'Closed Out' };
@@ -356,6 +358,8 @@ export default function ReturnsPage() {
                                     <th className="text-left px-3 py-3 text-sm font-semibold uppercase tracking-wide whitespace-nowrap text-gray-700">Store</th>
                                     <th className="text-left px-3 py-3 text-sm font-semibold uppercase tracking-wide whitespace-nowrap text-gray-700">Status</th>
                                     <th className="text-left px-3 py-3 text-sm font-semibold uppercase tracking-wide whitespace-nowrap text-gray-700">Items</th>
+                                    <th className="text-left px-3 py-3 text-sm font-semibold uppercase tracking-wide whitespace-nowrap text-gray-700">Paid Memos</th>
+                                    <th className="text-left px-3 py-3 text-sm font-semibold uppercase tracking-wide whitespace-nowrap text-gray-700">Unpaid Memos</th>
                                     <th className="text-left px-3 py-3 text-sm font-semibold uppercase tracking-wide whitespace-nowrap text-gray-700">Date</th>
                                     <th className="text-right px-3 py-3 text-sm font-semibold uppercase tracking-wide whitespace-nowrap text-gray-700">Actions</th>
                                 </tr>
@@ -375,6 +379,8 @@ export default function ReturnsPage() {
                                                 <Badge variant={badge.variant}><span className="text-[11px] leading-tight">{badge.label}</span></Badge>
                                             </td>
                                             <td className="px-3 py-2.5 text-sm tabular-nums text-gray-600">{tx.totalItems}</td>
+                                            <td className="px-3 py-2.5 text-sm tabular-nums text-green-700 font-medium">{tx.paidMemoCount ?? 0}</td>
+                                            <td className="px-3 py-2.5 text-sm tabular-nums text-red-600 font-medium">{tx.unpaidMemoCount ?? 0}</td>
                                             <td className="px-3 py-2.5 text-sm text-gray-600">{formatDate(tx.createdAt)}</td>
                                             <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
                                                 <div className="flex items-center justify-end gap-1">

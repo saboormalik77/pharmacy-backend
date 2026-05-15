@@ -60,7 +60,56 @@ BEGIN
         'processorId',               rt.processor_id,
         'processorName',             COALESCE(proc_info ->> 'name', NULL),
         'serviceType',               rt.service_type,
-        'status',                    rt.status,
+        'status',                    CASE
+                                        WHEN rt.status = 'verified'
+                                          AND rt.batch_id IS NOT NULL
+                                          AND EXISTS (
+                                                SELECT 1 FROM debit_memos dm
+                                                WHERE dm.batch_id = rt.batch_id
+                                                  AND dm.pharmacy_id = rt.pharmacy_id
+                                              )
+                                          AND NOT EXISTS (
+                                                SELECT 1 FROM debit_memos dm
+                                                WHERE dm.batch_id = rt.batch_id
+                                                  AND dm.pharmacy_id = rt.pharmacy_id
+                                                  AND dm.payment_status NOT IN ('paid', 'partial')
+                                              )
+                                          AND EXISTS (
+                                                SELECT 1 FROM pharmacy_payments pp
+                                                WHERE pp.batch_id = rt.batch_id
+                                                  AND pp.pharmacy_id = rt.pharmacy_id
+                                                  AND pp.check_number IS NOT NULL
+                                              )
+                                        THEN 'paid'
+                                        WHEN rt.status = 'verified'
+                                          AND rt.batch_id IS NOT NULL
+                                          AND EXISTS (
+                                                SELECT 1 FROM debit_memos dm
+                                                WHERE dm.batch_id = rt.batch_id
+                                                  AND dm.pharmacy_id = rt.pharmacy_id
+                                                  AND dm.payment_status IN ('paid', 'partial')
+                                              )
+                                        THEN 'partially_paid'
+                                        ELSE rt.status
+                                     END,
+        'paidMemoCount',             CASE
+                                        WHEN rt.batch_id IS NOT NULL THEN (
+                                            SELECT COUNT(*)::int FROM debit_memos dm
+                                            WHERE dm.batch_id = rt.batch_id
+                                              AND dm.pharmacy_id = rt.pharmacy_id
+                                              AND dm.payment_status IN ('paid', 'partial')
+                                        )
+                                        ELSE 0
+                                     END,
+        'unpaidMemoCount',           CASE
+                                        WHEN rt.batch_id IS NOT NULL THEN (
+                                            SELECT COUNT(*)::int FROM debit_memos dm
+                                            WHERE dm.batch_id = rt.batch_id
+                                              AND dm.pharmacy_id = rt.pharmacy_id
+                                              AND dm.payment_status NOT IN ('paid', 'partial')
+                                        )
+                                        ELSE 0
+                                     END,
         'fedexTracking',             rt.fedex_tracking,
         'fedexPickupConfirmation',   rt.fedex_pickup_confirmation,
         'totalItems',                rt.total_items,

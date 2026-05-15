@@ -36,6 +36,8 @@ interface ReturnTransaction {
     totalReturnableValue: number;
     totalNonReturnableValue: number;
     hasCiiItems?: boolean; // For DEA Form 222 availability
+    paidMemoCount?: number;
+    unpaidMemoCount?: number;
     notes: string | null;
     finalizedAt: string | null;
     createdAt: string;
@@ -77,6 +79,8 @@ function getStatusBadge(status: string): { variant: 'success' | 'warning' | 'err
         case 'paused': return { variant: 'warning', label: 'Paused' };
         case 'completed': return { variant: 'success', label: 'Completed' };
         case 'verified': return { variant: 'success', label: 'Verified' };
+        case 'paid': return { variant: 'success', label: 'Paid' };
+        case 'partially_paid': return { variant: 'warning', label: 'Partially Paid' };
         case 'finalized': return { variant: 'default', label: 'Finalized' };
         case 'received': return { variant: 'success', label: 'Received' };
         case 'closed_out': return { variant: 'default', label: 'Closed Out' };
@@ -389,6 +393,8 @@ export default function ReturnsPage() {
                                     <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454] border-r border-[var(--outline)]">Processor</th>
                                     <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454] border-r border-[var(--outline)]">Status</th>
                                     <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454] border-r border-[var(--outline)]">Items</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454] border-r border-[var(--outline)]">Paid Memos</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454] border-r border-[var(--outline)]">Unpaid Memos</th>
                                     <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454] border-r border-[var(--outline)]">Date</th>
                                     <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454]">Actions</th>
                                 </tr>
@@ -413,6 +419,8 @@ export default function ReturnsPage() {
                                                 <Badge variant={badge.variant}><span className="text-xs">{badge.label}</span></Badge>
                                             </td>
                                             <td className="px-3 py-3 text-sm text-[#505454] font-medium border-r border-[var(--outline-variant)]">{tx.totalItems}</td>
+                                            <td className="px-3 py-3 text-sm tabular-nums font-medium text-green-700 border-r border-[var(--outline-variant)]">{tx.paidMemoCount ?? 0}</td>
+                                            <td className="px-3 py-3 text-sm tabular-nums font-medium text-red-600 border-r border-[var(--outline-variant)]">{tx.unpaidMemoCount ?? 0}</td>
                                             <td className="px-3 py-3 text-sm text-[#505454] border-r border-[var(--outline-variant)]">{formatDate(tx.createdAt)}</td>
                                             <td className="px-3 py-3" onClick={e => e.stopPropagation()}>
                                                 <div className="flex items-center justify-end gap-1">
