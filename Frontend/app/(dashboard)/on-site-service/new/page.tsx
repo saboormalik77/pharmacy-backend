@@ -19,6 +19,7 @@ import {
 import { branchService, Branch } from '@/lib/api/services/branchService';
 import { usePharmacyPermissions } from '@/hooks/usePharmacyPermissions';
 import { toast } from 'react-toastify';
+import { validateFutureDate } from '@/lib/validation';
 
 export default function NewServiceRequestPage() {
   const router = useRouter();
@@ -33,6 +34,7 @@ export default function NewServiceRequestPage() {
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [dateError, setDateError] = useState<string>('');
   const [branches, setBranches] = useState<Branch[]>([]);
 
   // Derived values
@@ -108,13 +110,11 @@ export default function NewServiceRequestPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
-    
-    if (!requestedDate) {
-      setFormError('Please choose a preferred date');
-      return;
-    }
-    if (requestedDate < today) {
-      setFormError('Preferred date cannot be in the past');
+    setDateError('');
+
+    const dateResult = validateFutureDate(requestedDate);
+    if (!dateResult.valid) {
+      setDateError(dateResult.error!);
       return;
     }
     
@@ -182,10 +182,14 @@ export default function NewServiceRequestPage() {
                   type="date"
                   min={today}
                   value={requestedDate}
-                  onChange={(e) => setRequestedDate(e.target.value)}
+                  onChange={(e) => {
+                    setRequestedDate(e.target.value);
+                    setDateError('');
+                  }}
                   required
-                  className="w-full"
+                  className={`w-full ${dateError ? 'border-red-400' : ''}`}
                 />
+                {dateError && <p className="text-xs text-red-500 mt-1">{dateError}</p>}
                 <p className="text-xs text-muted-foreground mt-1">
                   Choose your preferred date for the visit
                 </p>

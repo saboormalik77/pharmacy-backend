@@ -16,6 +16,7 @@ import type { NDCProduct } from '@/data/mockNDCProducts';
 import Link from 'next/link';
 import { inventoryService, productsService } from '@/lib/api/services';
 import type { InventoryItem } from '@/types';
+import { validateQuantity, validateDateOptional } from '@/lib/validation';
 
 type UploadMethod = 'manual' | 'file' | 'link';
 type ViewMode = 'overview' | 'add' | 'list' | 'expired';
@@ -65,6 +66,7 @@ export default function InventoryPage() {
   const [importProgress, setImportProgress] = useState(0);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [manualFormErrors, setManualFormErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     loadInventory();
@@ -170,6 +172,7 @@ export default function InventoryPage() {
       };
       setProduct(transformedProduct);
       setCurrentItem({ lotNumber: '', expirationDate: '', quantity: 0, location: '' });
+      setManualFormErrors({});
     } catch (err: any) {
       setError(err.message || 'Failed to lookup NDC. Please try again.');
       setProduct(null);
@@ -184,18 +187,41 @@ export default function InventoryPage() {
   };
 
   const addToInventory = async () => {
-    if (!product || !currentItem.lotNumber || !currentItem.expirationDate || !currentItem.quantity) {
-      setError('Please fill in all required fields');
+    if (!product) {
+      setError('Please select a product first');
       return;
     }
+
+    const newErrors: Record<string, string> = {};
+
+    const qtyResult = validateQuantity(currentItem.quantity ?? '');
+    if (!qtyResult.valid) newErrors.quantity = qtyResult.error!;
+
+    if (currentItem.expirationDate) {
+      const dateResult = validateDateOptional(currentItem.expirationDate);
+      if (!dateResult.valid) newErrors.expirationDate = dateResult.error!;
+    } else {
+      newErrors.expirationDate = 'Expiration date is required.';
+    }
+
+    if (!currentItem.lotNumber?.trim()) {
+      newErrors.lotNumber = 'Lot number is required.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setManualFormErrors(newErrors);
+      return;
+    }
+
+    setManualFormErrors({});
     try {
       setLoading(true);
       await inventoryService.createInventoryItem({
         ndc: product.ndc,
         product_name: product.proprietaryName || product.nonProprietaryName || '',
-        lot_number: currentItem.lotNumber,
-        expiration_date: currentItem.expirationDate,
-        quantity: currentItem.quantity,
+        lot_number: currentItem.lotNumber ?? '',
+        expiration_date: currentItem.expirationDate ?? '',
+        quantity: currentItem.quantity ?? 0,
         location: currentItem.location || 'Main Warehouse',
         boxes: currentItem.boxes,
         tablets_per_box: currentItem.tabletsPerBox,
@@ -641,9 +667,43 @@ export default function InventoryPage() {
                     <div className="p-2 bg-blue-50 rounded border border-blue-200 space-y-2">
                       <div className="text-xs font-medium">{product.proprietaryName || product.nonProprietaryName}</div>
                       <div className="grid grid-cols-2 gap-2">
-                        <Input placeholder="Lot Number" className="h-7 text-xs" value={currentItem.lotNumber} onChange={(e) => setCurrentItem({...currentItem, lotNumber: e.target.value})} />
-                        <Input type="date" className="h-7 text-xs" value={currentItem.expirationDate} onChange={(e) => setCurrentItem({...currentItem, expirationDate: e.target.value})} />
-                        <Input type="number" placeholder="Quantity" className="h-7 text-xs" value={currentItem.quantity} onChange={(e) => setCurrentItem({...currentItem, quantity: parseInt(e.target.value) || 0})} />
+                        <div>
+                          <Input
+                            placeholder="Lot Number"
+                            className={`h-7 text-xs ${manualFormErrors.lotNumber ? 'border-red-400' : ''}`}
+                            value={currentItem.lotNumber}
+                            onChange={(e) => {
+                              setCurrentItem({...currentItem, lotNumber: e.target.value});
+                              setManualFormErrors(prev => ({ ...prev, lotNumber: '' }));
+                            }}
+                          />
+                          {manualFormErrors.lotNumber && <p className="text-xs text-red-500 mt-1">{manualFormErrors.lotNumber}</p>}
+                        </div>
+                        <div>
+                          <Input
+                            type="date"
+                            className={`h-7 text-xs ${manualFormErrors.expirationDate ? 'border-red-400' : ''}`}
+                            value={currentItem.expirationDate}
+                            onChange={(e) => {
+                              setCurrentItem({...currentItem, expirationDate: e.target.value});
+                              setManualFormErrors(prev => ({ ...prev, expirationDate: '' }));
+                            }}
+                          />
+                          {manualFormErrors.expirationDate && <p className="text-xs text-red-500 mt-1">{manualFormErrors.expirationDate}</p>}
+                        </div>
+                        <div>
+                          <Input
+                            type="number"
+                            placeholder="Quantity"
+                            className={`h-7 text-xs ${manualFormErrors.quantity ? 'border-red-400' : ''}`}
+                            value={currentItem.quantity}
+                            onChange={(e) => {
+                              setCurrentItem({...currentItem, quantity: parseInt(e.target.value) || 0});
+                              setManualFormErrors(prev => ({ ...prev, quantity: '' }));
+                            }}
+                          />
+                          {manualFormErrors.quantity && <p className="text-xs text-red-500 mt-1">{manualFormErrors.quantity}</p>}
+                        </div>
                         <Input placeholder="Location" className="h-7 text-xs" value={currentItem.location} onChange={(e) => setCurrentItem({...currentItem, location: e.target.value})} />
                       </div>
                       <Button size="sm" className="h-7 w-full" onClick={addToInventory}>

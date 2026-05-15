@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
 import { authService } from '@/lib/api/services'
+import { validateEmail } from '@/lib/validation'
 import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen'
 import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen'
 import { usePharmacyPortalTenant } from '@/lib/hooks/usePharmacyPortalTenant'
@@ -18,6 +19,7 @@ interface AdminBranding {
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
+  const [emailError, setEmailError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
   const [branding, setBranding] = useState<AdminBranding | null>(null)
@@ -61,6 +63,11 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    const emailResult = validateEmail(email)
+    setEmailError(emailResult.error ?? '')
+    if (!emailResult.valid) return
+
     setLoading(true)
 
     try {
@@ -164,10 +171,13 @@ export default function ForgotPasswordPage() {
                 type="email"
                 placeholder="john@pharmacy.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError('') }}
+                onBlur={() => { const r = validateEmail(email); setEmailError(r.error ?? '') }}
                 required
                 autoFocus
+                className={emailError ? 'border-red-500' : ''}
               />
+              {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
             </div>
             {error && (
               <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">

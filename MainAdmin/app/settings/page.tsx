@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { Save, Globe, Loader2, Eye, EyeOff, Shield, Warehouse } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
+import { validatePassword, validatePasswordMatch, validateUSPhoneOptional, validateZipCodeOptional, formatPhoneNumber } from '@/lib/validation';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
     fetchSettings,
@@ -39,6 +40,8 @@ export default function SettingsPage() {
         newPassword: '',
         confirmPassword: '',
     });
+
+    const [warehouseErrors, setWarehouseErrors] = useState<Record<string, string>>({});
 
     const [showPasswords, setShowPasswords] = useState({
         currentPassword: false,
@@ -85,6 +88,20 @@ export default function SettingsPage() {
     }, [error]);
 
     const handleSaveWarehouseAddress = async () => {
+        const newWarehouseErrors: Record<string, string> = {};
+
+        const phoneResult = validateUSPhoneOptional(warehouseForm.warehousePhone);
+        if (!phoneResult.valid) newWarehouseErrors.warehousePhone = phoneResult.error!;
+
+        const zipResult = validateZipCodeOptional(warehouseForm.warehouseZip);
+        if (!zipResult.valid) newWarehouseErrors.warehouseZip = zipResult.error!;
+
+        if (Object.keys(newWarehouseErrors).length > 0) {
+            setWarehouseErrors(newWarehouseErrors);
+            return;
+        }
+        setWarehouseErrors({});
+
         try {
             const result = await dispatch(updateWarehouseAddress(warehouseForm));
             if (updateWarehouseAddress.fulfilled.match(result)) {
@@ -105,18 +122,16 @@ export default function SettingsPage() {
             errors.currentPassword = 'Current password is required';
             isValid = false;
         }
-        if (!passwordForm.newPassword) {
-            errors.newPassword = 'New password is required';
-            isValid = false;
-        } else if (passwordForm.newPassword.length < 8) {
-            errors.newPassword = 'Password must be at least 8 characters';
+
+        const newPasswordResult = validatePassword(passwordForm.newPassword);
+        if (!newPasswordResult.valid) {
+            errors.newPassword = newPasswordResult.error!;
             isValid = false;
         }
-        if (!passwordForm.confirmPassword) {
-            errors.confirmPassword = 'Please confirm your password';
-            isValid = false;
-        } else if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            errors.confirmPassword = 'Passwords do not match';
+
+        const confirmResult = validatePasswordMatch(passwordForm.newPassword, passwordForm.confirmPassword);
+        if (!confirmResult.valid) {
+            errors.confirmPassword = confirmResult.error!;
             isValid = false;
         }
 
@@ -262,12 +277,13 @@ export default function SettingsPage() {
                                     <input
                                         type="text"
                                         value={warehouseForm.warehouseZip}
-                                        onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseZip: e.target.value.replace(/\D/g, '').slice(0, 5) })}
+                                        onChange={(e) => { setWarehouseForm({ ...warehouseForm, warehouseZip: e.target.value.replace(/\D/g, '').slice(0, 5) }); setWarehouseErrors(prev => ({ ...prev, warehouseZip: '' })); }}
                                         placeholder="75001"
                                         maxLength={5}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         disabled={isUpdating}
                                     />
+                                    {warehouseErrors.warehouseZip && <p className="text-xs text-red-500 mt-1">{warehouseErrors.warehouseZip}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
@@ -288,13 +304,14 @@ export default function SettingsPage() {
                                     type="tel"
                                     value={warehouseForm.warehousePhone}
                                     onChange={(e) => {
-                                        const cleaned = e.target.value.replace(/\D/g, '').slice(0, 10);
-                                        setWarehouseForm({ ...warehouseForm, warehousePhone: cleaned });
+                                        setWarehouseForm({ ...warehouseForm, warehousePhone: formatPhoneNumber(e.target.value) });
+                                        setWarehouseErrors(prev => ({ ...prev, warehousePhone: '' }));
                                     }}
-                                    placeholder="4695557890"
+                                    placeholder="(469) 555-7890"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 md:w-1/2"
                                     disabled={isUpdating}
                                 />
+                                {warehouseErrors.warehousePhone && <p className="text-xs text-red-500 mt-1">{warehouseErrors.warehousePhone}</p>}
                             </div>
 
                             <div className="flex justify-end pt-4">

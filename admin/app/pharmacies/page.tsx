@@ -17,6 +17,7 @@ import {
 } from '@/lib/store/pharmaciesSlice';
 import { Pharmacy, PharmacyUpdatePayload } from '@/lib/types';
 import { useDebounce } from '@/lib/hooks/useDebounce';
+import { validateName, validateEmail, validateUSPhoneOptional, validateZipCodeOptional, validateDEAOptional, validateNPIOptional, validateDateOptional, warnExpiringSoon, formatPhoneNumber } from '@/lib/validation';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD',
@@ -57,6 +58,8 @@ function PharmaciesPageContent() {
     const [isCreating, setIsCreating] = useState(false);
     const [createError, setCreateError] = useState<string | null>(null);
     const [createSuccess, setCreateSuccess] = useState<string | null>(null);
+    const [createErrors, setCreateErrors] = useState<Record<string, string>>({});
+    const [editErrors, setEditErrors] = useState<Record<string, string>>({});
     const [showInvites, setShowInvites] = useState(false);
     const [cancelInviteModal, setCancelInviteModal] = useState<any | null>(null);
 
@@ -200,10 +203,27 @@ function PharmaciesPageContent() {
     };
 
     const handleCreatePharmacy = async () => {
-        if (!createForm.pharmacyName.trim() || !createForm.email.trim()) {
-            setCreateError('Pharmacy name and email are required');
-            return;
+        const newErrors: Record<string, string> = {};
+        const nameResult = validateName(createForm.pharmacyName);
+        if (!nameResult.valid) newErrors.pharmacyName = nameResult.error!;
+        const emailResult = validateEmail(createForm.email);
+        if (!emailResult.valid) newErrors.email = emailResult.error!;
+        const phoneResult = validateUSPhoneOptional(createForm.phone);
+        if (!phoneResult.valid) newErrors.phone = phoneResult.error!;
+        const faxResult = validateUSPhoneOptional(createForm.fax);
+        if (!faxResult.valid) newErrors.fax = faxResult.error!;
+        const zipResult = validateZipCodeOptional(createForm.zip);
+        if (!zipResult.valid) newErrors.zip = zipResult.error!;
+        const deaResult = validateDEAOptional(createForm.deaNumber);
+        if (!deaResult.valid) newErrors.deaNumber = deaResult.error!;
+        const deaExpResult = validateDateOptional(createForm.deaExpiration);
+        if (!deaExpResult.valid) newErrors.deaExpiration = deaExpResult.error!;
+        if (createForm.daysBetweenVisits) {
+            const days = Number(createForm.daysBetweenVisits);
+            if (!Number.isInteger(days) || days <= 0) newErrors.daysBetweenVisits = 'Must be a positive whole number.';
         }
+        setCreateErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) return;
         setIsCreating(true);
         setCreateError(null);
         setCreateSuccess(null);
@@ -269,11 +289,51 @@ function PharmaciesPageContent() {
 
     const handleEdit = async () => {
         if (editModal) {
-            await dispatch(updatePharmacy({ 
-                id: editModal.id, 
-                payload: editFormData 
+            const newErrors: Record<string, string> = {};
+            if (editFormData.businessName !== undefined) {
+                const r = validateName(editFormData.businessName || '');
+                if (!r.valid) newErrors.businessName = r.error!;
+            }
+            if (editFormData.email !== undefined) {
+                const r = validateEmail(editFormData.email || '');
+                if (!r.valid) newErrors.email = r.error!;
+            }
+            if (editFormData.phone !== undefined) {
+                const r = validateUSPhoneOptional(editFormData.phone || '');
+                if (!r.valid) newErrors.phone = r.error!;
+            }
+            if (editFormData.fax !== undefined) {
+                const r = validateUSPhoneOptional(editFormData.fax || '');
+                if (!r.valid) newErrors.fax = r.error!;
+            }
+            if (editFormData.zipCode !== undefined) {
+                const r = validateZipCodeOptional(editFormData.zipCode || '');
+                if (!r.valid) newErrors.zipCode = r.error!;
+            }
+            if (editFormData.deaNumber !== undefined) {
+                const r = validateDEAOptional(editFormData.deaNumber || '');
+                if (!r.valid) newErrors.deaNumber = r.error!;
+            }
+            if (editFormData.deaExpiration !== undefined) {
+                const r = validateDateOptional(editFormData.deaExpiration || '');
+                if (!r.valid) newErrors.deaExpiration = r.error!;
+            }
+            if (editFormData.npiNumber !== undefined) {
+                const r = validateNPIOptional(editFormData.npiNumber || '');
+                if (!r.valid) newErrors.npiNumber = r.error!;
+            }
+            if (editFormData.daysBetweenVisits !== undefined && editFormData.daysBetweenVisits !== null) {
+                const days = Number(editFormData.daysBetweenVisits);
+                if (!Number.isInteger(days) || days <= 0) newErrors.daysBetweenVisits = 'Must be a positive whole number.';
+            }
+            setEditErrors(newErrors);
+            if (Object.keys(newErrors).length > 0) return;
+            await dispatch(updatePharmacy({
+                id: editModal.id,
+                payload: editFormData
             }));
             setEditModal(null);
+            setEditErrors({});
             setEditFormData({});
             // Refresh the list
             dispatch(fetchPharmacies({
@@ -307,7 +367,7 @@ function PharmaciesPageContent() {
                     <h1 className="text-lg font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Pharmacies</h1>
                     <p className="text-xs text-gray-500 mt-1">Manage registered pharmacies</p>
                 </div>
-                <button onClick={() => { setCreateModal(true); setCreateError(null); setCreateSuccess(null); setCreateForm({ ...INITIAL_CREATE_FORM }); }} className="inline-flex items-center gap-1 px-3 py-1 rounded-[4px] text-xs font-medium bg-[#516057] text-white hover:opacity-90 transition-all">
+                <button onClick={() => { setCreateModal(true); setCreateError(null); setCreateSuccess(null); setCreateForm({ ...INITIAL_CREATE_FORM }); setCreateErrors({}); }} className="inline-flex items-center gap-1 px-3 py-1 rounded-[4px] text-xs font-medium bg-[#516057] text-white hover:opacity-90 transition-all">
                     <Plus className="w-4 h-4" /> Add Pharmacy
                 </button>
             </div>
@@ -668,11 +728,11 @@ function PharmaciesPageContent() {
 
             {/* Edit Modal */}
             {editModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-3" onClick={() => { setEditModal(null); setEditFormData({}); }}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-3" onClick={() => { setEditModal(null); setEditFormData({}); setEditErrors({}); }}>
                     <div className="bg-white rounded-[4px] max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-6 py-5 border-b border-[#e2e2e2] bg-gray-50">
                             <h2 className="text-xs font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Edit Pharmacy</h2>
-                            <button onClick={() => { setEditModal(null); setEditFormData({}); }} className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-[4px] transition-all">
+                            <button onClick={() => { setEditModal(null); setEditFormData({}); setEditErrors({}); }} className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-[4px] transition-all">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -683,7 +743,8 @@ function PharmaciesPageContent() {
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="col-span-2">
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Business Name</label>
-                                        <input type="text" value={editFormData.businessName || ''} onChange={(e) => setEditFormData({ ...editFormData, businessName: e.target.value })} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        <input type="text" value={editFormData.businessName || ''} onChange={(e) => { setEditFormData({ ...editFormData, businessName: e.target.value }); setEditErrors(prev => ({ ...prev, businessName: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        {editErrors.businessName && <p className="text-xs text-red-500 mt-1">{editErrors.businessName}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Contact Name</label>
@@ -691,15 +752,18 @@ function PharmaciesPageContent() {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Email</label>
-                                        <input type="email" value={editFormData.email || ''} onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        <input type="email" value={editFormData.email || ''} onChange={(e) => { setEditFormData({ ...editFormData, email: e.target.value }); setEditErrors(prev => ({ ...prev, email: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        {editErrors.email && <p className="text-xs text-red-500 mt-1">{editErrors.email}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Phone</label>
-                                        <input type="tel" value={editFormData.phone || ''} onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        <input type="tel" value={editFormData.phone || ''} onChange={(e) => { setEditFormData({ ...editFormData, phone: formatPhoneNumber(e.target.value) }); setEditErrors(prev => ({ ...prev, phone: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        {editErrors.phone && <p className="text-xs text-red-500 mt-1">{editErrors.phone}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Fax</label>
-                                        <input type="text" value={editFormData.fax || ''} onChange={(e) => setEditFormData({ ...editFormData, fax: e.target.value })} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="Optional" />
+                                        <input type="text" value={editFormData.fax || ''} onChange={(e) => { setEditFormData({ ...editFormData, fax: formatPhoneNumber(e.target.value) }); setEditErrors(prev => ({ ...prev, fax: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="Optional" />
+                                        {editErrors.fax && <p className="text-xs text-red-500 mt-1">{editErrors.fax}</p>}
                                     </div>
                                 </div>
                             </div>
@@ -725,7 +789,8 @@ function PharmaciesPageContent() {
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 mb-2">ZIP</label>
-                                            <input type="text" value={editFormData.zipCode || ''} onChange={(e) => setEditFormData({ ...editFormData, zipCode: e.target.value })} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" maxLength={10} />
+                                            <input type="text" value={editFormData.zipCode || ''} onChange={(e) => { setEditFormData({ ...editFormData, zipCode: e.target.value }); setEditErrors(prev => ({ ...prev, zipCode: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" maxLength={10} />
+                                            {editErrors.zipCode && <p className="text-xs text-red-500 mt-1">{editErrors.zipCode}</p>}
                                         </div>
                                     </div>
                                 </div>
@@ -748,11 +813,16 @@ function PharmaciesPageContent() {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">DEA Number</label>
-                                        <input type="text" value={editFormData.deaNumber || ''} onChange={(e) => setEditFormData({ ...editFormData, deaNumber: e.target.value })} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="AB1234567" />
+                                        <input type="text" value={editFormData.deaNumber || ''} onChange={(e) => { setEditFormData({ ...editFormData, deaNumber: e.target.value }); setEditErrors(prev => ({ ...prev, deaNumber: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="AB1234567" />
+                                        {editErrors.deaNumber && <p className="text-xs text-red-500 mt-1">{editErrors.deaNumber}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">DEA Expiration</label>
-                                        <input type="date" value={editFormData.deaExpiration || ''} onChange={(e) => setEditFormData({ ...editFormData, deaExpiration: e.target.value })} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        <input type="date" value={editFormData.deaExpiration || ''} onChange={(e) => { setEditFormData({ ...editFormData, deaExpiration: e.target.value }); setEditErrors(prev => ({ ...prev, deaExpiration: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        {editErrors.deaExpiration && <p className="text-xs text-red-500 mt-1">{editErrors.deaExpiration}</p>}
+                                        {!editErrors.deaExpiration && editFormData.deaExpiration && warnExpiringSoon(editFormData.deaExpiration) && (
+                                            <p className="text-xs text-amber-600 mt-1">{warnExpiringSoon(editFormData.deaExpiration)}</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -769,7 +839,8 @@ function PharmaciesPageContent() {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Days Between Visits</label>
-                                        <input type="number" min="1" max="365" value={editFormData.daysBetweenVisits ?? ''} onChange={(e) => setEditFormData({ ...editFormData, daysBetweenVisits: e.target.value ? Number(e.target.value) : undefined })} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        <input type="number" min="1" max="365" value={editFormData.daysBetweenVisits ?? ''} onChange={(e) => { setEditFormData({ ...editFormData, daysBetweenVisits: e.target.value ? Number(e.target.value) : undefined }); setEditErrors(prev => ({ ...prev, daysBetweenVisits: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        {editErrors.daysBetweenVisits && <p className="text-xs text-red-500 mt-1">{editErrors.daysBetweenVisits}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Last Visit Date</label>
@@ -783,7 +854,7 @@ function PharmaciesPageContent() {
                             </div>
                         </div>
                         <div className="flex justify-end gap-3 px-6 py-5 border-t border-[#e2e2e2] bg-gray-50">
-                            <button onClick={() => { setEditModal(null); setEditFormData({}); }} className="px-4 py-1 text-xs rounded-[4px] border border-[#e2e2e2] text-gray-700 hover:bg-white transition-all">Cancel</button>
+                            <button onClick={() => { setEditModal(null); setEditFormData({}); setEditErrors({}); }} className="px-4 py-1 text-xs rounded-[4px] border border-[#e2e2e2] text-gray-700 hover:bg-white transition-all">Cancel</button>
                             <button onClick={handleEdit} disabled={isLoading} className="inline-flex items-center gap-2 px-4 py-1 text-xs rounded-[4px] bg-[#516057] text-white hover:opacity-90 disabled:opacity-50 transition-all">
                                 {isLoading ? 'Saving...' : 'Save Changes'}
                             </button>
@@ -875,11 +946,13 @@ function PharmaciesPageContent() {
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="col-span-2">
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Store Name <span className="text-red-500">*</span></label>
-                                        <input type="text" value={createForm.pharmacyName} onChange={e => setCreateForm({...createForm, pharmacyName: e.target.value})} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="Store / Pharmacy Name" />
+                                        <input type="text" value={createForm.pharmacyName} onChange={e => { setCreateForm({...createForm, pharmacyName: e.target.value}); setCreateErrors(prev => ({ ...prev, pharmacyName: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="Store / Pharmacy Name" />
+                                        {createErrors.pharmacyName && <p className="text-xs text-red-500 mt-1">{createErrors.pharmacyName}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Email <span className="text-red-500">*</span></label>
-                                        <input type="email" value={createForm.email} onChange={e => setCreateForm({...createForm, email: e.target.value})} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="pharmacy@email.com" />
+                                        <input type="email" value={createForm.email} onChange={e => { setCreateForm({...createForm, email: e.target.value}); setCreateErrors(prev => ({ ...prev, email: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="pharmacy@email.com" />
+                                        {createErrors.email && <p className="text-xs text-red-500 mt-1">{createErrors.email}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Contact Name</label>
@@ -887,11 +960,13 @@ function PharmaciesPageContent() {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Phone</label>
-                                        <input type="text" value={createForm.phone} onChange={e => setCreateForm({...createForm, phone: e.target.value})} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="(555) 123-4567" />
+                                        <input type="text" value={createForm.phone} onChange={e => { setCreateForm({...createForm, phone: formatPhoneNumber(e.target.value)}); setCreateErrors(prev => ({ ...prev, phone: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="(555) 123-4567" />
+                                        {createErrors.phone && <p className="text-xs text-red-500 mt-1">{createErrors.phone}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Fax</label>
-                                        <input type="text" value={createForm.fax} onChange={e => setCreateForm({...createForm, fax: e.target.value})} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="(555) 123-4568" />
+                                        <input type="text" value={createForm.fax} onChange={e => { setCreateForm({...createForm, fax: formatPhoneNumber(e.target.value)}); setCreateErrors(prev => ({ ...prev, fax: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="(555) 123-4568" />
+                                        {createErrors.fax && <p className="text-xs text-red-500 mt-1">{createErrors.fax}</p>}
                                     </div>
                                 </div>
                             </div>
@@ -917,7 +992,8 @@ function PharmaciesPageContent() {
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 mb-2">ZIP</label>
-                                            <input type="text" value={createForm.zip} onChange={e => setCreateForm({...createForm, zip: e.target.value})} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="10001" maxLength={10} />
+                                            <input type="text" value={createForm.zip} onChange={e => { setCreateForm({...createForm, zip: e.target.value}); setCreateErrors(prev => ({ ...prev, zip: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="10001" maxLength={10} />
+                                            {createErrors.zip && <p className="text-xs text-red-500 mt-1">{createErrors.zip}</p>}
                                         </div>
                                     </div>
                                 </div>
@@ -940,11 +1016,16 @@ function PharmaciesPageContent() {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">DEA Number</label>
-                                        <input type="text" value={createForm.deaNumber} onChange={e => setCreateForm({...createForm, deaNumber: e.target.value})} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="AB1234567" />
+                                        <input type="text" value={createForm.deaNumber} onChange={e => { setCreateForm({...createForm, deaNumber: e.target.value}); setCreateErrors(prev => ({ ...prev, deaNumber: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" placeholder="AB1234567" />
+                                        {createErrors.deaNumber && <p className="text-xs text-red-500 mt-1">{createErrors.deaNumber}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">DEA Expiration</label>
-                                        <input type="date" value={createForm.deaExpiration} onChange={e => setCreateForm({...createForm, deaExpiration: e.target.value})} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        <input type="date" value={createForm.deaExpiration} onChange={e => { setCreateForm({...createForm, deaExpiration: e.target.value}); setCreateErrors(prev => ({ ...prev, deaExpiration: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        {createErrors.deaExpiration && <p className="text-xs text-red-500 mt-1">{createErrors.deaExpiration}</p>}
+                                        {!createErrors.deaExpiration && createForm.deaExpiration && warnExpiringSoon(createForm.deaExpiration) && (
+                                            <p className="text-xs text-amber-600 mt-1">{warnExpiringSoon(createForm.deaExpiration)}</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -961,7 +1042,8 @@ function PharmaciesPageContent() {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Days Between Visits</label>
-                                        <input type="number" min="1" max="365" value={createForm.daysBetweenVisits} onChange={e => setCreateForm({...createForm, daysBetweenVisits: e.target.value})} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        <input type="number" min="1" max="365" value={createForm.daysBetweenVisits} onChange={e => { setCreateForm({...createForm, daysBetweenVisits: e.target.value}); setCreateErrors(prev => ({ ...prev, daysBetweenVisits: '' })); }} className="w-full px-4 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent" />
+                                        {createErrors.daysBetweenVisits && <p className="text-xs text-red-500 mt-1">{createErrors.daysBetweenVisits}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-2">Last Visit Date</label>

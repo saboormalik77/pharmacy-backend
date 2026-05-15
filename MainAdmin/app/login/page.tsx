@@ -6,6 +6,7 @@ import { Lock, Mail, Shield, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { loginUser, clearError } from '@/lib/store/authSlice';
+import { validateEmail } from '@/lib/validation';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -33,6 +35,16 @@ export default function LoginPage() {
     e.preventDefault();
     e.stopPropagation();
     setError('');
+
+    const newFieldErrors: Record<string, string> = {};
+    const emailResult = validateEmail(email);
+    if (!emailResult.valid) newFieldErrors.email = emailResult.error!;
+    if (!password.trim()) newFieldErrors.password = 'Password is required.';
+    if (Object.keys(newFieldErrors).length > 0) {
+      setFieldErrors(newFieldErrors);
+      return;
+    }
+    setFieldErrors({});
 
     try {
       const result = await dispatch(loginUser({ email, password }));
@@ -80,7 +92,7 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); setFieldErrors(prev => ({ ...prev, email: '' })); }}
                   className="w-full pl-10 pr-4 py-2.5 border rounded-[4px] focus:outline-none focus:ring-2 focus:border-transparent"
                   style={{ borderColor: 'var(--outline-variant)' }}
                   placeholder="admin@example.com"
@@ -88,6 +100,7 @@ export default function LoginPage() {
                   autoComplete="email"
                 />
               </div>
+              {fieldErrors.email && <p className="text-xs text-red-500 mt-1">{fieldErrors.email}</p>}
             </div>
 
             <div>
@@ -100,7 +113,7 @@ export default function LoginPage() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => { setPassword(e.target.value); setFieldErrors(prev => ({ ...prev, password: '' })); }}
                   className="w-full pl-10 pr-12 py-2.5 border rounded-[4px] focus:outline-none focus:ring-2 focus:border-transparent"
                   style={{ borderColor: 'var(--outline-variant)' }}
                   placeholder="Enter your password"
@@ -117,6 +130,7 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+              {fieldErrors.password && <p className="text-xs text-red-500 mt-1">{fieldErrors.password}</p>}
             </div>
 
             <Button

@@ -18,6 +18,7 @@ import {
     deleteNDCPricing,
 } from '@/lib/store/ndcPricingSlice';
 import { NDCPricingRecord, NDCPricingUpsertPayload, BarcodeScanResponse } from '@/lib/types';
+import { validateCurrencyOptional } from '@/lib/validation';
 
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
 
@@ -88,6 +89,7 @@ export default function NDCPricingPage() {
     const [deleteModal, setDeleteModal] = useState<NDCPricingRecord | null>(null);
     const [formData, setFormData] = useState<NDCPricingUpsertPayload>({ ...EMPTY_FORM });
     const [toasts, setToasts] = useState<Toast[]>([]);
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [suggestedPrice, setSuggestedPrice] = useState<{
         price: number;
         source: string;
@@ -229,6 +231,7 @@ export default function NDCPricingPage() {
     const openAdd = () => {
         setEditingRecord(null);
         setFormData({ ...EMPTY_FORM });
+        setFormErrors({});
         setSuggestedPrice(null);
         setNdcScanMode('camera');
         setNdcScanInput('');
@@ -241,6 +244,7 @@ export default function NDCPricingPage() {
     const openEdit = (record: NDCPricingRecord) => {
         setNdcScanError('');
         setNdcCameraOpen(false);
+        setFormErrors({});
         setEditingRecord(record);
         const cp = record.currentPrice ?? undefined;
         setFormData({
@@ -257,10 +261,16 @@ export default function NDCPricingPage() {
     };
 
     const handleSave = async () => {
-        if (!formData.ndc) { showToast('NDC code is required', 'error'); return; }
+        const newErrors: Record<string, string> = {};
+        if (!formData.ndc) newErrors.ndc = 'NDC code is required.';
+        const priceResult = validateCurrencyOptional(formData.currentPrice ?? '');
+        if (!priceResult.valid) newErrors.currentPrice = priceResult.error!;
+        setFormErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) return;
         try {
             await dispatch(upsertNDCPricing(formData)).unwrap();
             showToast(editingRecord ? 'NDC pricing updated' : 'NDC pricing created');
+            setFormErrors({});
             setFormModal(false);
             loadData(page);
         } catch (err: any) {
@@ -433,13 +443,13 @@ export default function NDCPricingPage() {
 
             {/* ── Add / Edit Modal ─────────────────────────── */}
             {formModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setFormModal(false)}>
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => { setFormModal(false); setFormErrors({}); }}>
                     <div className="bg-white rounded-[4px] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
                             <h2 className="text-sm font-semibold text-gray-900">
                                 {editingRecord ? 'Edit NDC Pricing' : 'Add NDC Pricing'}
                             </h2>
-                            <button onClick={() => setFormModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                            <button onClick={() => { setFormModal(false); setFormErrors({}); }} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
@@ -624,9 +634,11 @@ export default function NDCPricingPage() {
                                                 currentPrice: parsed,
                                                 estimatedStorePrice: estimatedStoreFromCurrent(parsed),
                                             }));
+                                            setFormErrors(prev => ({ ...prev, currentPrice: '' }));
                                         }}
                                         className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
                                     />
+                                    {formErrors.currentPrice && <p className="text-xs text-red-500 mt-1">{formErrors.currentPrice}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-1">Est. Store Price ($)</label>
@@ -683,7 +695,7 @@ export default function NDCPricingPage() {
                         </div>
 
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-                            <button onClick={() => setFormModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors">
+                            <button onClick={() => { setFormModal(false); setFormErrors({}); }} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors">
                                 Cancel
                             </button>
                             <button onClick={handleSave} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors font-medium">

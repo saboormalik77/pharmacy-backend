@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Shield, Lock, Eye, EyeOff, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { validatePassword, validatePasswordMatch } from '@/lib/validation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
@@ -19,6 +20,7 @@ function SetupAccountPageContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -58,15 +60,19 @@ function SetupAccountPageContent() {
     e.preventDefault();
     setError('');
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
+    const newFieldErrors: Record<string, string> = {};
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
+    const passwordResult = validatePassword(password);
+    if (!passwordResult.valid) newFieldErrors.password = passwordResult.error!;
+
+    const confirmResult = validatePasswordMatch(password, confirmPassword);
+    if (!confirmResult.valid) newFieldErrors.confirmPassword = confirmResult.error!;
+
+    if (Object.keys(newFieldErrors).length > 0) {
+      setFieldErrors(newFieldErrors);
       return;
     }
+    setFieldErrors({});
 
     setIsSubmitting(true);
 
@@ -185,12 +191,11 @@ function SetupAccountPageContent() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => { setPassword(e.target.value); setFieldErrors(prev => ({ ...prev, password: '' })); }}
                   className="w-full pl-10 pr-12 py-2.5 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
                   style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface)' }}
                   placeholder="Min 8 characters"
                   required
-                  minLength={8}
                   autoComplete="new-password"
                 />
                 <button
@@ -202,6 +207,7 @@ function SetupAccountPageContent() {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+              {fieldErrors.password && <p className="text-xs text-red-500 mt-1">{fieldErrors.password}</p>}
             </div>
 
             <div>
@@ -214,12 +220,11 @@ function SetupAccountPageContent() {
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => { setConfirmPassword(e.target.value); setFieldErrors(prev => ({ ...prev, confirmPassword: '' })); }}
                   className="w-full pl-10 pr-12 py-2.5 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
                   style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface)' }}
                   placeholder="Re-enter your password"
                   required
-                  minLength={8}
                   autoComplete="new-password"
                 />
                 <button
@@ -231,6 +236,7 @@ function SetupAccountPageContent() {
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+              {fieldErrors.confirmPassword && <p className="text-xs text-red-500 mt-1">{fieldErrors.confirmPassword}</p>}
             </div>
 
             <Button

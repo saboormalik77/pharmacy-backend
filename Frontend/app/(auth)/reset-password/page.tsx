@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
 import { authService } from '@/lib/api/services'
+import { validatePassword, validatePasswordMatch } from '@/lib/validation'
 import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen'
 import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen'
 import { usePharmacyPortalTenant } from '@/lib/hooks/usePharmacyPortalTenant'
@@ -26,6 +27,8 @@ function ResetPasswordForm() {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState('')
+  const [newPasswordError, setNewPasswordError] = useState('')
+  const [confirmPasswordError, setConfirmPasswordError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
   const [verifying, setVerifying] = useState(true)
@@ -154,14 +157,13 @@ function ResetPasswordForm() {
     e.preventDefault()
     setError('')
 
-    // Validate passwords
-    if (newPassword.length < 8) {
-      setError('Password must be at least 8 characters long')
-      return
-    }
+    const pwResult = validatePassword(newPassword)
+    const matchResult = validatePasswordMatch(newPassword, confirmPassword)
 
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match')
+    setNewPasswordError(pwResult.error ?? '')
+    setConfirmPasswordError(matchResult.error ?? '')
+
+    if (!pwResult.valid || !matchResult.valid) {
       return
     }
 
@@ -347,11 +349,11 @@ function ResetPasswordForm() {
                 type={showNewPassword ? "text" : "password"}
                 placeholder="••••••••"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) => { setNewPassword(e.target.value); if (newPasswordError) setNewPasswordError('') }}
+                onBlur={() => { const r = validatePassword(newPassword); setNewPasswordError(r.error ?? '') }}
                 required
-                minLength={8}
                 autoFocus
-                className="pr-10"
+                className={`pr-10 ${newPasswordError ? 'border-red-500' : ''}`}
               />
               <button
                 type="button"
@@ -365,9 +367,10 @@ function ResetPasswordForm() {
                 )}
               </button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Must be at least 8 characters long
-            </p>
+            {newPasswordError
+              ? <p className="text-xs text-red-500 mt-1">{newPasswordError}</p>
+              : <p className="text-xs text-muted-foreground">Must be at least 8 characters with uppercase, lowercase, number, and special character</p>
+            }
           </div>
           <div className="space-y-2">
             <label htmlFor="confirmPassword" className="text-sm font-medium">
@@ -379,10 +382,10 @@ function ResetPasswordForm() {
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="••••••••"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => { setConfirmPassword(e.target.value); if (confirmPasswordError) setConfirmPasswordError('') }}
+                onBlur={() => { const r = validatePasswordMatch(newPassword, confirmPassword); setConfirmPasswordError(r.error ?? '') }}
                 required
-                minLength={8}
-                className="pr-10"
+                className={`pr-10 ${confirmPasswordError ? 'border-red-500' : ''}`}
               />
               <button
                 type="button"
@@ -396,6 +399,7 @@ function ResetPasswordForm() {
                 )}
               </button>
             </div>
+            {confirmPasswordError && <p className="text-xs text-red-500 mt-1">{confirmPasswordError}</p>}
           </div>
           {error && (
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">

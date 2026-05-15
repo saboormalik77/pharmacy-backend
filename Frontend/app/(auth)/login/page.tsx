@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
 import { authService } from '@/lib/api/services'
+import { validateEmail, validateRequired } from '@/lib/validation'
 import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen'
 import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen'
 import { usePharmacyPortalTenant } from '@/lib/hooks/usePharmacyPortalTenant'
@@ -40,6 +41,8 @@ function LoginForm() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [branding, setBranding] = useState<AdminBranding | null>(null)
@@ -132,6 +135,17 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    const emailResult = validateEmail(email)
+    const passwordResult = validateRequired(password)
+
+    setEmailError(emailResult.error ?? '')
+    setPasswordError(passwordResult.error ?? '')
+
+    if (!emailResult.valid || !passwordResult.valid) {
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -199,9 +213,12 @@ function LoginForm() {
               type="email"
               placeholder="john@pharmacy.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError('') }}
+              onBlur={() => { const r = validateEmail(email); setEmailError(r.error ?? '') }}
               required
+              className={emailError ? 'border-red-500' : ''}
             />
+            {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -221,9 +238,10 @@ function LoginForm() {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); if (passwordError) setPasswordError('') }}
+                onBlur={() => { const r = validateRequired(password); setPasswordError(r.error ?? '') }}
                 required
-                className="pr-10"
+                className={`pr-10 ${passwordError ? 'border-red-500' : ''}`}
               />
               <button
                 type="button"
@@ -237,6 +255,7 @@ function LoginForm() {
                 )}
               </button>
             </div>
+            {passwordError && <p className="text-xs text-red-500 mt-1">{passwordError}</p>}
           </div>
           {error && (
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded-[4px]">

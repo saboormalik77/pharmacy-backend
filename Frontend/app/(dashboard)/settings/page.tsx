@@ -37,6 +37,16 @@ import { settingsService, fcrStoreSettingsService } from '@/lib/api/services';
 import type { FcrStoreSettings, UpdateFcrStoreSettings } from '@/lib/api/services';
 import { getUserData, setUserData } from '@/lib/utils/cookies';
 import { US_STATES } from '@/lib/constants/usStates';
+import {
+  validateEmail,
+  validateUSPhone,
+  validateZipCode,
+  validateNPI,
+  validateDEAOptional,
+  validatePassword as libValidatePassword,
+  validatePasswordMatch,
+  formatPhoneNumber,
+} from '@/lib/validation';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'billing' | 'security' | 'store'>('profile');
@@ -84,7 +94,8 @@ export default function SettingsPage() {
   });
 
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  
+  const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
+
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -224,11 +235,39 @@ export default function SettingsPage() {
     return changes;
   };
 
+  const validateProfile = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    const emailResult = validateEmail(profile.email);
+    if (!emailResult.valid) newErrors.email = emailResult.error!;
+
+    const phoneResult = validateUSPhone(profile.phone);
+    if (!phoneResult.valid) newErrors.phone = phoneResult.error!;
+
+    const zipResult = validateZipCode(profile.physicalAddress.zip);
+    if (!zipResult.valid) newErrors.zip = zipResult.error!;
+
+    if (profile.npiNumber) {
+      const npiResult = validateNPI(profile.npiNumber);
+      if (!npiResult.valid) newErrors.npiNumber = npiResult.error!;
+    }
+
+    if (profile.deaNumber) {
+      const deaResult = validateDEAOptional(profile.deaNumber);
+      if (!deaResult.valid) newErrors.deaNumber = deaResult.error!;
+    }
+
+    setProfileErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateProfile()) return;
+
     try {
       setLoading(true);
       setError(null);
-      
+
       const changedFields = getChangedFields();
       
       if (Object.keys(changedFields).length === 0) {
@@ -291,6 +330,7 @@ export default function SettingsPage() {
     setProfile(originalProfile);
     setIsEditing(false);
     setError(null);
+    setProfileErrors({});
   };
 
   // Document upload handlers
@@ -318,19 +358,8 @@ export default function SettingsPage() {
   };
 
   const validatePassword = (password: string): string | null => {
-    if (password.length < 8) {
-      return 'Password must be at least 8 characters long';
-    }
-    if (!/[A-Z]/.test(password)) {
-      return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
-    }
-    if (!/[a-z]/.test(password)) {
-      return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
-    }
-    if (!/[0-9]/.test(password)) {
-      return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
-    }
-    return null;
+    const result = libValidatePassword(password);
+    return result.valid ? null : result.error;
   };
 
   const handleChangePassword = async () => {
@@ -348,16 +377,17 @@ export default function SettingsPage() {
         return;
       }
 
-      const passwordValidationError = validatePassword(passwordData.newPassword);
-      if (passwordValidationError) {
-        setPasswordError(passwordValidationError);
-        setError(passwordValidationError);
+      const newPassResult = libValidatePassword(passwordData.newPassword);
+      if (!newPassResult.valid) {
+        setPasswordError(newPassResult.error);
+        setError(newPassResult.error);
         return;
       }
 
-      if (passwordData.newPassword !== passwordData.confirmPassword) {
-        setError('New passwords do not match');
-        setPasswordError('New passwords do not match');
+      const matchResult = validatePasswordMatch(passwordData.newPassword, passwordData.confirmPassword);
+      if (!matchResult.valid) {
+        setError(matchResult.error);
+        setPasswordError(matchResult.error);
         return;
       }
 
@@ -605,11 +635,15 @@ export default function SettingsPage() {
                       {!isEditing && <Lock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#9ca3af]" />}
                       <Input
                         value={profile.deaNumber}
-                        onChange={(e) => setProfile({ ...profile, deaNumber: e.target.value })}
+                        onChange={(e) => {
+                          setProfile({ ...profile, deaNumber: e.target.value });
+                          setProfileErrors(prev => ({ ...prev, deaNumber: '' }));
+                        }}
                         disabled={!isEditing}
-                        className={`text-xs h-8 ${!isEditing ? 'pl-7 bg-[#f5f2f1]' : ''}`}
+                        className={`text-xs h-8 ${!isEditing ? 'pl-7 bg-[#f5f2f1]' : ''} ${profileErrors.deaNumber ? 'border-red-400' : ''}`}
                       />
                     </div>
+                    {profileErrors.deaNumber && <p className="text-xs text-red-500 mt-1">{profileErrors.deaNumber}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-[#000000] mb-1">DEA Expiration</label>
@@ -709,13 +743,17 @@ export default function SettingsPage() {
                     <label className="block text-xs font-bold text-[#000000] mb-1">Zip</label>
                     <Input
                       value={profile.physicalAddress.zip}
-                      onChange={(e) => setProfile({
-                        ...profile,
-                        physicalAddress: { ...profile.physicalAddress, zip: e.target.value }
-                      })}
+                      onChange={(e) => {
+                        setProfile({
+                          ...profile,
+                          physicalAddress: { ...profile.physicalAddress, zip: e.target.value }
+                        });
+                        setProfileErrors(prev => ({ ...prev, zip: '' }));
+                      }}
                       disabled={!isEditing}
-                      className="text-xs h-8"
+                      className={`text-xs h-8 ${profileErrors.zip ? 'border-red-400' : ''}`}
                     />
+                    {profileErrors.zip && <p className="text-xs text-red-500 mt-1">{profileErrors.zip}</p>}
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-xs font-bold text-[#000000] mb-1">Corporate Name (If different than Pharmacy / Facility Name)</label>
@@ -779,20 +817,28 @@ export default function SettingsPage() {
                     <Input
                       type="email"
                       value={profile.email}
-                      onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                      onChange={(e) => {
+                        setProfile({ ...profile, email: e.target.value });
+                        setProfileErrors(prev => ({ ...prev, email: '' }));
+                      }}
                       disabled={!isEditing}
-                      className="text-xs h-8"
+                      className={`text-xs h-8 ${profileErrors.email ? 'border-red-400' : ''}`}
                     />
+                    {profileErrors.email && <p className="text-xs text-red-500 mt-1">{profileErrors.email}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-[#000000] mb-1">Phone Number</label>
                     <Input
                       type="tel"
                       value={profile.phone}
-                      onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                      onChange={(e) => {
+                        setProfile({ ...profile, phone: formatPhoneNumber(e.target.value) });
+                        setProfileErrors(prev => ({ ...prev, phone: '' }));
+                      }}
                       disabled={!isEditing}
-                      className="text-xs h-8"
+                      className={`text-xs h-8 ${profileErrors.phone ? 'border-red-400' : ''}`}
                     />
+                    {profileErrors.phone && <p className="text-xs text-red-500 mt-1">{profileErrors.phone}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-[#000000] mb-1">Fax</label>

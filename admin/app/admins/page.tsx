@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { fetchAdmins, createAdmin, updateAdmin, deleteAdmin, setFilters } from '@/lib/store/adminsSlice';
 import { Admin, AdminCreatePayload, AdminUpdatePayload } from '@/lib/types';
 import { useDebounce } from '@/lib/hooks/useDebounce';
+import { validateEmail, validatePassword } from '@/lib/validation';
 
 const ASSIGNABLE_PERMISSIONS = [
     { key: 'pharmacies', label: 'Pharmacies' },
@@ -62,6 +63,8 @@ export default function AdminsPage() {
     const [deleteModal, setDeleteModal] = useState<Admin | null>(null);
     const [editLoading, setEditLoading] = useState(false);
     const [toasts, setToasts] = useState<Toast[]>([]);
+    const [addErrors, setAddErrors] = useState<Record<string, string>>({});
+    const [editFormErrors, setEditFormErrors] = useState<Record<string, string>>({});
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
         const id = Math.random().toString(36).substring(7);
@@ -141,10 +144,19 @@ export default function AdminsPage() {
     };
 
     const handleAddAdmin = async () => {
+        const newErrors: Record<string, string> = {};
+        if (!newAdmin.name?.trim()) newErrors.name = 'Name is required.';
+        const emailResult = validateEmail(newAdmin.email || '');
+        if (!emailResult.valid) newErrors.email = emailResult.error!;
+        const pwResult = validatePassword(newAdmin.password || '');
+        if (!pwResult.valid) newErrors.password = pwResult.error!;
+        setAddErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) return;
         const result = await dispatch(createAdmin(newAdmin));
         if (createAdmin.fulfilled.match(result)) {
             showToast('Admin created successfully!', 'success');
             setAddModal(false);
+            setAddErrors({});
             setNewAdmin({
                 email: '',
                 password: '',
@@ -184,10 +196,19 @@ export default function AdminsPage() {
 
     const handleUpdate = async () => {
         if (editModal) {
+            const newErrors: Record<string, string> = {};
+            if (!editFormData.name?.trim()) newErrors.name = 'Name is required.';
+            if (editFormData.email !== undefined) {
+                const r = validateEmail(editFormData.email || '');
+                if (!r.valid) newErrors.email = r.error!;
+            }
+            setEditFormErrors(newErrors);
+            if (Object.keys(newErrors).length > 0) return;
             const result = await dispatch(updateAdmin({ id: editModal.id, payload: editFormData }));
             if (updateAdmin.fulfilled.match(result)) {
                 showToast('Admin updated successfully!', 'success');
                 setEditModal(null);
+                setEditFormErrors({});
                 setEditFormData({});
                 // Refresh the list
                 dispatch(fetchAdmins({
@@ -615,30 +636,33 @@ export default function AdminsPage() {
                                     <input
                                         type="text"
                                         value={newAdmin.name}
-                                        onChange={(e) => setNewAdmin({ ...newAdmin, name: e.target.value })}
+                                        onChange={(e) => { setNewAdmin({ ...newAdmin, name: e.target.value }); setAddErrors(prev => ({ ...prev, name: '' })); }}
                                         className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="Enter full name"
                                     />
+                                    {addErrors.name && <p className="text-xs text-red-500 mt-1">{addErrors.name}</p>}
                                 </div>
                                 <div className="col-span-2">
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Email *</label>
                                     <input
                                         type="email"
                                         value={newAdmin.email}
-                                        onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
+                                        onChange={(e) => { setNewAdmin({ ...newAdmin, email: e.target.value }); setAddErrors(prev => ({ ...prev, email: '' })); }}
                                         className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="email@example.com"
                                     />
+                                    {addErrors.email && <p className="text-xs text-red-500 mt-1">{addErrors.email}</p>}
                                 </div>
                                 <div className="col-span-2">
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Password *</label>
                                     <input
                                         type="password"
                                         value={newAdmin.password}
-                                        onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
+                                        onChange={(e) => { setNewAdmin({ ...newAdmin, password: e.target.value }); setAddErrors(prev => ({ ...prev, password: '' })); }}
                                         className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="Enter secure password"
                                     />
+                                    {addErrors.password && <p className="text-xs text-red-500 mt-1">{addErrors.password}</p>}
                                 </div>
                                 <div className="col-span-2">
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Role *</label>
@@ -702,15 +726,15 @@ export default function AdminsPage() {
             {editModal && (
                 <div 
                     className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4"
-                    onClick={() => { setEditModal(null); setEditFormData({}); }}
+                    onClick={() => { setEditModal(null); setEditFormData({}); setEditFormErrors({}); }}
                 >
-                    <div 
+                    <div
                         className="bg-white rounded-[4px] max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 flex-shrink-0">
                             <h2 className="text-lg font-semibold text-gray-900">Edit Admin</h2>
-                            <button onClick={() => { setEditModal(null); setEditFormData({}); }} className="text-gray-400 hover:text-gray-600 transition-colors">
+                            <button onClick={() => { setEditModal(null); setEditFormData({}); setEditFormErrors({}); }} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -721,20 +745,22 @@ export default function AdminsPage() {
                                     <input
                                         type="text"
                                         value={editFormData.name || ''}
-                                        onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                                        onChange={(e) => { setEditFormData({ ...editFormData, name: e.target.value }); setEditFormErrors(prev => ({ ...prev, name: '' })); }}
                                         className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="Enter full name"
                                     />
+                                    {editFormErrors.name && <p className="text-xs text-red-500 mt-1">{editFormErrors.name}</p>}
                                 </div>
                                 <div className="col-span-2">
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Email *</label>
                                     <input
                                         type="email"
                                         value={editFormData.email || ''}
-                                        onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                                        onChange={(e) => { setEditFormData({ ...editFormData, email: e.target.value }); setEditFormErrors(prev => ({ ...prev, email: '' })); }}
                                         className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="email@example.com"
                                     />
+                                    {editFormErrors.email && <p className="text-xs text-red-500 mt-1">{editFormErrors.email}</p>}
                                 </div>
                                 <div className="col-span-2">
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Role *</label>
@@ -783,7 +809,7 @@ export default function AdminsPage() {
                             </div>
                         </div>
                         <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 p-5 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-                            <Button variant="outline" size="md" onClick={() => { setEditModal(null); setEditFormData({}); }} className="text-sm w-full sm:w-auto">Cancel</Button>
+                            <Button variant="outline" size="md" onClick={() => { setEditModal(null); setEditFormData({}); setEditFormErrors({}); }} className="text-sm w-full sm:w-auto">Cancel</Button>
                             <Button
                                 variant="primary"
                                 size="md"

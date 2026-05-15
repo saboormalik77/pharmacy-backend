@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn, formatDate } from '@/lib/utils';
+import { validateEmail, validateName } from '@/lib/validation';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
   fetchSubAdmins,
@@ -52,6 +53,7 @@ export default function SubAdminsPage() {
   const [formError, setFormError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     name: '',
@@ -98,6 +100,7 @@ export default function SubAdminsPage() {
   const resetForm = () => {
     setFormData({ name: '', email: '', role: 'sub_admin', permissions: [], isActive: true });
     setFormError('');
+    setErrors({});
   };
 
   const openCreateModal = () => {
@@ -151,18 +154,23 @@ export default function SubAdminsPage() {
 
   const handleSubmitCreate = async () => {
     setFormError('');
-    if (!formData.name.trim()) {
-      setFormError('Name is required');
-      return;
-    }
-    if (!formData.email.trim()) {
-      setFormError('Email is required');
-      return;
-    }
+    const newErrors: Record<string, string> = {};
+
+    const nameResult = validateName(formData.name);
+    if (!nameResult.valid) newErrors.name = nameResult.error!;
+
+    const emailResult = validateEmail(formData.email);
+    if (!emailResult.valid) newErrors.email = emailResult.error!;
+
     if (formData.permissions.length === 0) {
       setFormError('At least one permission must be selected');
+    }
+
+    if (Object.keys(newErrors).length > 0 || formData.permissions.length === 0) {
+      setErrors(newErrors);
       return;
     }
+    setErrors({});
 
     setIsSaving(true);
 
@@ -186,10 +194,16 @@ export default function SubAdminsPage() {
   const handleSubmitEdit = async () => {
     setFormError('');
     if (!editingAdmin) return;
-    if (!formData.name.trim()) {
-      setFormError('Name is required');
+    const newErrors: Record<string, string> = {};
+
+    const nameResult = validateName(formData.name);
+    if (!nameResult.valid) newErrors.name = nameResult.error!;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
+    setErrors({});
 
     setIsSaving(true);
 
@@ -473,14 +487,15 @@ export default function SubAdminsPage() {
                       Name <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="text" 
+                      type="text"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) => { setFormData({ ...formData, name: e.target.value }); setErrors(prev => ({ ...prev, name: '' })); }}
                       className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                       placeholder="Enter full name"
                       disabled={isSaving}
                     />
+                    {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
                   </div>
 
                   <div>
@@ -488,14 +503,15 @@ export default function SubAdminsPage() {
                       Email <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="email" 
+                      type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={(e) => { setFormData({ ...formData, email: e.target.value }); setErrors(prev => ({ ...prev, email: '' })); }}
                       className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed"
                       style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                       placeholder="subadmin@example.com"
                       disabled={modalMode === 'edit' || isSaving}
                     />
+                    {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
                     {modalMode === 'create' && (
                       <div className="mt-1.5 p-2 border rounded text-xs flex items-start gap-1.5" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)', color: 'var(--on-surface-variant)' }}>
                         <Mail className="w-3 h-3 mt-0.5 flex-shrink-0" />

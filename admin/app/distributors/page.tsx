@@ -16,6 +16,7 @@ import {
 } from '@/lib/store/distributorsSlice';
 import { Distributor, DistributorUpdatePayload, DistributorCreatePayload } from '@/lib/types';
 import { useDebounce } from '@/lib/hooks/useDebounce';
+import { validateEmail } from '@/lib/validation';
 
 export default function DistributorsPage() {
     const router = useRouter();

@@ -20,6 +20,7 @@ import {
     FetchPoliciesParams,
 } from '@/lib/store/policiesSlice';
 import { ManufacturerPolicyCreatePayload, ManufacturerPolicy, ReturnPolicyCreatePayload, PolicyNotePayload } from '@/lib/types';
+import { validateLabelerID, validateDiscountRate } from '@/lib/validation';
 
 interface ReverseDistributorOption {
     id: string;
@@ -68,6 +69,7 @@ export default function PoliciesPage() {
     const [newReturnPolicy, setNewReturnPolicy] = useState({ ...INITIAL_RETURN_POLICY });
     const [partialPolicy, setPartialPolicy] = useState({ ...INITIAL_PARTIAL_POLICY });
     const [newNote, setNewNote] = useState('');
+    const [addErrors, setAddErrors] = useState<Record<string, string>>({});
 
     // Reverse distributors for the Destination dropdown
     const [reverseDistributors, setReverseDistributors] = useState<ReverseDistributorOption[]>([]);
@@ -105,17 +107,13 @@ export default function PoliciesPage() {
     useEffect(() => { setPage(1); }, [debouncedSearch, labelerType, destination]);
 
     const handleAdd = async () => {
-        if (!newPolicy.labelerId.trim()) {
-            showToast('Labeler ID is required.', 'error');
-            return;
-        }
-        if (newPolicy.labelerId.trim().length > 10) {
-            showToast('Labeler ID must be 10 characters or fewer (e.g. 00032).', 'error');
-            return;
-        }
-        if (!newPolicy.manufacturerName.trim()) {
-            showToast('Manufacturer Name is required.', 'error');
-            return;
+        const newErrors: Record<string, string> = {};
+        const labelerResult = validateLabelerID(newPolicy.labelerId);
+        if (!labelerResult.valid) newErrors.labelerId = labelerResult.error!;
+        if (!newPolicy.manufacturerName.trim()) newErrors.manufacturerName = 'Manufacturer name is required.';
+        if (newReturnPolicy.discountRate != null) {
+            const drResult = validateDiscountRate(newReturnPolicy.discountRate);
+            if (!drResult.valid) newErrors.discountRate = drResult.error!;
         }
         // If any return-policy field is filled, destination is required
         const returnFieldsFilled =
@@ -124,14 +122,10 @@ export default function PoliciesPage() {
             newReturnPolicy.policyDescription ||
             newReturnPolicy.discountRate != null;
         if (returnFieldsFilled && !newReturnPolicy.destination) {
-            showToast('Please select a Destination in the Labeler Return Information section.', 'error');
-            return;
+            newErrors.destination = 'Please select a Destination.';
         }
-        // Discount rate must be a fraction between 0 and 1
-        if (newReturnPolicy.discountRate != null && (newReturnPolicy.discountRate < 0 || newReturnPolicy.discountRate > 1)) {
-            showToast('Discount Rate must be between 0 and 1 (e.g. 0.30 for 30%).', 'error');
-            return;
-        }
+        setAddErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) return;
 
         const result = await dispatch(createPolicy(newPolicy));
         if (createPolicy.fulfilled.match(result)) {
@@ -178,6 +172,7 @@ export default function PoliciesPage() {
 
             showToast(`Policy for ${newPolicy.manufacturerName} created!`);
             setAddModal(false);
+            setAddErrors({});
             setNewPolicy({ labelerId: '', manufacturerName: '', labelerType: 'generic' });
             setNewReturnPolicy({ ...INITIAL_RETURN_POLICY });
             setPartialPolicy({ ...INITIAL_PARTIAL_POLICY });
@@ -363,11 +358,11 @@ export default function PoliciesPage() {
 
             {/* ── Add Policy Modal ─────────────────────────── */}
             {addModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setAddModal(false)}>
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => { setAddModal(false); setAddErrors({}); }}>
                     <div className="bg-white rounded-[4px] max-w-3xl w-full shadow-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
                             <h2 className="text-sm font-semibold text-gray-900">Master Labeler Information</h2>
-                            <button onClick={() => setAddModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                            <button onClick={() => { setAddModal(false); setAddErrors({}); }} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-5 py-4 overflow-y-auto flex-1 space-y-4">
 
@@ -376,23 +371,21 @@ export default function PoliciesPage() {
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">
                                         Labeler ID <span className="text-red-500">*</span>
-                                        <span className="ml-1 text-[10px] text-gray-400 font-normal">max 10 chars</span>
+                                        <span className="ml-1 text-[10px] text-gray-400 font-normal">5 digits</span>
                                     </label>
                                     <input
                                         type="text"
                                         value={newPolicy.labelerId}
-                                        onChange={e => setNewPolicy({ ...newPolicy, labelerId: e.target.value })}
+                                        onChange={e => { setNewPolicy({ ...newPolicy, labelerId: e.target.value }); setAddErrors(prev => ({ ...prev, labelerId: '' })); }}
                                         placeholder="e.g. 00032"
                                         maxLength={10}
                                         className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                                            newPolicy.labelerId.length > 10
+                                            addErrors.labelerId
                                                 ? 'border-red-400 focus:ring-red-400'
                                                 : 'border-gray-300'
                                         }`}
                                     />
-                                    {newPolicy.labelerId.length > 0 && (
-                                        <p className="text-[10px] text-gray-400 mt-0.5">{newPolicy.labelerId.length}/10</p>
-                                    )}
+                                    {addErrors.labelerId && <p className="text-xs text-red-500 mt-1">{addErrors.labelerId}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Labeler Type</label>
@@ -417,7 +410,8 @@ export default function PoliciesPage() {
                             {/* Labeler Name */}
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Labeler Name <span className="text-red-500">*</span></label>
-                                <input type="text" value={newPolicy.manufacturerName} onChange={e => setNewPolicy({ ...newPolicy, manufacturerName: e.target.value })} placeholder="e.g. AbbVie Inc." className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                <input type="text" value={newPolicy.manufacturerName} onChange={e => { setNewPolicy({ ...newPolicy, manufacturerName: e.target.value }); setAddErrors(prev => ({ ...prev, manufacturerName: '' })); }} placeholder="e.g. AbbVie Inc." className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                {addErrors.manufacturerName && <p className="text-xs text-red-500 mt-1">{addErrors.manufacturerName}</p>}
                             </div>
 
                             {/* Address */}
@@ -513,6 +507,7 @@ export default function PoliciesPage() {
                                                         destination: e.target.value,
                                                         autoRaEmail: selected?.email || '',
                                                     });
+                                                    setAddErrors(prev => ({ ...prev, destination: '' }));
                                                 }}
                                                 className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
                                             >
@@ -527,6 +522,7 @@ export default function PoliciesPage() {
                                                 <Loader2 className="w-3 h-3 animate-spin absolute right-7 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                             )}
                                         </div>
+                                        {addErrors.destination && <p className="text-xs text-red-500 mt-1">{addErrors.destination}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -570,21 +566,22 @@ export default function PoliciesPage() {
                                             min="0"
                                             max="1"
                                             value={newReturnPolicy.discountRate ?? ''}
-                                            onChange={e => setNewReturnPolicy({ ...newReturnPolicy, discountRate: e.target.value ? parseFloat(e.target.value) : undefined })}
+                                            onChange={e => { setNewReturnPolicy({ ...newReturnPolicy, discountRate: e.target.value ? parseFloat(e.target.value) : undefined }); setAddErrors(prev => ({ ...prev, discountRate: '' })); }}
                                             placeholder="e.g. 0.30"
                                             className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                                                newReturnPolicy.discountRate != null && (newReturnPolicy.discountRate < 0 || newReturnPolicy.discountRate > 1)
+                                                addErrors.discountRate
                                                     ? 'border-red-400 focus:ring-red-400'
                                                     : 'border-gray-300'
                                             }`}
                                         />
-                                        <p className="text-[10px] text-gray-400 mt-0.5">
-                                            {newReturnPolicy.discountRate != null && newReturnPolicy.discountRate >= 0 && newReturnPolicy.discountRate <= 1
-                                                ? `= ${(newReturnPolicy.discountRate * 100).toFixed(0)}%`
-                                                : newReturnPolicy.discountRate != null
-                                                    ? <span className="text-red-500">Must be 0–1 (e.g. 0.30 for 30%)</span>
+                                        {addErrors.discountRate
+                                            ? <p className="text-xs text-red-500 mt-1">{addErrors.discountRate}</p>
+                                            : <p className="text-[10px] text-gray-400 mt-0.5">
+                                                {newReturnPolicy.discountRate != null && newReturnPolicy.discountRate >= 0 && newReturnPolicy.discountRate <= 1
+                                                    ? `= ${(newReturnPolicy.discountRate * 100).toFixed(0)}%`
                                                     : 'e.g. 0.30 = 30%'}
-                                        </p>
+                                              </p>
+                                        }
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-1">Partials?</label>
@@ -647,7 +644,7 @@ export default function PoliciesPage() {
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 px-5 py-3 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-                            <button onClick={() => setAddModal(false)} className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-[4px] hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={() => { setAddModal(false); setAddErrors({}); }} className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-[4px] hover:bg-gray-50 transition-colors">Cancel</button>
                             <button onClick={handleAdd} disabled={isActionLoading} className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 rounded-[4px] hover:bg-primary-700 disabled:opacity-50 transition-colors inline-flex items-center">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />Creating...</> : 'Save Contact Info'}
                             </button>

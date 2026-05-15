@@ -20,6 +20,7 @@ import {
     clearError, clearCurrentMemo,
 } from '@/lib/store/batchSlice';
 import { DebitMemo, DebitMemoItem } from '@/lib/types';
+import { validateCurrencyOptional, validateTrackingNumber, validateRANumber, validateDateOptional, validateDateRange } from '@/lib/validation';
 
 const PAYMENT_OPTIONS = [
     { value: '', label: 'All Payments' },
@@ -68,6 +69,7 @@ export default function DebitMemosPage() {
     const [expandedMemoId, setExpandedMemoId] = useState<string | null>(null);
     const [editing, setEditing] = useState(false);
     const [editForm, setEditForm] = useState<Record<string, any>>({});
+    const [editErrors, setEditErrors] = useState<Record<string, string>>({});
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -107,6 +109,7 @@ export default function DebitMemosPage() {
 
     const startEditing = (memo: DebitMemo) => {
         setEditing(true);
+        setEditErrors({});
         setEditForm({
             raNumber: memo.raNumber || '',
             raRequestedAt: memo.raRequestedAt?.split('T')[0] || '',
@@ -123,6 +126,27 @@ export default function DebitMemosPage() {
 
     const handleSave = async () => {
         if (!currentMemo) return;
+        const newErrors: Record<string, string> = {};
+        const amtReqResult = validateCurrencyOptional(editForm.amountRequested);
+        if (!amtReqResult.valid) newErrors.amountRequested = amtReqResult.error!;
+        const amtRecResult = validateCurrencyOptional(editForm.amountReceived);
+        if (!amtRecResult.valid) newErrors.amountReceived = amtRecResult.error!;
+        const trackResult = validateTrackingNumber(editForm.outboundTracking);
+        if (!trackResult.valid) newErrors.outboundTracking = trackResult.error!;
+        const raResult = validateRANumber(editForm.raNumber);
+        if (!raResult.valid) newErrors.raNumber = raResult.error!;
+        const raReqResult = validateDateOptional(editForm.raRequestedAt);
+        if (!raReqResult.valid) newErrors.raRequestedAt = raReqResult.error!;
+        const raRecResult = validateDateOptional(editForm.raReceivedAt);
+        if (!raRecResult.valid) newErrors.raReceivedAt = raRecResult.error!;
+        const ticklerResult = validateDateOptional(editForm.ticklerDate);
+        if (!ticklerResult.valid) newErrors.ticklerDate = ticklerResult.error!;
+        const shippedResult = validateDateOptional(editForm.shippedAt);
+        if (!shippedResult.valid) newErrors.shippedAt = shippedResult.error!;
+        const rangeResult = validateDateRange(editForm.raRequestedAt, editForm.raReceivedAt);
+        if (!rangeResult.valid) newErrors.raReceivedAt = rangeResult.error!;
+        setEditErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) return;
         const updates: Record<string, any> = {};
         if (editForm.raNumber) updates.raNumber = editForm.raNumber;
         if (editForm.raRequestedAt) updates.raRequestedAt = editForm.raRequestedAt;
@@ -139,6 +163,7 @@ export default function DebitMemosPage() {
         if (updateDebitMemo.fulfilled.match(result)) {
             addToast('Debit memo updated', 'success');
             setEditing(false);
+            setEditErrors({});
             dispatch(fetchDebitMemoDetail(currentMemo.id));
             loadMemos();
         }
@@ -263,7 +288,7 @@ export default function DebitMemosPage() {
                                                             </button>
                                                         ) : (
                                                             <div className="flex gap-1.5">
-                                                                <button onClick={() => setEditing(false)} className="px-2.5 py-1 rounded text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                                                                <button onClick={() => { setEditing(false); setEditErrors({}); }} className="px-2.5 py-1 rounded text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
                                                                 <button onClick={handleSave} disabled={isActionLoading} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
                                                                     {isActionLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                                                                     Save
@@ -287,7 +312,8 @@ export default function DebitMemosPage() {
                                                                     ].map(({ label, key, type }) => (
                                                                         <div key={key}>
                                                                             <label className="block text-[10px] text-gray-500 mb-0.5">{label}</label>
-                                                                            <input type={type} className="w-full border border-gray-300 rounded px-2 py-1 text-xs" value={editForm[key]} onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))} />
+                                                                            <input type={type} className="w-full border border-gray-300 rounded px-2 py-1 text-xs" value={editForm[key]} onChange={e => { setEditForm(f => ({ ...f, [key]: e.target.value })); setEditErrors(prev => ({ ...prev, [key]: '' })); }} />
+                                                                            {editErrors[key] && <p className="text-xs text-red-500 mt-0.5">{editErrors[key]}</p>}
                                                                         </div>
                                                                     ))}
                                                                 </div>
@@ -320,7 +346,8 @@ export default function DebitMemosPage() {
                                                                     ].map(({ label, key, type }) => (
                                                                         <div key={key}>
                                                                             <label className="block text-[10px] text-gray-500 mb-0.5">{label}</label>
-                                                                            <input type={type} className="w-full border border-gray-300 rounded px-2 py-1 text-xs" value={editForm[key]} onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))} />
+                                                                            <input type={type} className="w-full border border-gray-300 rounded px-2 py-1 text-xs" value={editForm[key]} onChange={e => { setEditForm(f => ({ ...f, [key]: e.target.value })); setEditErrors(prev => ({ ...prev, [key]: '' })); }} />
+                                                                            {editErrors[key] && <p className="text-xs text-red-500 mt-0.5">{editErrors[key]}</p>}
                                                                         </div>
                                                                     ))}
                                                                 </div>
@@ -356,11 +383,13 @@ export default function DebitMemosPage() {
                                                                     </div>
                                                                     <div>
                                                                         <label className="block text-[10px] text-gray-500 mb-0.5">Amount Requested</label>
-                                                                        <input type="number" step="0.01" className="w-full border border-gray-300 rounded px-2 py-1 text-xs" value={editForm.amountRequested} onChange={e => setEditForm(f => ({ ...f, amountRequested: e.target.value }))} />
+                                                                        <input type="number" step="0.01" className="w-full border border-gray-300 rounded px-2 py-1 text-xs" value={editForm.amountRequested} onChange={e => { setEditForm(f => ({ ...f, amountRequested: e.target.value })); setEditErrors(prev => ({ ...prev, amountRequested: '' })); }} />
+                                                                        {editErrors.amountRequested && <p className="text-xs text-red-500 mt-0.5">{editErrors.amountRequested}</p>}
                                                                     </div>
                                                                     <div>
                                                                         <label className="block text-[10px] text-gray-500 mb-0.5">Amount Received</label>
-                                                                        <input type="number" step="0.01" className="w-full border border-gray-300 rounded px-2 py-1 text-xs" value={editForm.amountReceived} onChange={e => setEditForm(f => ({ ...f, amountReceived: e.target.value }))} />
+                                                                        <input type="number" step="0.01" className="w-full border border-gray-300 rounded px-2 py-1 text-xs" value={editForm.amountReceived} onChange={e => { setEditForm(f => ({ ...f, amountReceived: e.target.value })); setEditErrors(prev => ({ ...prev, amountReceived: '' })); }} />
+                                                                        {editErrors.amountReceived && <p className="text-xs text-red-500 mt-0.5">{editErrors.amountReceived}</p>}
                                                                     </div>
                                                                 </div>
                                                             ) : (

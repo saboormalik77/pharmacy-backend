@@ -7,6 +7,13 @@ import { Input } from '@/components/ui/Input'
 import { branchService, BranchFormData } from '@/lib/api/services/branchService'
 import { roleService, Role } from '@/lib/api/services/roleService'
 import { US_STATES } from '@/lib/constants/usStates'
+import {
+  validateEmail,
+  validateUSPhoneOptional,
+  validateZipCodeOptional,
+  validateDEAOptional,
+  formatPhoneNumber,
+} from '@/lib/validation'
 
 interface CreateBranchModalProps {
   isOpen: boolean
@@ -17,6 +24,7 @@ interface CreateBranchModalProps {
 export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [roles, setRoles] = useState<Role[]>([])
   const [rolesLoading, setRolesLoading] = useState(false)
   const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([])
@@ -40,7 +48,12 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
   })
 
   const update = (field: keyof BranchFormData, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }))
+    let formatted = value
+    if (field === 'phone' || field === 'fax') {
+      formatted = formatPhoneNumber(value)
+    }
+    setForm((prev) => ({ ...prev, [field]: formatted }))
+    setFieldErrors((prev) => ({ ...prev, [field]: '' }))
   }
 
   useEffect(() => {
@@ -61,10 +74,51 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
 
   const handleSubmit = async () => {
     setError('')
-    if (!form.pharmacyName.trim() || !form.email.trim()) {
-      setError('Pharmacy name and email are required.')
+    const newErrors: Record<string, string> = {}
+
+    // pharmacyName: required, 2-100 chars
+    const trimmedName = form.pharmacyName.trim()
+    if (!trimmedName) {
+      newErrors.pharmacyName = 'Pharmacy name is required.'
+    } else if (trimmedName.length < 2) {
+      newErrors.pharmacyName = 'Pharmacy name must be at least 2 characters.'
+    } else if (trimmedName.length > 100) {
+      newErrors.pharmacyName = 'Pharmacy name must be 100 characters or fewer.'
+    }
+
+    // email: required
+    const emailResult = validateEmail(form.email)
+    if (!emailResult.valid) newErrors.email = emailResult.error!
+
+    // phone: optional, format validated
+    const phoneResult = validateUSPhoneOptional(form.phone ?? '')
+    if (!phoneResult.valid) newErrors.phone = phoneResult.error!
+
+    // fax: optional, format validated
+    const faxResult = validateUSPhoneOptional(form.fax ?? '')
+    if (!faxResult.valid) newErrors.fax = faxResult.error!
+
+    // zip: optional, format validated
+    const zipResult = validateZipCodeOptional(form.zip ?? '')
+    if (!zipResult.valid) newErrors.zip = zipResult.error!
+
+    // deaNumber: optional, checksum validated
+    const deaResult = validateDEAOptional(form.deaNumber ?? '')
+    if (!deaResult.valid) newErrors.deaNumber = deaResult.error!
+
+    // daysBetweenVisits: must be positive integer if provided
+    if (form.daysBetweenVisits) {
+      const daysNum = parseInt(form.daysBetweenVisits, 10)
+      if (isNaN(daysNum) || !Number.isInteger(daysNum) || daysNum <= 0) {
+        newErrors.daysBetweenVisits = 'Days between visits must be a positive whole number.'
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors)
       return
     }
+
     setIsSubmitting(true)
     try {
       await branchService.createBranch({
@@ -74,6 +128,7 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
       onSuccess()
       onClose()
       setSelectedRoleIds([])
+      setFieldErrors({})
       setForm({ pharmacyName: '', email: '', contactName: '', phone: '', fax: '', street: '', city: '', state: '', zip: '', wholesaler: '', wholesalerAccount: '', secondaryWholesaler: '', deaNumber: '', deaExpiration: '', serviceType: 'full_service', daysBetweenVisits: '120' })
     } catch (err: any) {
       setError(err.message || 'Failed to create branch')
@@ -109,11 +164,13 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-gray-900 mb-1">Pharmacy Name *</label>
-              <Input className="h-8 text-xs" value={form.pharmacyName} onChange={(e) => update('pharmacyName', e.target.value)} placeholder="Branch pharmacy name" />
+              <Input className={`h-8 text-xs ${fieldErrors.pharmacyName ? 'border-red-400' : ''}`} value={form.pharmacyName} onChange={(e) => update('pharmacyName', e.target.value)} placeholder="Branch pharmacy name" />
+              {fieldErrors.pharmacyName && <p className="text-xs text-red-500 mt-1">{fieldErrors.pharmacyName}</p>}
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-900 mb-1">Email *</label>
-              <Input className="h-8 text-xs" type="email" value={form.email} onChange={(e) => update('email', e.target.value)} placeholder="branch@pharmacy.com" />
+              <Input className={`h-8 text-xs ${fieldErrors.email ? 'border-red-400' : ''}`} type="email" value={form.email} onChange={(e) => update('email', e.target.value)} placeholder="branch@pharmacy.com" />
+              {fieldErrors.email && <p className="text-xs text-red-500 mt-1">{fieldErrors.email}</p>}
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-900 mb-1">Contact Name</label>
@@ -121,11 +178,13 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-900 mb-1">Phone</label>
-              <Input className="h-8 text-xs" value={form.phone} onChange={(e) => update('phone', e.target.value)} placeholder="555-0102" />
+              <Input className={`h-8 text-xs ${fieldErrors.phone ? 'border-red-400' : ''}`} value={form.phone} onChange={(e) => update('phone', e.target.value)} placeholder="(555) 010-2000" />
+              {fieldErrors.phone && <p className="text-xs text-red-500 mt-1">{fieldErrors.phone}</p>}
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-900 mb-1">Fax</label>
-              <Input className="h-8 text-xs" value={form.fax} onChange={(e) => update('fax', e.target.value)} placeholder="555-0103" />
+              <Input className={`h-8 text-xs ${fieldErrors.fax ? 'border-red-400' : ''}`} value={form.fax} onChange={(e) => update('fax', e.target.value)} placeholder="(555) 010-3000" />
+              {fieldErrors.fax && <p className="text-xs text-red-500 mt-1">{fieldErrors.fax}</p>}
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-900 mb-1">Street</label>
@@ -152,7 +211,8 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-900 mb-1">ZIP</label>
-              <Input className="h-8 text-xs" value={form.zip} onChange={(e) => update('zip', e.target.value)} placeholder="10002" />
+              <Input className={`h-8 text-xs ${fieldErrors.zip ? 'border-red-400' : ''}`} value={form.zip} onChange={(e) => update('zip', e.target.value)} placeholder="10002" />
+              {fieldErrors.zip && <p className="text-xs text-red-500 mt-1">{fieldErrors.zip}</p>}
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-900 mb-1">Wholesaler</label>
@@ -168,7 +228,8 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-900 mb-1">DEA Number</label>
-              <Input className="h-8 text-xs" value={form.deaNumber} onChange={(e) => update('deaNumber', e.target.value)} placeholder="AB1234567" />
+              <Input className={`h-8 text-xs ${fieldErrors.deaNumber ? 'border-red-400' : ''}`} value={form.deaNumber} onChange={(e) => update('deaNumber', e.target.value)} placeholder="AB1234567" />
+              {fieldErrors.deaNumber && <p className="text-xs text-red-500 mt-1">{fieldErrors.deaNumber}</p>}
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-900 mb-1">DEA Expiration</label>
@@ -187,7 +248,8 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-900 mb-1">Days Between Visits</label>
-              <Input className="h-8 text-xs" type="number" value={form.daysBetweenVisits} onChange={(e) => update('daysBetweenVisits', e.target.value)} placeholder="120" />
+              <Input className={`h-8 text-xs ${fieldErrors.daysBetweenVisits ? 'border-red-400' : ''}`} type="number" value={form.daysBetweenVisits} onChange={(e) => update('daysBetweenVisits', e.target.value)} placeholder="120" />
+              {fieldErrors.daysBetweenVisits && <p className="text-xs text-red-500 mt-1">{fieldErrors.daysBetweenVisits}</p>}
             </div>
           </div>
 
@@ -226,10 +288,10 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t-[0.5px] border-gray-200 bg-gray-50 p-3">
-          <Button 
+          <Button
             className="h-8 text-xs"
-            variant="outline" 
-            onClick={() => { setSelectedRoleIds([]); onClose() }} 
+            variant="outline"
+            onClick={() => { setSelectedRoleIds([]); setFieldErrors({}); onClose() }}
             disabled={isSubmitting}
           >
             Cancel

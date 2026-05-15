@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { fetchCategories, fetchMarketplaceDeals, createMarketplaceDeal, updateMarketplaceDeal, deleteMarketplaceDeal, setDealOfTheDay, unsetDealOfTheDay, DealType } from '@/lib/store/marketplaceSlice';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
+import { validateQuantity, validateCurrency, validateNotExpired } from '@/lib/validation';
 
 export default function MarketplacePage() {
     const dispatch = useAppDispatch();
@@ -57,6 +58,8 @@ export default function MarketplacePage() {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [editDealImage, setEditDealImage] = useState<File | null>(null);
     const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+    const [addErrors, setAddErrors] = useState<Record<string, string>>({});
+    const [editErrors, setEditErrors] = useState<Record<string, string>>({});
 
     // Debounce search term
     const debouncedSearch = useDebounce(searchTerm, 500);
@@ -97,11 +100,18 @@ export default function MarketplacePage() {
     };
 
     const handleEdit = async (deal: any) => {
-        // Validate quantity is not less than minimumBuyQuantity
-        if (deal.quantity < deal.minimumBuyQuantity) {
-            showToast(`Quantity cannot be less than minimum buy quantity (${deal.minimumBuyQuantity})`, 'error');
-            return;
-        }
+        const newErrors: Record<string, string> = {};
+        const qtyResult = validateQuantity(deal.quantity);
+        if (!qtyResult.valid) newErrors.quantity = qtyResult.error!;
+        else if (deal.minimumBuyQuantity > 0 && deal.quantity < deal.minimumBuyQuantity) newErrors.quantity = `Must be at least ${deal.minimumBuyQuantity}.`;
+        const origResult = validateCurrency(deal.originalPrice);
+        if (!origResult.valid) newErrors.originalPrice = origResult.error!;
+        const dealResult = validateCurrency(deal.dealPrice);
+        if (!dealResult.valid) newErrors.dealPrice = dealResult.error!;
+        const expiryResult = validateNotExpired(deal.expiryDate);
+        if (!expiryResult.valid) newErrors.expiryDate = expiryResult.error!;
+        setEditErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) return;
 
         try {
             const result = await dispatch(updateMarketplaceDeal({
@@ -124,6 +134,7 @@ export default function MarketplacePage() {
             if (updateMarketplaceDeal.fulfilled.match(result)) {
                 showToast('Deal updated successfully!', 'success');
                 setEditModal(null);
+                setEditErrors({});
                 setEditDealImage(null);
                 setEditImagePreview(null);
                 // Refresh deals after edit
@@ -145,17 +156,19 @@ export default function MarketplacePage() {
     };
 
     const handleAddDeal = async () => {
-        // Validate minimumBuyQuantity is at least 1
-        if (!newDeal.minimumBuyQuantity || newDeal.minimumBuyQuantity < 1) {
-            showToast('Minimum Buy Quantity must be at least 1', 'error');
-            return;
-        }
-
-        // Validate quantity is not less than minimumBuyQuantity
-        if (newDeal.quantity < newDeal.minimumBuyQuantity) {
-            showToast(`Quantity cannot be less than minimum buy quantity (${newDeal.minimumBuyQuantity})`, 'error');
-            return;
-        }
+        const newErrors: Record<string, string> = {};
+        const qtyResult = validateQuantity(newDeal.quantity);
+        if (!qtyResult.valid) newErrors.quantity = qtyResult.error!;
+        else if (newDeal.minimumBuyQuantity > 0 && newDeal.quantity < newDeal.minimumBuyQuantity) newErrors.quantity = `Must be at least ${newDeal.minimumBuyQuantity}.`;
+        const origResult = validateCurrency(newDeal.originalPrice);
+        if (!origResult.valid) newErrors.originalPrice = origResult.error!;
+        const dealPriceResult = validateCurrency(newDeal.dealPrice);
+        if (!dealPriceResult.valid) newErrors.dealPrice = dealPriceResult.error!;
+        const expiryResult = validateNotExpired(newDeal.expiryDate);
+        if (!expiryResult.valid) newErrors.expiryDate = expiryResult.error!;
+        if (!newDeal.minimumBuyQuantity || newDeal.minimumBuyQuantity < 1) newErrors.minimumBuyQuantity = 'Minimum Buy Quantity must be at least 1.';
+        setAddErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) return;
 
         try {
             const result = await dispatch(createMarketplaceDeal({
@@ -174,6 +187,7 @@ export default function MarketplacePage() {
             if (createMarketplaceDeal.fulfilled.match(result)) {
                 showToast('Deal created successfully!', 'success');
                 setAddModal(false);
+                setAddErrors({});
                 // Reset form
                 setNewDeal({
                     productName: '',
@@ -818,9 +832,9 @@ export default function MarketplacePage() {
             {editModal && (
                 <div 
                     className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4"
-                    onClick={() => !isUpdatingDeal && setEditModal(null)}
+                    onClick={() => { if (!isUpdatingDeal) { setEditModal(null); setEditErrors({}); } }}
                 >
-                    <div 
+                    <div
                         className="bg-white rounded-[4px] shadow-xl max-w-3xl w-full"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -829,6 +843,7 @@ export default function MarketplacePage() {
                             <button onClick={() => {
                                 if (!isUpdatingDeal) {
                                     setEditModal(null);
+                                    setEditErrors({});
                                     setEditDealImage(null);
                                     setEditImagePreview(null);
                                 }
@@ -939,17 +954,15 @@ export default function MarketplacePage() {
                                         type="number"
                                         min="1"
                                         value={editModal.quantity || ''}
-                                        onChange={(e) => setEditModal({ ...editModal, quantity: Number(e.target.value) })}
+                                        onChange={(e) => { setEditModal({ ...editModal, quantity: Number(e.target.value) }); setEditErrors(prev => ({ ...prev, quantity: '' })); }}
                                         className={`w-full px-2.5 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 ${
-                                            editModal.minimumBuyQuantity > 0 && editModal.quantity > 0 && editModal.quantity < editModal.minimumBuyQuantity
+                                            editErrors.quantity
                                                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                                                 : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
                                         }`}
                                         placeholder="0"
                                     />
-                                    {editModal.minimumBuyQuantity > 0 && editModal.quantity > 0 && editModal.quantity < editModal.minimumBuyQuantity && (
-                                        <p className="mt-0.5 text-xs text-red-600">Must be ≥ {editModal.minimumBuyQuantity}</p>
-                                    )}
+                                    {editErrors.quantity && <p className="text-xs text-red-500 mt-1">{editErrors.quantity}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Unit *</label>
@@ -970,10 +983,11 @@ export default function MarketplacePage() {
                                         type="number"
                                         step="0.01"
                                         value={editModal.originalPrice || ''}
-                                        onChange={(e) => setEditModal({ ...editModal, originalPrice: Number(e.target.value) })}
+                                        onChange={(e) => { setEditModal({ ...editModal, originalPrice: Number(e.target.value) }); setEditErrors(prev => ({ ...prev, originalPrice: '' })); }}
                                         className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="0.00"
                                     />
+                                    {editErrors.originalPrice && <p className="text-xs text-red-500 mt-1">{editErrors.originalPrice}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Deal Price ($) *</label>
@@ -981,33 +995,36 @@ export default function MarketplacePage() {
                                         type="number"
                                         step="0.01"
                                         value={editModal.dealPrice || ''}
-                                        onChange={(e) => setEditModal({ ...editModal, dealPrice: Number(e.target.value) })}
+                                        onChange={(e) => { setEditModal({ ...editModal, dealPrice: Number(e.target.value) }); setEditErrors(prev => ({ ...prev, dealPrice: '' })); }}
                                         className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="0.00"
                                     />
+                                    {editErrors.dealPrice && <p className="text-xs text-red-500 mt-1">{editErrors.dealPrice}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Expiry Date *</label>
                                     <input
                                         type="date"
                                         value={editModal.expiryDate || ''}
-                                        onChange={(e) => setEditModal({ ...editModal, expiryDate: e.target.value })}
+                                        onChange={(e) => { setEditModal({ ...editModal, expiryDate: e.target.value }); setEditErrors(prev => ({ ...prev, expiryDate: '' })); }}
                                         className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                     />
+                                    {editErrors.expiryDate && <p className="text-xs text-red-500 mt-1">{editErrors.expiryDate}</p>}
                                 </div>
                             </div>
                         </div>
                         <div className="flex justify-end gap-3 p-4 border-t border-gray-200 bg-gray-50">
-                            <Button 
-                                variant="outline" 
-                                size="md" 
+                            <Button
+                                variant="outline"
+                                size="md"
                                 onClick={() => {
                                     if (!isUpdatingDeal) {
                                         setEditModal(null);
+                                        setEditErrors({});
                                         setEditDealImage(null);
                                         setEditImagePreview(null);
                                     }
-                                }} 
+                                }}
                                 className="text-sm" 
                                 disabled={isUpdatingDeal}
                             >
@@ -1046,15 +1063,15 @@ export default function MarketplacePage() {
             {addModal && (
                 <div 
                     className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4"
-                    onClick={() => !isCreatingDeal && setAddModal(false)}
+                    onClick={() => { if (!isCreatingDeal) { setAddModal(false); setAddErrors({}); } }}
                 >
-                    <div 
+                    <div
                         className="bg-white rounded-[4px] shadow-xl max-w-3xl w-full"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-lg font-semibold text-gray-900">Post New Deal</h2>
-                            <button onClick={() => !isCreatingDeal && setAddModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors" disabled={isCreatingDeal}>
+                            <button onClick={() => { if (!isCreatingDeal) { setAddModal(false); setAddErrors({}); } }} className="text-gray-400 hover:text-gray-600 transition-colors" disabled={isCreatingDeal}>
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -1161,17 +1178,15 @@ export default function MarketplacePage() {
                                         type="number"
                                         min="1"
                                         value={newDeal.quantity || ''}
-                                        onChange={(e) => setNewDeal({ ...newDeal, quantity: Number(e.target.value) })}
+                                        onChange={(e) => { setNewDeal({ ...newDeal, quantity: Number(e.target.value) }); setAddErrors(prev => ({ ...prev, quantity: '' })); }}
                                         className={`w-full px-2.5 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 ${
-                                            newDeal.minimumBuyQuantity > 0 && newDeal.quantity > 0 && newDeal.quantity < newDeal.minimumBuyQuantity
+                                            addErrors.quantity
                                                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                                                 : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
                                         }`}
                                         placeholder="0"
                                     />
-                                    {newDeal.minimumBuyQuantity > 0 && newDeal.quantity > 0 && newDeal.quantity < newDeal.minimumBuyQuantity && (
-                                        <p className="mt-0.5 text-xs text-red-600">Must be ≥ {newDeal.minimumBuyQuantity}</p>
-                                    )}
+                                    {addErrors.quantity && <p className="text-xs text-red-500 mt-1">{addErrors.quantity}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Unit *</label>
@@ -1192,10 +1207,11 @@ export default function MarketplacePage() {
                                         type="number"
                                         step="0.01"
                                         value={newDeal.originalPrice || ''}
-                                        onChange={(e) => setNewDeal({ ...newDeal, originalPrice: Number(e.target.value) })}
+                                        onChange={(e) => { setNewDeal({ ...newDeal, originalPrice: Number(e.target.value) }); setAddErrors(prev => ({ ...prev, originalPrice: '' })); }}
                                         className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="0.00"
                                     />
+                                    {addErrors.originalPrice && <p className="text-xs text-red-500 mt-1">{addErrors.originalPrice}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Deal Price ($) *</label>
@@ -1203,19 +1219,21 @@ export default function MarketplacePage() {
                                         type="number"
                                         step="0.01"
                                         value={newDeal.dealPrice || ''}
-                                        onChange={(e) => setNewDeal({ ...newDeal, dealPrice: Number(e.target.value) })}
+                                        onChange={(e) => { setNewDeal({ ...newDeal, dealPrice: Number(e.target.value) }); setAddErrors(prev => ({ ...prev, dealPrice: '' })); }}
                                         className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="0.00"
                                     />
+                                    {addErrors.dealPrice && <p className="text-xs text-red-500 mt-1">{addErrors.dealPrice}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Expiry Date *</label>
                                     <input
                                         type="date"
                                         value={newDeal.expiryDate}
-                                        onChange={(e) => setNewDeal({ ...newDeal, expiryDate: e.target.value })}
+                                        onChange={(e) => { setNewDeal({ ...newDeal, expiryDate: e.target.value }); setAddErrors(prev => ({ ...prev, expiryDate: '' })); }}
                                         className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                     />
+                                    {addErrors.expiryDate && <p className="text-xs text-red-500 mt-1">{addErrors.expiryDate}</p>}
                                 </div>
                             </div>
                         </div>
@@ -1223,6 +1241,7 @@ export default function MarketplacePage() {
                             <Button variant="outline" size="md" onClick={() => {
                                 if (!isCreatingDeal) {
                                     setAddModal(false);
+                                    setAddErrors({});
                                     setDealImage(null);
                                     setImagePreview(null);
                                 }

@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Loader2, CheckCircle, AlertCircle, Eye, EyeOff, Building2, Mail, Phone, MapPin, Shield, GitBranch } from 'lucide-react';
+import { validatePassword, validatePasswordMatch } from '@/lib/validation';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
@@ -40,6 +41,8 @@ function SetupAccountContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+  const [passwordFieldError, setPasswordFieldError] = useState('');
+  const [confirmPasswordFieldError, setConfirmPasswordFieldError] = useState('');
 
   useEffect(() => {
     if (!token) {
@@ -81,12 +84,13 @@ function SetupAccountContent() {
   const handleSubmit = async () => {
     setFormError('');
 
-    if (!hasMinLength || !hasUppercase || !hasLowercase || !hasNumber) {
-      setFormError('Password does not meet all requirements.');
-      return;
-    }
-    if (!passwordsMatch) {
-      setFormError('Passwords do not match.');
+    const pwResult = validatePassword(password);
+    const matchResult = validatePasswordMatch(password, confirmPassword);
+
+    setPasswordFieldError(pwResult.error ?? '');
+    setConfirmPasswordFieldError(matchResult.error ?? '');
+
+    if (!pwResult.valid || !matchResult.valid) {
       return;
     }
 
@@ -265,14 +269,16 @@ function SetupAccountContent() {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                    onChange={e => { setPassword(e.target.value); if (passwordFieldError) setPasswordFieldError(''); }}
+                    onBlur={() => { const r = validatePassword(password); setPasswordFieldError(r.error ?? ''); }}
+                    className={`w-full px-4 py-2.5 border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 ${passwordFieldError ? 'border-red-500' : 'border-gray-300'}`}
                     placeholder="Enter your password"
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
+                {passwordFieldError && <p className="text-xs text-red-500 mt-1">{passwordFieldError}</p>}
               </div>
 
               <div>
@@ -280,10 +286,12 @@ function SetupAccountContent() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={e => { setConfirmPassword(e.target.value); if (confirmPasswordFieldError) setConfirmPasswordFieldError(''); }}
+                  onBlur={() => { const r = validatePasswordMatch(password, confirmPassword); setConfirmPasswordFieldError(r.error ?? ''); }}
+                  className={`w-full px-4 py-2.5 border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500 ${confirmPasswordFieldError ? 'border-red-500' : 'border-gray-300'}`}
                   placeholder="Confirm your password"
                 />
+                {confirmPasswordFieldError && <p className="text-xs text-red-500 mt-1">{confirmPasswordFieldError}</p>}
               </div>
 
               {/* Password Requirements */}

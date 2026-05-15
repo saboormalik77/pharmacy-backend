@@ -11,6 +11,7 @@ import { Search, AlertTriangle, CheckCircle, Save, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils/format';
 import type { NDCProduct } from '@/data/mockNDCProducts';
 import { productsService } from '@/lib/api/services';
+import { validateQuantity, validateCurrency, validateNotExpired, validateRequired } from '@/lib/validation';
 
 export default function CreateListingPage() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function CreateListingPage() {
   const [product, setProduct] = useState<NDCProduct | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   
   // Listing form state
   const [formData, setFormData] = useState({
@@ -121,21 +123,31 @@ export default function CreateListingPage() {
       return;
     }
 
-    // Validate required fields
-    if (!formData.lotNumber || !formData.expirationDate || formData.quantity <= 0) {
-      setError('Please fill in all required fields (lot number, expiration date, and quantity)');
+    // Per-field validation
+    const newErrors: Record<string, string> = {};
+
+    const lotResult = validateRequired(formData.lotNumber);
+    if (!lotResult.valid) newErrors.lotNumber = 'Lot number is required.';
+
+    const expResult = validateNotExpired(formData.expirationDate);
+    if (!expResult.valid) newErrors.expirationDate = expResult.error!;
+
+    const qtyResult = validateQuantity(formData.quantity);
+    if (!qtyResult.valid) newErrors.quantity = qtyResult.error!;
+
+    const priceResult = validateCurrency(formData.pricePerUnit);
+    if (!priceResult.valid) newErrors.pricePerUnit = priceResult.error!;
+    else if (formData.pricePerUnit <= 0) newErrors.pricePerUnit = 'Price per unit must be greater than 0.';
+
+    if (!formData.location.city.trim()) newErrors.city = 'City is required.';
+    if (!formData.location.state.trim()) newErrors.state = 'State is required.';
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
       return;
     }
 
-    if (formData.pricePerUnit <= 0) {
-      setError('Please set a valid price per unit');
-      return;
-    }
-
-    if (!formData.location.city || !formData.location.state) {
-      setError('Please provide location (city and state)');
-      return;
-    }
+    setFieldErrors({});
 
     // Check compliance requirements
     const complianceWarnings: string[] = [];
@@ -257,10 +269,15 @@ export default function CreateListingPage() {
                   </label>
                   <Input
                     value={formData.lotNumber}
-                    onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, lotNumber: e.target.value });
+                      setFieldErrors(prev => ({ ...prev, lotNumber: '' }));
+                    }}
                     placeholder="Enter lot number"
                     required
+                    className={fieldErrors.lotNumber ? 'border-red-400' : ''}
                   />
+                  {fieldErrors.lotNumber && <p className="text-xs text-red-500 mt-1">{fieldErrors.lotNumber}</p>}
                 </div>
 
                 <div>
@@ -270,9 +287,14 @@ export default function CreateListingPage() {
                   <Input
                     type="date"
                     value={formData.expirationDate}
-                    onChange={(e) => setFormData({ ...formData, expirationDate: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, expirationDate: e.target.value });
+                      setFieldErrors(prev => ({ ...prev, expirationDate: '' }));
+                    }}
                     required
+                    className={fieldErrors.expirationDate ? 'border-red-400' : ''}
                   />
+                  {fieldErrors.expirationDate && <p className="text-xs text-red-500 mt-1">{fieldErrors.expirationDate}</p>}
                 </div>
               </div>
 
@@ -284,11 +306,16 @@ export default function CreateListingPage() {
                   <Input
                     type="number"
                     value={formData.quantity}
-                    onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 });
+                      setFieldErrors(prev => ({ ...prev, quantity: '' }));
+                    }}
                     placeholder="0"
                     min="1"
                     required
+                    className={fieldErrors.quantity ? 'border-red-400' : ''}
                   />
+                  {fieldErrors.quantity && <p className="text-xs text-red-500 mt-1">{fieldErrors.quantity}</p>}
                   <p className="text-xs text-muted-foreground mt-1">
                     Unit: {product.packageUnit}
                   </p>
@@ -303,16 +330,20 @@ export default function CreateListingPage() {
                     <Input
                       type="number"
                       value={formData.pricePerUnit}
-                      onChange={(e) => setFormData({ ...formData, pricePerUnit: parseFloat(e.target.value) || 0 })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, pricePerUnit: parseFloat(e.target.value) || 0 });
+                        setFieldErrors(prev => ({ ...prev, pricePerUnit: '' }));
+                      }}
                       placeholder="0.00"
                       min="0"
                       step="0.01"
-                      className="pl-7"
+                      className={`pl-7 ${fieldErrors.pricePerUnit ? 'border-red-400' : ''}`}
                       required
                     />
                   </div>
+                  {fieldErrors.pricePerUnit && <p className="text-xs text-red-500 mt-1">{fieldErrors.pricePerUnit}</p>}
                   <p className="text-xs text-muted-foreground mt-1">
-                    WAC: {formatCurrency(product.wac || 0)} | 
+                    WAC: {formatCurrency(product.wac || 0)} |
                     Discount: {discount.toFixed(1)}%
                   </p>
                 </div>
@@ -338,13 +369,18 @@ export default function CreateListingPage() {
                   </label>
                   <Input
                     value={formData.location.city}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      location: { ...formData.location, city: e.target.value }
-                    })}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        location: { ...formData.location, city: e.target.value }
+                      });
+                      setFieldErrors(prev => ({ ...prev, city: '' }));
+                    }}
                     placeholder="City"
                     required
+                    className={fieldErrors.city ? 'border-red-400' : ''}
                   />
+                  {fieldErrors.city && <p className="text-xs text-red-500 mt-1">{fieldErrors.city}</p>}
                 </div>
 
                 <div>
@@ -353,14 +389,19 @@ export default function CreateListingPage() {
                   </label>
                   <Input
                     value={formData.location.state}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      location: { ...formData.location, state: e.target.value }
-                    })}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        location: { ...formData.location, state: e.target.value }
+                      });
+                      setFieldErrors(prev => ({ ...prev, state: '' }));
+                    }}
                     placeholder="State"
                     maxLength={2}
                     required
+                    className={fieldErrors.state ? 'border-red-400' : ''}
                   />
+                  {fieldErrors.state && <p className="text-xs text-red-500 mt-1">{fieldErrors.state}</p>}
                 </div>
               </div>
 

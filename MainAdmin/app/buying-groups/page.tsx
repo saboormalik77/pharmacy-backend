@@ -7,6 +7,11 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn, formatDate } from '@/lib/utils';
+import {
+  validateEmail, validatePassword, validateName,
+  validateUSPhoneOptional, validateSupabaseURL, validateSupabaseKey,
+  validateDomainOptional, validateHostname, formatPhoneNumber,
+} from '@/lib/validation';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
   fetchBuyingGroups,
@@ -59,6 +64,7 @@ export default function BuyingGroupsPage() {
     supabaseEnabled: false,
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showSupabaseKeys, setShowSupabaseKeys] = useState({ anonKey: false, serviceKey: false });
 
@@ -179,6 +185,7 @@ export default function BuyingGroupsPage() {
       status: 'active', adminEmail: '', adminPassword: '', adminName: '',
       supabaseUrl: '', supabaseAnonKey: '', supabaseServiceRoleKey: '', supabaseEnabled: false,
     });
+    setErrors({});
     setFormError('');
     setShowPassword(false);
     setLocalDomains([]);
@@ -233,8 +240,18 @@ export default function BuyingGroupsPage() {
       setDomainError('Admin hostname is required');
       return;
     }
+    const adminHostnameResult = validateHostname(domainForm.adminHostname);
+    if (!adminHostnameResult.valid) {
+      setDomainError(adminHostnameResult.error!);
+      return;
+    }
     if (!domainForm.pharmacyHostname.trim()) {
       setDomainError('Pharmacy hostname is required');
+      return;
+    }
+    const pharmacyHostnameResult = validateHostname(domainForm.pharmacyHostname);
+    if (!pharmacyHostnameResult.valid) {
+      setDomainError(pharmacyHostnameResult.error!);
       return;
     }
     if (domainForm.adminHostname.trim().toLowerCase() === domainForm.pharmacyHostname.trim().toLowerCase()) {
@@ -282,8 +299,18 @@ export default function BuyingGroupsPage() {
       setLocalDomainError('Admin hostname is required');
       return;
     }
+    const adminHostnameResult = validateHostname(localDomainForm.adminHostname);
+    if (!adminHostnameResult.valid) {
+      setLocalDomainError(adminHostnameResult.error!);
+      return;
+    }
     if (!localDomainForm.pharmacyHostname.trim()) {
       setLocalDomainError('Pharmacy hostname is required');
+      return;
+    }
+    const pharmacyHostnameResult = validateHostname(localDomainForm.pharmacyHostname);
+    if (!pharmacyHostnameResult.valid) {
+      setLocalDomainError(pharmacyHostnameResult.error!);
       return;
     }
     if (localDomainForm.adminHostname.trim().toLowerCase() === localDomainForm.pharmacyHostname.trim().toLowerCase()) {
@@ -319,14 +346,46 @@ export default function BuyingGroupsPage() {
 
   const handleSubmitCreate = async () => {
     setFormError('');
-    if (!formData.name.trim()) {
-      setFormError('Buying group name is required');
+    const newErrors: Record<string, string> = {};
+
+    const nameResult = validateName(formData.name);
+    if (!nameResult.valid) newErrors.name = nameResult.error!;
+
+    if (formData.contactEmail.trim()) {
+      const emailResult = validateEmail(formData.contactEmail);
+      if (!emailResult.valid) newErrors.contactEmail = emailResult.error!;
+    }
+
+    if (formData.contactPhone.trim()) {
+      const phoneResult = validateUSPhoneOptional(formData.contactPhone);
+      if (!phoneResult.valid) newErrors.contactPhone = phoneResult.error!;
+    }
+
+    const adminEmailResult = validateEmail(formData.adminEmail);
+    if (!adminEmailResult.valid) newErrors.adminEmail = adminEmailResult.error!;
+
+    const adminPasswordResult = validatePassword(formData.adminPassword);
+    if (!adminPasswordResult.valid) newErrors.adminPassword = adminPasswordResult.error!;
+
+    const adminNameResult = validateName(formData.adminName);
+    if (!adminNameResult.valid) newErrors.adminName = adminNameResult.error!;
+
+    if (formData.supabaseEnabled) {
+      const urlResult = validateSupabaseURL(formData.supabaseUrl);
+      if (!urlResult.valid) newErrors.supabaseUrl = urlResult.error!;
+
+      const anonResult = validateSupabaseKey(formData.supabaseAnonKey, 'Anon Key');
+      if (!anonResult.valid) newErrors.supabaseAnonKey = anonResult.error!;
+
+      const serviceResult = validateSupabaseKey(formData.supabaseServiceRoleKey, 'Service Role Key');
+      if (!serviceResult.valid) newErrors.supabaseServiceRoleKey = serviceResult.error!;
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
-    if (formData.adminEmail && !formData.adminPassword) {
-      setFormError('Password is required when providing admin email');
-      return;
-    }
+    setErrors({});
 
     setIsSubmitting(true);
     try {
@@ -377,10 +436,37 @@ export default function BuyingGroupsPage() {
   const handleSubmitEdit = async () => {
     setFormError('');
     if (!editingGroup) return;
-    if (!formData.name.trim()) {
-      setFormError('Buying group name is required');
+    const newErrors: Record<string, string> = {};
+
+    const nameResult = validateName(formData.name);
+    if (!nameResult.valid) newErrors.name = nameResult.error!;
+
+    if (formData.contactEmail.trim()) {
+      const emailResult = validateEmail(formData.contactEmail);
+      if (!emailResult.valid) newErrors.contactEmail = emailResult.error!;
+    }
+
+    if (formData.contactPhone.trim()) {
+      const phoneResult = validateUSPhoneOptional(formData.contactPhone);
+      if (!phoneResult.valid) newErrors.contactPhone = phoneResult.error!;
+    }
+
+    if (formData.supabaseEnabled) {
+      const urlResult = validateSupabaseURL(formData.supabaseUrl);
+      if (!urlResult.valid) newErrors.supabaseUrl = urlResult.error!;
+
+      const anonResult = validateSupabaseKey(formData.supabaseAnonKey, 'Anon Key');
+      if (!anonResult.valid) newErrors.supabaseAnonKey = anonResult.error!;
+
+      const serviceResult = validateSupabaseKey(formData.supabaseServiceRoleKey, 'Service Role Key');
+      if (!serviceResult.valid) newErrors.supabaseServiceRoleKey = serviceResult.error!;
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
+    setErrors({});
 
     setIsSubmitting(true);
     try {
@@ -712,11 +798,12 @@ export default function BuyingGroupsPage() {
                   <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Group Name <span className="text-red-500">*</span></label>
                   <input
                     type="text" value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => { setFormData({ ...formData, name: e.target.value }); setErrors(prev => ({ ...prev, name: '' })); }}
                     autoComplete="off"
                     className="w-full px-3 py-2.5 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
                     placeholder="e.g. Northeast Pharmacy Alliance"
                   />
+                  {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -724,21 +811,23 @@ export default function BuyingGroupsPage() {
                     <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Contact Email</label>
                     <input
                       type="email" value={formData.contactEmail}
-                      onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
+                      onChange={(e) => { setFormData({ ...formData, contactEmail: e.target.value }); setErrors(prev => ({ ...prev, contactEmail: '' })); }}
                       autoComplete="off"
                       className="w-full px-3 py-2.5 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
                       placeholder="contact@example.com"
                     />
+                    {errors.contactEmail && <p className="text-xs text-red-500 mt-1">{errors.contactEmail}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Contact Phone</label>
                     <input
                       type="text" value={formData.contactPhone}
-                      onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                      onChange={(e) => { setFormData({ ...formData, contactPhone: formatPhoneNumber(e.target.value) }); setErrors(prev => ({ ...prev, contactPhone: '' })); }}
                       autoComplete="off"
                       className="w-full px-3 py-2.5 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
-                      placeholder="+1 (234) 567-8900"
+                      placeholder="(234) 567-8900"
                     />
+                    {errors.contactPhone && <p className="text-xs text-red-500 mt-1">{errors.contactPhone}</p>}
                   </div>
                 </div>
 
@@ -810,11 +899,12 @@ export default function BuyingGroupsPage() {
                         <input
                           type="url"
                           value={formData.supabaseUrl}
-                          onChange={(e) => setFormData({ ...formData, supabaseUrl: e.target.value })}
+                          onChange={(e) => { setFormData({ ...formData, supabaseUrl: e.target.value }); setErrors(prev => ({ ...prev, supabaseUrl: '' })); }}
                           autoComplete="off"
                           className="w-full px-3 py-2.5 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
                           placeholder="https://your-project.supabase.co"
                         />
+                        {errors.supabaseUrl && <p className="text-xs text-red-500 mt-1">{errors.supabaseUrl}</p>}
                       </div>
 
                       <div>
@@ -823,7 +913,7 @@ export default function BuyingGroupsPage() {
                           <input
                             type={showSupabaseKeys.anonKey ? "text" : "password"}
                             value={formData.supabaseAnonKey}
-                            onChange={(e) => setFormData({ ...formData, supabaseAnonKey: e.target.value })}
+                            onChange={(e) => { setFormData({ ...formData, supabaseAnonKey: e.target.value }); setErrors(prev => ({ ...prev, supabaseAnonKey: '' })); }}
                             autoComplete="off"
                             className="w-full px-3 py-2.5 pr-10 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
                             placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -836,6 +926,7 @@ export default function BuyingGroupsPage() {
                             {showSupabaseKeys.anonKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </button>
                         </div>
+                        {errors.supabaseAnonKey && <p className="text-xs text-red-500 mt-1">{errors.supabaseAnonKey}</p>}
                       </div>
 
                       <div>
@@ -844,7 +935,7 @@ export default function BuyingGroupsPage() {
                           <input
                             type={showSupabaseKeys.serviceKey ? "text" : "password"}
                             value={formData.supabaseServiceRoleKey}
-                            onChange={(e) => setFormData({ ...formData, supabaseServiceRoleKey: e.target.value })}
+                            onChange={(e) => { setFormData({ ...formData, supabaseServiceRoleKey: e.target.value }); setErrors(prev => ({ ...prev, supabaseServiceRoleKey: '' })); }}
                             autoComplete="off"
                             className="w-full px-3 py-2.5 pr-10 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
                             placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -857,6 +948,7 @@ export default function BuyingGroupsPage() {
                             {showSupabaseKeys.serviceKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </button>
                         </div>
+                        {errors.supabaseServiceRoleKey && <p className="text-xs text-red-500 mt-1">{errors.supabaseServiceRoleKey}</p>}
                       </div>
                     </>
                   )}
@@ -986,34 +1078,36 @@ export default function BuyingGroupsPage() {
                         </p>
 
                         <div>
-                          <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Admin Name</label>
+                          <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Admin Name <span className="text-red-500">*</span></label>
                           <input
                             type="text" value={formData.adminName}
-                            onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
+                            onChange={(e) => { setFormData({ ...formData, adminName: e.target.value }); setErrors(prev => ({ ...prev, adminName: '' })); }}
                             autoComplete="off"
                             className="w-full px-3 py-2.5 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
                             placeholder="Admin user display name"
                           />
+                          {errors.adminName && <p className="text-xs text-red-500 mt-1">{errors.adminName}</p>}
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Admin Email</label>
+                            <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Admin Email <span className="text-red-500">*</span></label>
                             <input
                               type="email" value={formData.adminEmail}
-                              onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
+                              onChange={(e) => { setFormData({ ...formData, adminEmail: e.target.value }); setErrors(prev => ({ ...prev, adminEmail: '' })); }}
                               autoComplete="off"
                               className="w-full px-3 py-2.5 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
                               placeholder="admin@buyinggroup.com"
                             />
+                            {errors.adminEmail && <p className="text-xs text-red-500 mt-1">{errors.adminEmail}</p>}
                           </div>
                           <div>
-                            <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Admin Password</label>
+                            <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Admin Password <span className="text-red-500">*</span></label>
                             <div className="relative">
                               <input
                                 type={showPassword ? "text" : "password"}
                                 value={formData.adminPassword}
-                                onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
+                                onChange={(e) => { setFormData({ ...formData, adminPassword: e.target.value }); setErrors(prev => ({ ...prev, adminPassword: '' })); }}
                                 autoComplete="new-password"
                                 className="w-full px-3 py-2.5 pr-10 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
                                 placeholder="Min 8 characters"
@@ -1026,6 +1120,7 @@ export default function BuyingGroupsPage() {
                                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                               </button>
                             </div>
+                            {errors.adminPassword && <p className="text-xs text-red-500 mt-1">{errors.adminPassword}</p>}
                           </div>
                         </div>
                       </div>
@@ -1068,11 +1163,12 @@ export default function BuyingGroupsPage() {
                               <input
                                 type="url"
                                 value={formData.supabaseUrl}
-                                onChange={(e) => setFormData({ ...formData, supabaseUrl: e.target.value })}
+                                onChange={(e) => { setFormData({ ...formData, supabaseUrl: e.target.value }); setErrors(prev => ({ ...prev, supabaseUrl: '' })); }}
                                 autoComplete="off"
                                 className="w-full px-3 py-2.5 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
                                 placeholder="https://your-project.supabase.co"
                               />
+                              {errors.supabaseUrl && <p className="text-xs text-red-500 mt-1">{errors.supabaseUrl}</p>}
                             </div>
 
                             <div>
@@ -1081,7 +1177,7 @@ export default function BuyingGroupsPage() {
                                 <input
                                   type={showSupabaseKeys.anonKey ? "text" : "password"}
                                   value={formData.supabaseAnonKey}
-                                  onChange={(e) => setFormData({ ...formData, supabaseAnonKey: e.target.value })}
+                                  onChange={(e) => { setFormData({ ...formData, supabaseAnonKey: e.target.value }); setErrors(prev => ({ ...prev, supabaseAnonKey: '' })); }}
                                   autoComplete="off"
                                   className="w-full px-3 py-2.5 pr-10 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
                                   placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -1094,6 +1190,7 @@ export default function BuyingGroupsPage() {
                                   {showSupabaseKeys.anonKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                 </button>
                               </div>
+                              {errors.supabaseAnonKey && <p className="text-xs text-red-500 mt-1">{errors.supabaseAnonKey}</p>}
                             </div>
 
                             <div>
@@ -1102,7 +1199,7 @@ export default function BuyingGroupsPage() {
                                 <input
                                   type={showSupabaseKeys.serviceKey ? "text" : "password"}
                                   value={formData.supabaseServiceRoleKey}
-                                  onChange={(e) => setFormData({ ...formData, supabaseServiceRoleKey: e.target.value })}
+                                  onChange={(e) => { setFormData({ ...formData, supabaseServiceRoleKey: e.target.value }); setErrors(prev => ({ ...prev, supabaseServiceRoleKey: '' })); }}
                                   autoComplete="off"
                                   className="w-full px-3 py-2.5 pr-10 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
                                   placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -1115,6 +1212,7 @@ export default function BuyingGroupsPage() {
                                   {showSupabaseKeys.serviceKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                 </button>
                               </div>
+                              {errors.supabaseServiceRoleKey && <p className="text-xs text-red-500 mt-1">{errors.supabaseServiceRoleKey}</p>}
                             </div>
                           </>
                         )}

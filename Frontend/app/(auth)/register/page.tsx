@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
 import { authService } from '@/lib/api/services'
+import { validateNPI, validateDEA, validateUSPhone, formatPhoneNumber, getPasswordStrength, validateZipCode } from '@/lib/validation'
 import { US_STATES } from '@/lib/constants/usStates'
 import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen'
 import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen'
@@ -18,129 +19,6 @@ interface AdminBranding {
   businessName: string | null
 }
 
-// Validation functions
-const validateNPI = (npi: string): { isValid: boolean; error?: string } => {
-  const cleaned = npi.replace(/\D/g, '')
-  if (cleaned.length !== 10) {
-    return { isValid: false, error: 'NPI must be exactly 10 digits' }
-  }
-  if (!/^\d{10}$/.test(cleaned)) {
-    return { isValid: false, error: 'NPI must contain only digits' }
-  }
-  return { isValid: true }
-}
-
-const validateDEA = (dea: string): { isValid: boolean; error?: string } => {
-  const cleaned = dea.replace(/\s/g, '').toUpperCase()
-  if (cleaned.length !== 9) {
-    return { isValid: false, error: 'DEA must be 9 characters (2 letters + 7 digits)' }
-  }
-  
-  // DEA format: 2 letters followed by 7 digits
-  const deaPattern = /^[A-Z]{2}\d{7}$/
-  if (!deaPattern.test(cleaned)) {
-    return { isValid: false, error: 'DEA format: 2 letters followed by 7 digits (e.g., AB1234563)' }
-  }
-  
-  // DEA checksum validation
-  const firstLetter = cleaned[0]
-  const secondLetter = cleaned[1]
-  const digits = cleaned.slice(2)
-  
-  // First letter must be A-Z (excluding I, O, S, Z)
-  const invalidFirstLetters = ['I', 'O', 'S', 'Z']
-  if (invalidFirstLetters.includes(firstLetter)) {
-    return { isValid: false, error: 'DEA first letter cannot be I, O, S, or Z' }
-  }
-  
-  // Calculate checksum using standard DEA algorithm:
-  // 1. Sum of letter values (A=0, B=1, ..., Z=25)
-  // 2. Sum of 1st, 3rd, and 5th digits
-  // 3. Sum of 2nd, 4th, and 6th digits multiplied by 2
-  // 4. Total mod 10 should equal the 7th digit (checksum digit)
-  const firstLetterValue = firstLetter.charCodeAt(0) - 65 // A=0, B=1, etc.
-  const secondLetterValue = secondLetter.charCodeAt(0) - 65
-  
-  // Sum of 1st, 3rd, and 5th digits (positions 0, 2, 4)
-  const oddPositionSum = parseInt(digits[0]) + parseInt(digits[2]) + parseInt(digits[4])
-  
-  // Sum of 2nd, 4th, and 6th digits (positions 1, 3, 5) multiplied by 2
-  const evenPositionSum = (parseInt(digits[1]) + parseInt(digits[3]) + parseInt(digits[5])) * 2
-  
-  // Total sum
-  const totalSum = firstLetterValue + secondLetterValue + oddPositionSum + evenPositionSum
-  
-  // The last digit of the total should match the 7th digit (checksum)
-  const checkDigit = totalSum % 10
-  const lastDigit = parseInt(digits[6])
-  
-  if (checkDigit !== lastDigit) {
-    return { isValid: false, error: 'Invalid DEA number (checksum validation failed)' }
-  }
-  
-  return { isValid: true }
-}
-
-const formatPhoneNumber = (value: string): string => {
-  const cleaned = value.replace(/\D/g, '')
-  if (cleaned.length === 0) return ''
-  if (cleaned.length <= 3) return `(${cleaned}`
-  if (cleaned.length <= 6) return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`
-  return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`
-}
-
-const validatePhone = (phone: string): { isValid: boolean; error?: string } => {
-  const cleaned = phone.replace(/\D/g, '')
-  if (cleaned.length !== 10) {
-    return { isValid: false, error: 'Phone number must be 10 digits' }
-  }
-  // Check if it's a valid US phone number (not starting with 0 or 1)
-  if (cleaned[0] === '0' || cleaned[0] === '1') {
-    return { isValid: false, error: 'Invalid US phone number format' }
-  }
-  return { isValid: true }
-}
-
-const getPasswordStrength = (password: string): { strength: 'weak' | 'medium' | 'strong'; score: number; suggestions: string[] } => {
-  const suggestions: string[] = []
-  let score = 0
-  
-  if (password.length < 8) {
-    suggestions.push('At least 8 characters')
-  } else {
-    score++
-  }
-  
-  if (!/[a-z]/.test(password)) {
-    suggestions.push('One lowercase letter')
-  } else {
-    score++
-  }
-  
-  if (!/[A-Z]/.test(password)) {
-    suggestions.push('One uppercase letter')
-  } else {
-    score++
-  }
-  
-  if (!/\d/.test(password)) {
-    suggestions.push('One number')
-  } else {
-    score++
-  }
-  
-  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-    suggestions.push('One special character')
-  } else {
-    score++
-  }
-  
-  let strength: 'weak' | 'medium' | 'strong' = 'weak'
-  if (score >= 4) strength = 'strong'
-  else if (score >= 3) strength = 'medium'
-  
-  return { strength, score, suggestions }
-}
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -165,6 +43,7 @@ export default function RegisterPage() {
   const [npiError, setNpiError] = useState('')
   const [deaError, setDeaError] = useState('')
   const [phoneError, setPhoneError] = useState('')
+  const [zipError, setZipError] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [confirmPasswordError, setConfirmPasswordError] = useState('')
   
@@ -217,7 +96,7 @@ export default function RegisterPage() {
     setNpiNumber(cleaned)
     if (cleaned.length > 0) {
       const validation = validateNPI(cleaned)
-      setNpiError(validation.isValid ? '' : validation.error || '')
+      setNpiError(validation.valid ? '' : validation.error || '')
     } else {
       setNpiError('')
     }
@@ -228,7 +107,7 @@ export default function RegisterPage() {
     setDeaNumber(cleaned)
     if (cleaned.length > 0) {
       const validation = validateDEA(cleaned)
-      setDeaError(validation.isValid ? '' : validation.error || '')
+      setDeaError(validation.valid ? '' : validation.error || '')
     } else {
       setDeaError('')
     }
@@ -239,8 +118,8 @@ export default function RegisterPage() {
     setPhone(formatted)
     const cleaned = value.replace(/\D/g, '')
     if (cleaned.length > 0) {
-      const validation = validatePhone(formatted)
-      setPhoneError(validation.isValid ? '' : validation.error || '')
+      const validation = validateUSPhone(formatted)
+      setPhoneError(validation.valid ? '' : validation.error || '')
     } else {
       setPhoneError('')
     }
@@ -283,29 +162,41 @@ export default function RegisterPage() {
     if (step === 1) {
       const npiValidation = validateNPI(npiNumber)
       const deaValidation = validateDEA(deaNumber)
-      if (!npiValidation.isValid) {
+      if (!npiValidation.valid) {
         setNpiError(npiValidation.error || '')
       }
-      if (!deaValidation.isValid) {
+      if (!deaValidation.valid) {
         setDeaError(deaValidation.error || '')
       }
-      return npiValidation.isValid && deaValidation.isValid
+      return npiValidation.valid && deaValidation.valid
     } else if (step === 2) {
-      const phoneValidation = validatePhone(phone)
-      if (!phoneValidation.isValid) {
+      const phoneValidation = validateUSPhone(phone)
+      if (!phoneValidation.valid) {
         setPhoneError(phoneValidation.error || '')
       }
-      return phoneValidation.isValid
+      // Only validate ZIP if it has been entered (it's optional)
+      let zipValid = true
+      if (physicalAddress.zip) {
+        const zipValidation = validateZipCode(physicalAddress.zip)
+        if (!zipValidation.valid) {
+          setZipError(zipValidation.error || '')
+          zipValid = false
+        } else {
+          setZipError('')
+        }
+      }
+      return phoneValidation.valid && zipValid
     } else if (step === 3) {
       const strength = getPasswordStrength(password)
-      const hasError = strength.suggestions.length > 0 || password.length < 8 || password !== confirmPassword
-      if (strength.suggestions.length > 0 || password.length < 8) {
+      const hasPasswordError = strength.suggestions.length > 0 || password.length < 8
+      const hasMatchError = password !== confirmPassword
+      if (hasPasswordError) {
         setPasswordError('Password does not meet all requirements')
       }
-      if (password !== confirmPassword) {
+      if (hasMatchError) {
         setConfirmPasswordError('Passwords do not match')
       }
-      return !hasError
+      return !hasPasswordError && !hasMatchError
     }
     return true
   }
@@ -581,8 +472,19 @@ export default function RegisterPage() {
                         id="zip"
                         placeholder="62701"
                         value={physicalAddress.zip}
-                        onChange={(e) => setPhysicalAddress({ ...physicalAddress, zip: e.target.value })}
+                        onChange={(e) => {
+                          setPhysicalAddress({ ...physicalAddress, zip: e.target.value })
+                          if (zipError) setZipError('')
+                        }}
+                        onBlur={() => {
+                          if (physicalAddress.zip) {
+                            const r = validateZipCode(physicalAddress.zip)
+                            setZipError(r.error ?? '')
+                          }
+                        }}
+                        className={zipError ? 'border-red-500' : ''}
                       />
+                      {zipError && <p className="text-xs text-red-500 mt-1">{zipError}</p>}
                     </div>
                   </div>
                 </div>
@@ -647,22 +549,22 @@ export default function RegisterPage() {
                         <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div
                             className={`h-full transition-all ${
-                              passwordStrength.strength === 'strong'
+                              passwordStrength.level === 'strong'
                                 ? 'bg-green-500 w-full'
-                                : passwordStrength.strength === 'medium'
+                                : passwordStrength.level === 'medium'
                                 ? 'bg-yellow-500 w-2/3'
                                 : 'bg-red-500 w-1/3'
                             }`}
                           />
                         </div>
                         <span className={`text-xs font-medium ${
-                          passwordStrength.strength === 'strong'
+                          passwordStrength.level === 'strong'
                             ? 'text-green-600'
-                            : passwordStrength.strength === 'medium'
+                            : passwordStrength.level === 'medium'
                             ? 'text-yellow-600'
                             : 'text-red-600'
                         }`}>
-                          {passwordStrength.strength.toUpperCase()}
+                          {passwordStrength.level.toUpperCase()}
                         </span>
                       </div>
                       

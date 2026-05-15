@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { fetchSettings, updateWarehouseAddress, updateBusinessSettings, uploadLogo, resetPassword } from '@/lib/store/settingsSlice';
+import { validateUSPhoneOptional, validateZipCodeOptional, validatePassword, validatePasswordMatch, formatPhoneNumber } from '@/lib/validation';
 
 export default function SettingsPage() {
     const dispatch = useAppDispatch();
@@ -45,6 +46,8 @@ export default function SettingsPage() {
         newPassword: '',
         confirmPassword: '',
     });
+
+    const [warehouseErrors, setWarehouseErrors] = useState<Record<string, string>>({});
 
     const [showPasswords, setShowPasswords] = useState({
         currentPassword: false,
@@ -125,6 +128,13 @@ export default function SettingsPage() {
     };
 
     const handleSaveWarehouseAddress = async () => {
+        const newErrors: Record<string, string> = {};
+        const phoneResult = validateUSPhoneOptional(warehouseForm.warehousePhone);
+        if (!phoneResult.valid) newErrors.warehousePhone = phoneResult.error!;
+        const zipResult = validateZipCodeOptional(warehouseForm.warehouseZip);
+        if (!zipResult.valid) newErrors.warehouseZip = zipResult.error!;
+        setWarehouseErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) return;
         try {
             const result = await dispatch(updateWarehouseAddress(warehouseForm));
             if (updateWarehouseAddress.fulfilled.match(result)) {
@@ -140,11 +150,11 @@ export default function SettingsPage() {
     const validatePasswordForm = (): boolean => {
         const errors = { currentPassword: '', newPassword: '', confirmPassword: '' };
         let isValid = true;
-        if (!passwordForm.currentPassword) { errors.currentPassword = 'Current password is required'; isValid = false; }
-        if (!passwordForm.newPassword) { errors.newPassword = 'New password is required'; isValid = false; }
-        else if (passwordForm.newPassword.length < 8) { errors.newPassword = 'Password must be at least 8 characters'; isValid = false; }
-        if (!passwordForm.confirmPassword) { errors.confirmPassword = 'Please confirm your password'; isValid = false; }
-        else if (passwordForm.newPassword !== passwordForm.confirmPassword) { errors.confirmPassword = 'Passwords do not match'; isValid = false; }
+        if (!passwordForm.currentPassword) { errors.currentPassword = 'Current password is required.'; isValid = false; }
+        const pwResult = validatePassword(passwordForm.newPassword);
+        if (!pwResult.valid) { errors.newPassword = pwResult.error!; isValid = false; }
+        const matchResult = validatePasswordMatch(passwordForm.newPassword, passwordForm.confirmPassword);
+        if (!matchResult.valid) { errors.confirmPassword = matchResult.error!; isValid = false; }
         setPasswordErrors(errors);
         return isValid;
     };
@@ -476,12 +486,13 @@ export default function SettingsPage() {
                                     <input
                                         type="text"
                                         value={warehouseForm.warehouseZip}
-                                        onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseZip: e.target.value.replace(/\D/g, '').slice(0, 5) })}
+                                        onChange={(e) => { setWarehouseForm({ ...warehouseForm, warehouseZip: e.target.value.replace(/\D/g, '').slice(0, 5) }); setWarehouseErrors(prev => ({ ...prev, warehouseZip: '' })); }}
                                         placeholder="75001"
                                         maxLength={5}
                                         className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                         disabled={isUpdating}
                                     />
+                                    {warehouseErrors.warehouseZip && <p className="text-xs text-red-500 mt-1">{warehouseErrors.warehouseZip}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
@@ -502,13 +513,14 @@ export default function SettingsPage() {
                                     type="tel"
                                     value={warehouseForm.warehousePhone}
                                     onChange={(e) => {
-                                        const cleaned = e.target.value.replace(/\D/g, '').slice(0, 10);
-                                        setWarehouseForm({ ...warehouseForm, warehousePhone: cleaned });
+                                        setWarehouseForm({ ...warehouseForm, warehousePhone: formatPhoneNumber(e.target.value) });
+                                        setWarehouseErrors(prev => ({ ...prev, warehousePhone: '' }));
                                     }}
-                                    placeholder="4695557890"
+                                    placeholder="(469) 555-7890"
                                     className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent md:w-1/2"
                                     disabled={isUpdating}
                                 />
+                                {warehouseErrors.warehousePhone && <p className="text-xs text-red-500 mt-1">{warehouseErrors.warehousePhone}</p>}
                             </div>
 
                             <div className="flex justify-end pt-2">

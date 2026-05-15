@@ -25,6 +25,7 @@ import {
 } from '@/lib/store/processorsSlice';
 import { Processor, ProcessorCreatePayload, ProcessorUpdatePayload, AssignedStore } from '@/lib/types';
 import { useDebounce } from '@/lib/hooks/useDebounce';
+import { validateEmail, validatePassword, validateUSPhoneOptional, formatPhoneNumber } from '@/lib/validation';
 
 // ── Available Permissions ──────────────────────────────────────
 
@@ -81,6 +82,8 @@ export default function ProcessorsPage() {
     });
     const [editForm, setEditForm] = useState<ProcessorUpdatePayload & { permissions?: string[] }>({});
     const [showPassword, setShowPassword] = useState(false);
+    const [addErrors, setAddErrors] = useState<Record<string, string>>({});
+    const [editErrors, setEditErrors] = useState<Record<string, string>>({});
 
     // Pharmacies for assignment
     const [availablePharmacies, setAvailablePharmacies] = useState<{ id: string; name: string; isAssigned?: boolean }[]>([]);
@@ -149,12 +152,17 @@ export default function ProcessorsPage() {
     };
 
     const handleAdd = async () => {
-        if (!newProcessor.name.trim()) { showToast('Name is required', 'error'); return; }
-        if (!newProcessor.email.trim()) { showToast('Email is required', 'error'); return; }
-        if (!newProcessor.password || newProcessor.password.length < 8) {
-            showToast('Password must be at least 8 characters', 'error'); return;
-        }
-        
+        const newErrors: Record<string, string> = {};
+        if (!newProcessor.name.trim()) newErrors.name = 'Name is required.';
+        const emailResult = validateEmail(newProcessor.email);
+        if (!emailResult.valid) newErrors.email = emailResult.error!;
+        const pwResult = validatePassword(newProcessor.password || '');
+        if (!pwResult.valid) newErrors.password = pwResult.error!;
+        const phoneResult = validateUSPhoneOptional(newProcessor.phone || '');
+        if (!phoneResult.valid) newErrors.phone = phoneResult.error!;
+        setAddErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) return;
+
         try {
             const result = await dispatch(createProcessor(newProcessor));
             if (createProcessor.fulfilled.match(result)) {
@@ -169,6 +177,7 @@ export default function ProcessorsPage() {
                 }
                 showToast('Processor created successfully!');
                 setAddModal(false);
+                setAddErrors({});
                 setNewProcessor({ name: '', email: '', password: '', phone: '', notes: '', permissions: [] });
                 setShowPassword(false);
                 refresh();
@@ -250,8 +259,19 @@ export default function ProcessorsPage() {
 
     const handleUpdate = async () => {
         if (!editModal) return;
-        if (!editForm.name?.trim()) { showToast('Name is required', 'error'); return; }
-        
+        const newErrors: Record<string, string> = {};
+        if (!editForm.name?.trim()) newErrors.name = 'Name is required.';
+        if (editForm.email !== undefined) {
+            const r = validateEmail(editForm.email || '');
+            if (!r.valid) newErrors.email = r.error!;
+        }
+        if (editForm.phone !== undefined) {
+            const r = validateUSPhoneOptional(editForm.phone || '');
+            if (!r.valid) newErrors.phone = r.error!;
+        }
+        setEditErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) return;
+
         try {
             // Update processor basic info
             const result = await dispatch(updateProcessor({ id: editModal.id, payload: editForm }));
@@ -265,6 +285,7 @@ export default function ProcessorsPage() {
                 }
                 showToast('Processor updated successfully!');
                 setEditModal(null);
+                setEditErrors({});
                 refresh();
             } else {
                 showToast(result.payload as string || 'Failed to update processor', 'error');
@@ -704,21 +725,23 @@ export default function ProcessorsPage() {
                                     <input
                                         type="text"
                                         value={newProcessor.name}
-                                        onChange={e => setNewProcessor({ ...newProcessor, name: e.target.value })}
+                                        onChange={e => { setNewProcessor({ ...newProcessor, name: e.target.value }); setAddErrors(prev => ({ ...prev, name: '' })); }}
                                         className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                         placeholder="Full name"
                                         autoComplete="off"
                                     />
+                                    {addErrors.name && <p className="text-xs text-red-500 mt-1">{addErrors.name}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
                                     <input
                                         type="tel"
                                         value={newProcessor.phone}
-                                        onChange={e => setNewProcessor({ ...newProcessor, phone: e.target.value })}
+                                        onChange={e => { setNewProcessor({ ...newProcessor, phone: formatPhoneNumber(e.target.value) }); setAddErrors(prev => ({ ...prev, phone: '' })); }}
                                         className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                         placeholder="(555) 000-0000"
                                     />
+                                    {addErrors.phone && <p className="text-xs text-red-500 mt-1">{addErrors.phone}</p>}
                                 </div>
                             </div>
                             <div>
@@ -726,12 +749,13 @@ export default function ProcessorsPage() {
                                 <input
                                     type="email"
                                     value={newProcessor.email}
-                                    onChange={e => setNewProcessor({ ...newProcessor, email: e.target.value })}
+                                    onChange={e => { setNewProcessor({ ...newProcessor, email: e.target.value }); setAddErrors(prev => ({ ...prev, email: '' })); }}
                                     className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                     placeholder="email@example.com"
                                     autoComplete="off"
                                 />
-                                <p className="text-xs text-gray-500 mt-1.5">Used as the login email for the admin panel.</p>
+                                {addErrors.email && <p className="text-xs text-red-500 mt-1">{addErrors.email}</p>}
+                                {!addErrors.email && <p className="text-xs text-gray-500 mt-1.5">Used as the login email for the admin panel.</p>}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Password <span className="text-red-500">*</span></label>
@@ -739,7 +763,7 @@ export default function ProcessorsPage() {
                                     <input
                                         type={showPassword ? 'text' : 'password'}
                                         value={newProcessor.password}
-                                        onChange={e => setNewProcessor({ ...newProcessor, password: e.target.value })}
+                                        onChange={e => { setNewProcessor({ ...newProcessor, password: e.target.value }); setAddErrors(prev => ({ ...prev, password: '' })); }}
                                         className="w-full px-3.5 py-2.5 pr-12 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                         placeholder="Min. 8 characters"
                                         autoComplete="new-password"
@@ -752,7 +776,8 @@ export default function ProcessorsPage() {
                                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">Processor will use this to log in. Min. 8 characters.</p>
+                                {addErrors.password && <p className="text-xs text-red-500 mt-1">{addErrors.password}</p>}
+                                {!addErrors.password && <p className="text-xs text-gray-500 mt-1">Processor will use this to log in. Min. 8 characters.</p>}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Notes</label>
@@ -794,18 +819,20 @@ export default function ProcessorsPage() {
                                     <input
                                         type="text"
                                         value={editForm.name || ''}
-                                        onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                                        onChange={e => { setEditForm({ ...editForm, name: e.target.value }); setEditErrors(prev => ({ ...prev, name: '' })); }}
                                         className="w-full px-3 py-2 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
+                                    {editErrors.name && <p className="text-xs text-red-500 mt-1">{editErrors.name}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
                                     <input
                                         type="tel"
                                         value={editForm.phone || ''}
-                                        onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
+                                        onChange={e => { setEditForm({ ...editForm, phone: formatPhoneNumber(e.target.value) }); setEditErrors(prev => ({ ...prev, phone: '' })); }}
                                         className="w-full px-3 py-2 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
+                                    {editErrors.phone && <p className="text-xs text-red-500 mt-1">{editErrors.phone}</p>}
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
@@ -814,9 +841,10 @@ export default function ProcessorsPage() {
                                     <input
                                         type="email"
                                         value={editForm.email || ''}
-                                        onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                                        onChange={e => { setEditForm({ ...editForm, email: e.target.value }); setEditErrors(prev => ({ ...prev, email: '' })); }}
                                         className="w-full px-3 py-2 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
+                                    {editErrors.email && <p className="text-xs text-red-500 mt-1">{editErrors.email}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
