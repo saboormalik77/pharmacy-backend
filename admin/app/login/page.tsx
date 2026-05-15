@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { loginUser, clearError } from '@/lib/store/authSlice';
 import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen';
 import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen';
+import { validateEmail, validateRequired } from '@/lib/validation';
 
 interface AdminBranding {
   logoUrl: string | null;
@@ -31,6 +32,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [branding, setBranding] = useState<AdminBranding>({ logoUrl: null, businessName: null });
   const [tenantError, setTenantError] = useState<string | null>(null);
@@ -173,6 +175,17 @@ export default function LoginPage() {
     e.stopPropagation();
     setError('');
 
+    const newFieldErrors: Record<string, string> = {};
+    const emailResult = validateEmail(email);
+    if (!emailResult.valid) newFieldErrors.email = emailResult.error!;
+    const passwordResult = validateRequired(password);
+    if (!passwordResult.valid) newFieldErrors.password = 'Password is required.';
+    if (Object.keys(newFieldErrors).length > 0) {
+      setFieldErrors(newFieldErrors);
+      return;
+    }
+    setFieldErrors({});
+
     try {
       const result = await dispatch(loginUser({ email, password }));
       
@@ -233,13 +246,14 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  onChange={(e) => { setEmail(e.target.value); setFieldErrors(prev => ({ ...prev, email: '' })); }}
+                  className={`w-full pl-10 pr-4 py-2.5 border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent ${fieldErrors.email ? 'border-red-500' : 'border-gray-300'}`}
                   placeholder="admin@buyinggroup.com"
                   required
                   autoComplete="email"
                 />
               </div>
+              {fieldErrors.email && <p className="text-xs text-red-500 mt-1">{fieldErrors.email}</p>}
             </div>
 
             {/* Password Field */}
@@ -253,8 +267,8 @@ export default function LoginPage() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  onChange={(e) => { setPassword(e.target.value); setFieldErrors(prev => ({ ...prev, password: '' })); }}
+                  className={`w-full pl-10 pr-12 py-2.5 border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent ${fieldErrors.password ? 'border-red-500' : 'border-gray-300'}`}
                   placeholder="Enter your password"
                   required
                   autoComplete="current-password"
@@ -272,6 +286,7 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
+              {fieldErrors.password && <p className="text-xs text-red-500 mt-1">{fieldErrors.password}</p>}
             </div>
 
             {/* Remember Me & Forgot Password */}

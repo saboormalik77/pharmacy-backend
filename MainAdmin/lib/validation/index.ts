@@ -33,7 +33,10 @@ export function validateEmail(value: string): ValidationResult {
   const trimmed = value?.trim().toLowerCase() ?? '';
   if (!trimmed) return { valid: false, error: 'Email is required.' };
   if (trimmed.length > 254) return { valid: false, error: 'Email must be 254 characters or fewer.' };
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed))
+  if (/\.\./.test(trimmed))
+    return { valid: false, error: 'Enter a valid email address.' };
+  // Strict: alphanumeric-bounded local part, proper domain labels, letters-only TLD (2–63 chars)
+  if (!/^[a-zA-Z0-9]([a-zA-Z0-9._%+\-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,63}$/.test(trimmed))
     return { valid: false, error: 'Enter a valid email address.' };
   return { valid: true, error: null };
 }

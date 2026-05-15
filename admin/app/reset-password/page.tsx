@@ -7,6 +7,7 @@ import { Lock, Shield, ArrowLeft, CheckCircle, AlertTriangle } from 'lucide-reac
 import { Button } from '@/components/ui/Button';
 import { useAppDispatch } from '@/lib/store/hooks';
 import { verifyResetToken, resetPassword } from '@/lib/store/authSlice';
+import { validatePassword, validatePasswordMatch } from '@/lib/validation';
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -16,6 +17,7 @@ function ResetPasswordForm() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isVerifying, setIsVerifying] = useState(true);
@@ -92,16 +94,16 @@ function ResetPasswordForm() {
     e.preventDefault();
     setError('');
 
-    // Validate passwords
-    if (newPassword.length < 8) {
-      setError('Password must be at least 8 characters long');
+    const newFieldErrors: Record<string, string> = {};
+    const passwordResult = validatePassword(newPassword);
+    if (!passwordResult.valid) newFieldErrors.newPassword = passwordResult.error!;
+    const confirmResult = validatePasswordMatch(newPassword, confirmPassword);
+    if (!confirmResult.valid) newFieldErrors.confirmPassword = confirmResult.error!;
+    if (Object.keys(newFieldErrors).length > 0) {
+      setFieldErrors(newFieldErrors);
       return;
     }
-
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
+    setFieldErrors({});
 
     if (!accessToken) {
       setError('Reset token not found. Please request a new password reset.');
@@ -231,18 +233,18 @@ function ResetPasswordForm() {
               id="newPassword"
               type="password"
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              onChange={(e) => { setNewPassword(e.target.value); setFieldErrors(prev => ({ ...prev, newPassword: '' })); }}
+              className={`w-full pl-10 pr-4 py-2.5 border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${fieldErrors.newPassword ? 'border-red-500' : 'border-gray-300'}`}
               placeholder="Enter new password"
               required
-              minLength={8}
               autoComplete="new-password"
               autoFocus
             />
           </div>
-          <p className="mt-1 text-xs text-gray-500">
-            Must be at least 8 characters long
-          </p>
+          {fieldErrors.newPassword
+            ? <p className="mt-1 text-xs text-red-500">{fieldErrors.newPassword}</p>
+            : <p className="mt-1 text-xs text-gray-500">Min 8 chars, uppercase, lowercase, number, special character</p>
+          }
         </div>
 
         {/* Confirm Password Field */}
@@ -256,14 +258,14 @@ function ResetPasswordForm() {
               id="confirmPassword"
               type="password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              onChange={(e) => { setConfirmPassword(e.target.value); setFieldErrors(prev => ({ ...prev, confirmPassword: '' })); }}
+              className={`w-full pl-10 pr-4 py-2.5 border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${fieldErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'}`}
               placeholder="Confirm new password"
               required
-              minLength={8}
               autoComplete="new-password"
             />
           </div>
+          {fieldErrors.confirmPassword && <p className="mt-1 text-xs text-red-500">{fieldErrors.confirmPassword}</p>}
         </div>
 
         {/* Submit Button */}

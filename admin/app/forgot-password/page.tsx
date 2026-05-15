@@ -6,17 +6,27 @@ import { Mail, Shield, ArrowLeft, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAppDispatch } from '@/lib/store/hooks';
 import { forgotPassword } from '@/lib/store/authSlice';
+import { validateEmail } from '@/lib/validation';
 
 export default function ForgotPasswordPage() {
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+    setEmailError('');
+
+    const emailResult = validateEmail(email);
+    if (!emailResult.valid) {
+      setEmailError(emailResult.error!);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -118,14 +128,15 @@ export default function ForgotPasswordPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  onChange={(e) => { setEmail(e.target.value); setEmailError(''); }}
+                  className={`w-full pl-10 pr-4 py-2.5 border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${emailError ? 'border-red-500' : 'border-gray-300'}`}
                   placeholder="admin@buyinggroup.com"
                   required
                   autoComplete="email"
                   autoFocus
                 />
               </div>
+              {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
             </div>
 
             {/* Submit Button */}
