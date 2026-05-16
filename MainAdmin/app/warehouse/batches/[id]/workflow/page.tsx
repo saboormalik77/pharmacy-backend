@@ -314,45 +314,18 @@ export default function BatchWorkflowPage() {
         addToast('RA request step completed.', 'success');
     };
 
-    // Step complete if persisted workflow row says so OR batch/debit-memos prove it (same rules everywhere).
-    const isStepComplete = (stepKey: string) => {
-        if (!batch) return false;
-        const ws = workflowState;
-
-        switch (stepKey) {
-            case 'cardinal_generated':
-                return Boolean(ws?.cardinalGenerated || batch.cardinalFileGenerated);
-            case 'cardinal_sent':
-                return Boolean(ws?.cardinalSent || batch.cardinalSubmittedAt);
-            case 'debit_memos_created':
-                return Boolean(ws?.debitMemosCreated || batch.totalDebitMemos > 0);
-            case 'ra_requested': {
-                const allRasSent =
-                    batchMemos.length > 0 &&
-                    batchMemos.every(
-                        memo =>
-                            memo.raRequestedAt ||
-                            memo.raStatus === 'requested' ||
-                            memo.raStatus === 'received' ||
-                            memo.raStatus === 'shipped'
-                    );
-                return Boolean(ws?.raRequested || allRasSent);
-            }
-            default:
-                return false;
-        }
-    };
-
+    // Persisted batch_workflow_steps is the source of truth (same as admin stepper modal).
     const getActiveStepIndex = () => {
-        if (!batch) return 0;
+        if (!workflowState) return 0;
         for (let i = 0; i < WORKFLOW_STEPS.length; i++) {
-            if (!isStepComplete(WORKFLOW_STEPS[i].key)) return i;
+            if (!workflowState[WORKFLOW_STEPS[i].stateKey]) return i;
         }
         return WORKFLOW_STEPS.length;
     };
 
     const activeStepIndex = getActiveStepIndex();
-    const allDone = activeStepIndex === WORKFLOW_STEPS.length;
+    const allDone = workflowState !== null && activeStepIndex === WORKFLOW_STEPS.length;
+    const workflowReady = workflowState !== null;
 
     const loadingGenerateCardinal = generatingCardinalDownloads;
     const loadingSendCardinal = completingWorkflowStep === 'cardinal_sent';
@@ -375,6 +348,15 @@ export default function BatchWorkflowPage() {
                 <button onClick={() => router.back()} className="mt-4 inline-flex items-center gap-1 text-sm text-[var(--on-primary-container)] hover:text-[var(--on-surface)]">
                     <ArrowLeft className="w-4 h-4" /> Go Back
                 </button>
+            </div>
+        );
+    }
+
+    if (!workflowReady) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+                <p className="text-sm text-[var(--on-surface-variant)]">Loading workflow progress…</p>
             </div>
         );
     }
@@ -420,7 +402,7 @@ export default function BatchWorkflowPage() {
                 )}
                 <div className="flex items-center gap-0">
                     {WORKFLOW_STEPS.map((step, idx) => {
-                        const done = isStepComplete(step.key);
+                        const done = workflowState[step.stateKey];
                         const isLast = idx === WORKFLOW_STEPS.length - 1;
                         return (
                             <div key={step.key} className="flex items-center flex-1">
@@ -450,7 +432,7 @@ export default function BatchWorkflowPage() {
             {/* Steps list */}
             <div className="space-y-3">
                 {WORKFLOW_STEPS.map((step, idx) => {
-                    const done = isStepComplete(step.key);
+                    const done = workflowState[step.stateKey];
                     const isActive = idx === activeStepIndex && !allDone;
                     const isLocked = idx > activeStepIndex && !allDone;
                     const Icon = step.icon;
@@ -571,39 +553,14 @@ export default function BatchWorkflowPage() {
                                                                 ))}
                                                             </div>
                                                             <div className="flex items-center gap-2 flex-wrap">
-                                                                {workflowState?.debitMemosCreated ? (
-                                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] border font-medium"
-                                                                          style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}>
-                                                                        <CheckCircle className="w-3.5 h-3.5" />
-                                                                        Step Manually Completed
-                                                                    </span>
-                                                                ) : batch && batch.totalDebitMemos > 0 ? (
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] border font-medium"
-                                                                              style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}>
-                                                                            <CheckCircle className="w-3.5 h-3.5" />
-                                                                            Memos Created (Auto-Complete)
-                                                                        </span>
-                                                                        <button
-                                                                            onClick={handleConfirmDebitMemos}
-                                                                            disabled={loadingDebitMemosStep}
-                                                                            className="inline-flex items-center gap-1.5 px-2 py-1 text-[10px] rounded-[4px] border transition-colors font-medium hover:bg-[var(--surface-container-low)] disabled:opacity-50"
-                                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
-                                                                        >
-                                                                            {loadingDebitMemosStep ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
-                                                                            Mark Complete
-                                                                        </button>
-                                                                    </div>
-                                                                ) : (
-                                                                    <button
-                                                                        onClick={handleConfirmDebitMemos}
-                                                                        disabled={loadingDebitMemosStep}
-                                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--primary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
-                                                                    >
-                                                                        {loadingDebitMemosStep ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
-                                                                        Confirm &amp; Next Step
-                                                                    </button>
-                                                                )}
+                                                                <button
+                                                                    onClick={handleConfirmDebitMemos}
+                                                                    disabled={loadingDebitMemosStep}
+                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--primary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
+                                                                >
+                                                                    {loadingDebitMemosStep ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                                                    Confirm &amp; Next Step
+                                                                </button>
                                                                 <a
                                                                     href={`/warehouse/debit-memos?batchId=${batchId}`}
                                                                     target="_blank"

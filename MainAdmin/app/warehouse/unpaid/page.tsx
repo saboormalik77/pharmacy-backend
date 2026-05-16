@@ -181,12 +181,34 @@ export default function UnpaidMemosPage() {
         setIsAmountAutoCalculated(false);
     };
 
+    const closePaymentModal = () => {
+        setPaymentMemo(null);
+        setCreditMemoFile(null);
+        setExistingCreditMemoUrl(null);
+        setIsAnalyzingCreditMemo(false);
+        setIsAmountAutoCalculated(false);
+    };
+
+    const handleCreditMemoFileSelect = (file: File | null) => {
+        if (isAnalyzingCreditMemo) return;
+        if (file && file.type !== 'application/pdf') {
+            addToast('Only PDF files are allowed', 'error');
+            return;
+        }
+        setCreditMemoFile(file);
+        setIsAmountAutoCalculated(false);
+        if (file && !isEditMode) {
+            setIsAnalyzingCreditMemo(true);
+        }
+    };
+
     // Analyze credit memo when file is uploaded (for new payments only)
     useEffect(() => {
         if (!creditMemoFile || isEditMode || !paymentMemo) return;
 
+        let cancelled = false;
+
         const analyzeCreditMemo = async () => {
-            setIsAnalyzingCreditMemo(true);
             setIsAmountAutoCalculated(false);
 
             try {
@@ -204,31 +226,37 @@ export default function UnpaidMemosPage() {
                         errorMessage?: string | null;
                     };
                 }>(`/admin/debit-memos/${paymentMemo.id}/analyze-credit-memo`, formData);
-                
+
+                if (cancelled) return;
+
                 if (result.data.totalAmount != null && result.data.totalAmount > 0) {
                     setPaymentAmount(result.data.totalAmount.toFixed(2));
                     setIsAmountAutoCalculated(true);
                     addToast(`Amount auto-calculated: ${fmt(result.data.totalAmount)} (${result.data.lineItemsCount} NDCs matched)`, 'success');
                 } else {
-                    setPaymentAmount('0'); // Reset to 0 if no amount calculated
+                    setPaymentAmount('0');
                     addToast(`Credit memo uploaded successfully. No NDC matches were found automatically — please enter the payment amount manually.`, 'warning');
                     setIsAmountAutoCalculated(false);
                 }
             } catch (error: any) {
+                if (cancelled) return;
                 console.error('Credit memo analysis failed:', error);
-                setPaymentAmount('0'); // Reset to 0 on error
+                setPaymentAmount('0');
                 addToast(error.message || 'Failed to analyze credit memo. Please enter amount manually.', 'error');
                 setIsAmountAutoCalculated(false);
             } finally {
-                setIsAnalyzingCreditMemo(false);
+                if (!cancelled) {
+                    setIsAnalyzingCreditMemo(false);
+                }
             }
         };
 
         analyzeCreditMemo();
+        return () => { cancelled = true; };
     }, [creditMemoFile, isEditMode, paymentMemo, addToast]);
 
     const handleRecordPayment = async () => {
-        if (!paymentMemo) return;
+        if (!paymentMemo || isAnalyzingCreditMemo) return;
         const amt = parseFloat(paymentAmount);
         if (isNaN(amt) || amt <= 0) { 
             addToast('Please enter a valid amount received (greater than 0)', 'error'); 
@@ -246,9 +274,7 @@ export default function UnpaidMemosPage() {
             }));
             if (updatePayment.fulfilled.match(result)) {
                 addToast(`Payment updated for ${paymentMemo.memoNumber}`, 'success');
-                setPaymentMemo(null);
-                setCreditMemoFile(null);
-                setExistingCreditMemoUrl(null);
+                closePaymentModal();
                 dispatch(fetchPaidMemos({ search: debouncedPaidSearch || undefined, destination: paidDestination || undefined, page: paidPage, limit: PAGE_SIZE }));
             }
         } else {
@@ -263,8 +289,7 @@ export default function UnpaidMemosPage() {
             }));
             if (recordPayment.fulfilled.match(result)) {
                 addToast(`Payment of ${fmt(amt)} recorded for ${paymentMemo.memoNumber}`, 'success');
-                setPaymentMemo(null);
-                setCreditMemoFile(null);
+                closePaymentModal();
                 dispatch(fetchUnpaidGroupedByReturn({
                     search: debouncedSearch || undefined,
                     destination: destination || undefined,
@@ -1048,7 +1073,7 @@ export default function UnpaidMemosPage() {
                                 <h3 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{isEditMode ? 'Update Payment' : 'Record Payment'}</h3>
                                 <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>{paymentMemo.memoNumber} — {paymentMemo.labelerName || 'Unknown'}</p>
                             </div>
-                            <button onClick={() => { setPaymentMemo(null); setExistingCreditMemoUrl(null); }} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
+                            <button onClick={closePaymentModal} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
                         </div>
 
                         <div className="px-4 py-3 space-y-3">
@@ -1115,6 +1140,12 @@ export default function UnpaidMemosPage() {
                                         Upload credit memo — amount will be auto-calculated or you can enter it manually
                                     </p>
                                 )}
+                                {isAnalyzingCreditMemo && (
+                                    <p className="text-[10px] mt-1 flex items-center gap-1" style={{ color: 'var(--secondary)' }}>
+                                        <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                                        Analyzing credit memo...
+                                    </p>
+                                )}
                                 {!isEditMode && creditMemoFile && !isAmountAutoCalculated && !isAnalyzingCreditMemo && (
                                     <p className="text-[10px] mt-1 flex items-center gap-1" style={{ color: 'var(--tertiary)' }}>
                                         <Info className="w-2.5 h-2.5" />
@@ -1153,28 +1184,36 @@ export default function UnpaidMemosPage() {
                                     </div>
                                 )}
                                 <label
-                                    className="flex items-center gap-3 w-full px-3 py-2.5 border-2 border-dashed rounded cursor-pointer transition-colors"
+                                    className={`flex items-center gap-3 w-full px-3 py-2.5 border-2 border-dashed rounded transition-colors ${
+                                        isAnalyzingCreditMemo || isActionLoading ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'
+                                    }`}
                                     style={{
-                                        borderColor: creditMemoFile ? 'var(--secondary)' : 'var(--outline-variant)',
-                                        backgroundColor: creditMemoFile ? 'var(--secondary-container)' : 'var(--surface-container-low)',
+                                        borderColor: isAnalyzingCreditMemo || creditMemoFile ? 'var(--secondary)' : 'var(--outline-variant)',
+                                        backgroundColor: isAnalyzingCreditMemo || creditMemoFile ? 'var(--secondary-container)' : 'var(--surface-container-low)',
                                     }}
+                                    aria-busy={isAnalyzingCreditMemo}
                                 >
                                     <input
                                         type="file"
                                         accept="application/pdf"
                                         className="hidden"
+                                        disabled={isAnalyzingCreditMemo || isActionLoading}
                                         onChange={e => {
-                                            const f = e.target.files?.[0] || null;
-                                            if (f && f.type !== 'application/pdf') {
-                                                addToast('Only PDF files are allowed', 'error');
-                                                return;
-                                            }
-                                            setCreditMemoFile(f);
-                                            // Reset auto-calculation state when a new file is selected
-                                            setIsAmountAutoCalculated(false);
+                                            handleCreditMemoFileSelect(e.target.files?.[0] || null);
+                                            e.target.value = '';
                                         }}
                                     />
-                                    {creditMemoFile ? (
+                                    {isAnalyzingCreditMemo ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 flex-shrink-0 animate-spin" style={{ color: 'var(--secondary)' }} />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-medium" style={{ color: 'var(--on-secondary-container)' }}>Analyzing credit memo...</p>
+                                                <p className="text-[10px]" style={{ color: 'var(--on-secondary-container)' }}>
+                                                    {creditMemoFile?.name ?? 'Processing file'}
+                                                </p>
+                                            </div>
+                                        </>
+                                    ) : creditMemoFile ? (
                                         <>
                                             <FileText className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--secondary)' }} />
                                             <div className="flex-1 min-w-0">
@@ -1183,17 +1222,18 @@ export default function UnpaidMemosPage() {
                                             </div>
                                             <button
                                                 type="button"
-                                                onClick={e => { 
-                                                    e.preventDefault(); 
+                                                disabled={isAnalyzingCreditMemo || isActionLoading}
+                                                onClick={e => {
+                                                    e.preventDefault();
                                                     setCreditMemoFile(null);
                                                     setIsAmountAutoCalculated(false);
-                                                    setPaymentAmount('0'); // Reset amount when file is removed
+                                                    setPaymentAmount('0');
                                                 }}
-                                                className="flex-shrink-0 transition-colors"
+                                                className="flex-shrink-0 transition-colors disabled:opacity-40"
                                                 style={{ color: 'var(--outline)' }}
-                                            > 
+                                            >
                                                 <X className="w-3.5 h-3.5" />
-                                            </button> 
+                                            </button>
                                         </>
                                     ) : (
                                         <>
@@ -1210,7 +1250,7 @@ export default function UnpaidMemosPage() {
 
                         <div className="flex justify-end gap-2 px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <button
-                                onClick={() => { setPaymentMemo(null); setCreditMemoFile(null); setExistingCreditMemoUrl(null); }}
+                                onClick={closePaymentModal}
                                 className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40"
                                 style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)', backgroundColor: 'var(--surface-container-lowest)' }}
                             >

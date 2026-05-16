@@ -23,11 +23,11 @@ BEGIN
     );
   END IF;
   
-  -- Check if email already exists
-  IF EXISTS (SELECT 1 FROM admin WHERE email = p_email) THEN
+  IF public.email_is_in_use(LOWER(TRIM(p_email))) THEN
     RETURN jsonb_build_object(
       'error', true,
-      'message', 'Email already exists'
+      'code', 409,
+      'message', 'An account with this email already exists'
     );
   END IF;
 
@@ -64,7 +64,7 @@ BEGIN
     is_active, buying_group_id, created_at, updated_at
   )
   VALUES (
-    p_email, p_password_hash, p_name, p_role,
+    LOWER(TRIM(p_email)), p_password_hash, p_name, p_role,
     COALESCE(p_permissions, '[]'::jsonb),
     true, v_buying_group_id, NOW(), NOW()
   )

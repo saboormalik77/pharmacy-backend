@@ -430,12 +430,12 @@ const batchSlice = createSlice({
                 state.isLoading = true;
                 state.error = null;
                 const incomingBatchId = action.meta.arg;
-                // Only clear workflow when switching batches (or initial load with no batch yet).
-                // Same-batch refetches (e.g. after RA send) must NOT clear — that briefly made every
-                // isStepComplete() depend only on batch fallbacks and reset the stepper to step 1.
+                // Only clear workflow when navigating to a different batch. Same-batch refetches
+                // (e.g. after RA send) and initial page load must keep workflowState so refresh
+                // shows the persisted completed stepper instead of batch-field fallbacks.
                 const switchingBatch =
                     state.currentBatch != null && state.currentBatch.id !== incomingBatchId;
-                if (switchingBatch || !state.currentBatch) {
+                if (switchingBatch) {
                     state.workflowState = null;
                 }
             })

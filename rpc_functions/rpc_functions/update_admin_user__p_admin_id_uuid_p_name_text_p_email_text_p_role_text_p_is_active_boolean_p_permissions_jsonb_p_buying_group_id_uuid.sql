@@ -12,7 +12,6 @@ CREATE OR REPLACE FUNCTION public.update_admin_user(p_admin_id uuid, p_name text
 AS $function$
 DECLARE
   v_admin JSONB;
-  v_existing_email TEXT;
   v_current_role TEXT;
   v_effective_role TEXT;
 BEGIN
@@ -33,15 +32,12 @@ BEGIN
     );
   END IF;
   
-  -- Check email uniqueness if email is being updated
-  IF p_email IS NOT NULL THEN
-    SELECT email INTO v_existing_email FROM admin WHERE email = p_email AND id != p_admin_id;
-    IF v_existing_email IS NOT NULL THEN
-      RETURN jsonb_build_object(
-        'error', true,
-        'message', 'Email already exists'
-      );
-    END IF;
+  IF p_email IS NOT NULL AND public.email_is_in_use(LOWER(TRIM(p_email)), p_exclude_admin_id => p_admin_id) THEN
+    RETURN jsonb_build_object(
+      'error', true,
+      'code', 409,
+      'message', 'An account with this email already exists'
+    );
   END IF;
 
   -- Validate buying_group_id if provided
@@ -61,7 +57,7 @@ BEGIN
   UPDATE admin
   SET
     name = COALESCE(p_name, name),
-    email = COALESCE(p_email, email),
+    email = COALESCE(LOWER(TRIM(p_email)), email),
     role = COALESCE(p_role, role),
     is_active = COALESCE(p_is_active, is_active),
     permissions = COALESCE(p_permissions, permissions),

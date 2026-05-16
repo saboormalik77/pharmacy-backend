@@ -157,7 +157,7 @@ export default function RATrackingPage() {
     });
     const [groupPickupLoading, setGroupPickupLoading] = useState(false);
     const [groupPickupConfirmation, setGroupPickupConfirmation] = useState('');
-    const [printGroupLabelLoading, setPrintGroupLabelLoading] = useState(false);
+    const [printGroupLabelLoading, setPrintGroupLabelLoading] = useState<string | null>(null);
     
     // Schedule pickup state
     const [pickupForm, setPickupForm] = useState({
@@ -172,13 +172,17 @@ export default function RATrackingPage() {
     const [printAllPackageLabelsLoading, setPrintAllPackageLabelsLoading] = useState(false);
     const [printSinglePackageLabelLoading, setPrintSinglePackageLabelLoading] = useState<string | null>(null);
 
-    const printDebitMemoLabel = async (memoId: string) => {
-        setPrintLabelLoading(memoId);
+    const printDebitMemoLabel = async (memo: DebitMemo) => {
+        setPrintLabelLoading(memo.id);
         try {
             const { cookieUtils } = await import('@/lib/utils/cookies');
             const token = cookieUtils.getAuthToken();
             const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-            const res = await fetch(`${baseUrl}/admin/debit-memos/${encodeURIComponent(memoId)}/shipping-label`, {
+            if (memo.shipmentGroupId) {
+                await printGroupLabels(memo.shipmentGroupId, { skipLoadingState: true });
+                return;
+            }
+            const res = await fetch(`${baseUrl}/admin/debit-memos/${encodeURIComponent(memo.id)}/shipping-label`, {
                 headers: { Authorization: `Bearer ${token}`, Accept: 'text/html' },
             });
             if (!res.ok) {
@@ -196,12 +200,13 @@ export default function RATrackingPage() {
             }
         } catch (e: any) {
             addToast(e.message || 'Failed to print label', 'error');
+        } finally {
+            setPrintLabelLoading(null);
         }
-        setPrintLabelLoading(null);
     };
 
     const printShipmentGroupLabel = async (groupId: string) => {
-        setPrintGroupLabelLoading(true);
+        setPrintGroupLabelLoading(groupId);
         try {
             const { cookieUtils } = await import('@/lib/utils/cookies');
             const token = cookieUtils.getAuthToken();
@@ -224,12 +229,13 @@ export default function RATrackingPage() {
             }
         } catch (e: any) {
             addToast(e.message || 'Failed to print group label', 'error');
+        } finally {
+            setPrintGroupLabelLoading(null);
         }
-        setPrintGroupLabelLoading(false);
     };
 
     const printAllFedexLabels = async (groupId: string) => {
-        setPrintGroupLabelLoading(true);
+        setPrintGroupLabelLoading(groupId);
         try {
             const { cookieUtils } = await import('@/lib/utils/cookies');
             const token = cookieUtils.getAuthToken();
@@ -251,12 +257,14 @@ export default function RATrackingPage() {
             }
         } catch (e: any) {
             addToast(e.message || 'Failed to print FedEx labels', 'error');
+        } finally {
+            setPrintGroupLabelLoading(null);
         }
-        setPrintGroupLabelLoading(false);
     };
 
     const printSingleFedexLabel = async (groupId: string, packageNumber: number) => {
-        setPrintGroupLabelLoading(true);
+        const loadingKey = `${groupId}:pkg:${packageNumber}`;
+        setPrintGroupLabelLoading(loadingKey);
         try {
             const { cookieUtils } = await import('@/lib/utils/cookies');
             const token = cookieUtils.getAuthToken();
@@ -279,13 +287,64 @@ export default function RATrackingPage() {
             }
         } catch (e: any) {
             addToast(e.message || 'Failed to print FedEx label', 'error');
+        } finally {
+            setPrintGroupLabelLoading(null);
         }
-        setPrintGroupLabelLoading(false);
     };
 
-    const addToast = useCallback((msg: string, type: Toast['type']) => {
-        setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
-    }, []);
+    const printGroupLabels = async (
+        groupId: string,
+        options?: { skipLoadingState?: boolean }
+    ) => {
+        if (!options?.skipLoadingState) setPrintGroupLabelLoading(groupId);
+        try {
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            const token = cookieUtils.getAuthToken();
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            const headers = { Authorization: `Bearer ${token}`, Accept: 'text/html' };
+
+            let res = await fetch(
+                `${baseUrl}/admin/shipment-groups/${encodeURIComponent(groupId)}/fedex-labels/print-all`,
+                { headers }
+            );
+            if (!res.ok) {
+                res = await fetch(
+                    `${baseUrl}/admin/shipment-groups/${encodeURIComponent(groupId)}/shipping-label`,
+                    { headers }
+                );
+            }
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ message: 'Print failed' }));
+                throw new Error(err.message || 'Print failed');
+            }
+
+            const htmlContent = await res.text();
+            const isFedexPdfPrintPage = htmlContent.includes('FedEx Shipping Labels Ready');
+            const isPackingSlipOnly =
+                htmlContent.includes('GROUP SHIPMENT —') && !isFedexPdfPrintPage;
+            if (isPackingSlipOnly) {
+                addToast(
+                    'No FedEx PDF labels are saved for this group (common for older shipments). Showing address slip only. Create a new FedEx group shipment to store printable labels.',
+                    'warning'
+                );
+            }
+
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(htmlContent);
+                printWindow.document.close();
+                if (isPackingSlipOnly) {
+                    printWindow.onload = () => { setTimeout(() => printWindow.print(), 500); };
+                }
+            } else {
+                throw new Error('Unable to open print window. Please check popup blockers.');
+            }
+        } catch (e: any) {
+            addToast(e.message || 'Failed to print group labels', 'error');
+        } finally {
+            if (!options?.skipLoadingState) setPrintGroupLabelLoading(null);
+        }
+    };
 
     const loadData = useCallback(() => {
         dispatch(fetchRATracking({
@@ -727,7 +786,7 @@ export default function RATrackingPage() {
                                                     )}
                                                     {eff === 'shipped' && memo.outboundTracking && (
                                                         <button
-                                                            onClick={e => { e.stopPropagation(); printDebitMemoLabel(memo.id); }}
+                                                            onClick={e => { e.stopPropagation(); printDebitMemoLabel(memo); }}
                                                             disabled={printLabelLoading === memo.id}
                                                             title="Print shipping label"
                                                             className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 transition-colors whitespace-nowrap disabled:opacity-50"
@@ -833,11 +892,11 @@ export default function RATrackingPage() {
                                                         <td className="px-3 py-1.5 text-right">
                                                             <button
                                                                 type="button"
-                                                                onClick={() => printShipmentGroupLabel(g.id)}
-                                                                disabled={printGroupLabelLoading}
+                                                                onClick={() => printGroupLabels(g.id)}
+                                                                disabled={printGroupLabelLoading === g.id}
                                                                 className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 disabled:opacity-50"
                                                             >
-                                                                {printGroupLabelLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                                {printGroupLabelLoading === g.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
                                                                 Print label
                                                             </button>
                                                         </td>
@@ -1170,10 +1229,10 @@ export default function RATrackingPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => printAllFedexLabels(groupShipGroupId)}
-                                                disabled={printGroupLabelLoading}
+                                                disabled={printGroupLabelLoading === groupShipGroupId}
                                                 className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 disabled:opacity-50"
                                             >
-                                                {printGroupLabelLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                {printGroupLabelLoading === groupShipGroupId ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
                                                 Print Labels
                                             </button>
                                         </div>
@@ -1187,11 +1246,11 @@ export default function RATrackingPage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => printSingleFedexLabel(groupShipGroupId, i + 1)}
-                                                        disabled={printGroupLabelLoading}
+                                                        disabled={printGroupLabelLoading === `${groupShipGroupId}:pkg:${i + 1}`}
                                                         className="flex items-center justify-center w-7 h-7 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 disabled:opacity-50"
                                                         title={`Print label for package ${i + 1}`}
                                                     >
-                                                        {printGroupLabelLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                        {printGroupLabelLoading === `${groupShipGroupId}:pkg:${i + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
                                                     </button>
                                                 </div>
                                             ))}
@@ -1313,7 +1372,7 @@ export default function RATrackingPage() {
                                             <p className="text-sm font-semibold text-gray-800">Package Tracking Numbers:</p>
                                             {selectedMemo && (
                                                 <button
-                                                    onClick={() => printDebitMemoLabel(selectedMemo.id)}
+                                                    onClick={() => printDebitMemoLabel(selectedMemo)}
                                                     disabled={printLabelLoading === selectedMemo.id}
                                                     className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
                                                     title="Print shipping label"
@@ -1334,7 +1393,7 @@ export default function RATrackingPage() {
                                                     </div>
                                                     {selectedMemo && (
                                                         <button
-                                                            onClick={() => printDebitMemoLabel(selectedMemo.id)}
+                                                            onClick={() => printDebitMemoLabel(selectedMemo)}
                                                             disabled={printLabelLoading === selectedMemo.id}
                                                             className="flex items-center justify-center w-7 h-7 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
                                                             title="Print shipping label"

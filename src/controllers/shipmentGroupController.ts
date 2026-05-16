@@ -5,6 +5,11 @@ import { supabaseAdmin } from '../config/supabase';
 import { generateBarcode } from '../services/barcodeService';
 import * as shipmentGroupService from '../services/shipmentGroupService';
 import { getWarehouseAddressFromTable } from '../utils/warehouseAddress';
+import {
+  parseShipmentGroupFedexLabels,
+  buildFedexLabelsPrintHtml,
+} from '../utils/shipmentGroupFedexLabels';
+import { isFedExSandbox } from '../services/fedexService';
 
 // ============================================================
 // GET /api/admin/shipment-groups/shipped
@@ -77,6 +82,28 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
     const { id } = req.params;
 
     if (!supabaseAdmin) throw new AppError('Supabase admin client not configured', 500);
+
+    // FedEx API group shipments store PDF labels on the group — return those instead of the
+    // internal HTML "packing slip" used for manual tracking-only shipments.
+    const { data: groupRow, error: groupRowErr } = await supabaseAdmin
+      .from('shipment_groups')
+      .select('id, fedex_labels, outbound_tracking, fedex_shipment_id')
+      .eq('id', id)
+      .single();
+
+    if (!groupRowErr && groupRow) {
+      const fedexLabels = parseShipmentGroupFedexLabels(groupRow.fedex_labels);
+      if (fedexLabels) {
+        const html = buildFedexLabelsPrintHtml(groupRow, fedexLabels, {
+          fedExSandbox: isFedExSandbox(),
+        });
+        res.set({
+          'Content-Type': 'text/html; charset=utf-8',
+          'Content-Disposition': `inline; filename="fedex-labels-${groupRow.id}.html"`,
+        });
+        return res.send(html);
+      }
+    }
 
     const details = await shipmentGroupService.getShipmentGroupDetails(id);
     const group = details.group;
@@ -294,29 +321,20 @@ export const downloadShipmentGroupFedexLabelHandler = catchAsync(
       throw new AppError('No FedEx labels found for this shipment group', 404);
     }
 
-    const labels = typeof group.fedex_labels === 'string'
-      ? JSON.parse(group.fedex_labels)
-      : group.fedex_labels;
-
-    // Debug: log what labels are stored
-    console.log('Stored labels for group:', {
-      groupId: id,
-      packageNumber,
-      availableKeys: Object.keys(labels),
-      labelSizes: Object.entries(labels).map(([k, v]) => `${k}: ${(v as string)?.length || 0} chars`),
-    });
+    const labels = parseShipmentGroupFedexLabels(group.fedex_labels);
+    if (!labels) {
+      throw new AppError('No FedEx labels found for this shipment group', 404);
+    }
 
     const key = `package${packageNumber}`;
     const labelBase64 = labels[key];
     if (!labelBase64) {
       throw new AppError(`No label found for package ${packageNumber}. Available: ${Object.keys(labels).join(', ')}`, 404);
     }
-    
-    console.log(`Returning label for ${key}, size: ${labelBase64.length} chars`);
 
     // If format=print, return HTML page that embeds the PDF for printing
     if (format === 'print') {
-      const totalLabels = Object.keys(labels).filter(k => labels[k]).length;
+      const totalLabels = Object.keys(labels).length;
       const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -376,104 +394,14 @@ export const printAllShipmentGroupFedexLabelsHandler = catchAsync(
       throw new AppError('Shipment group not found', 404);
     }
 
-    if (!group.fedex_labels) {
+    const labels = parseShipmentGroupFedexLabels(group.fedex_labels);
+    if (!labels) {
       throw new AppError('No FedEx labels found for this shipment group', 404);
     }
 
-    const labels = typeof group.fedex_labels === 'string'
-      ? JSON.parse(group.fedex_labels)
-      : group.fedex_labels;
-
-    const labelEntries = Object.entries(labels).filter(([, val]) => val);
-    if (labelEntries.length === 0) {
-      throw new AppError('No labels available to print', 404);
-    }
-
-    // Generate HTML with embedded PDF labels using embed tags (better print support than iframes)
-    const labelPages = labelEntries.map(([key, base64], i) => {
-      const pkgNum = key.replace('package', '');
-      return `
-        <div class="label-page" id="page-${i}">
-          <div class="label-header">FedEx Label - Package ${pkgNum} of ${labelEntries.length}</div>
-          <embed src="data:application/pdf;base64,${base64}" type="application/pdf" class="label-embed" />
-        </div>
-      `;
-    }).join('\n');
-
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>FedEx Labels - ${group.outbound_tracking || group.id}</title>
-<style>
-  @page { margin: 0; size: 4in 6in; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: Arial, Helvetica, sans-serif; background: #fff; }
-  .label-page { 
-    width: 4in; 
-    height: 6in; 
-    page-break-after: always; 
-    position: relative;
-    margin: 0 auto 20px;
-    border: 1px solid #ccc;
-    background: #fff;
-  }
-  .label-page:last-child { page-break-after: auto; }
-  .label-header { 
-    text-align: center; 
-    font-size: 10pt; 
-    padding: 6px; 
-    background: #f5f5f5; 
-    border-bottom: 1px solid #ddd;
-    font-weight: bold;
-  }
-  .label-embed { 
-    width: 100%; 
-    height: calc(6in - 30px); 
-    border: none; 
-  }
-  .print-info {
-    text-align: center;
-    padding: 20px;
-    background: #e8f5e9;
-    margin-bottom: 20px;
-    border-radius: 4px;
-  }
-  .print-info h2 { margin: 0 0 10px; color: #2e7d32; }
-  .print-info p { margin: 0; color: #555; }
-  .print-btn {
-    display: inline-block;
-    margin-top: 15px;
-    padding: 10px 30px;
-    background: #1976d2;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  .print-btn:hover { background: #1565c0; }
-  @media print {
-    .print-info { display: none; }
-    .label-page { margin: 0; border: none; }
-    .label-header { display: none; }
-    .label-embed { height: 6in; }
-  }
-</style>
-</head>
-<body>
-<div class="print-info">
-  <h2>FedEx Shipping Labels Ready</h2>
-  <p>Tracking: <strong>${group.outbound_tracking || 'N/A'}</strong> | Total Labels: <strong>${labelEntries.length}</strong></p>
-  <button class="print-btn" onclick="window.print()">Print All Labels</button>
-</div>
-${labelPages}
-<script>
-  // Auto-print after a delay to allow PDFs to load
-  setTimeout(function() { window.print(); }, 1500);
-</script>
-</body>
-</html>`;
+    const html = buildFedexLabelsPrintHtml(group, labels, {
+      fedExSandbox: isFedExSandbox(),
+    });
 
     res.set({
       'Content-Type': 'text/html; charset=utf-8',
@@ -570,6 +498,7 @@ export const createGroupFedexShipmentHandler = catchAsync(
         memos: result.memos,
         shipment: result.shipment,
         labels: result.labels,
+        fedExTestMode: isFedExSandbox(),
       },
     });
   }

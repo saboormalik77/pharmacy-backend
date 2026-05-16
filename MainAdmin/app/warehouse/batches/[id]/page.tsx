@@ -264,28 +264,15 @@ export default function BatchDetailPage() {
         }
     };
 
-    // Workflow completion from batch + debit memos (same rules as /workflow page).
-    // Do not require workflowState — it loads in a second request and caused "Continue Workflow"
-    // to flash before fetchBatchWorkflow returned. Optional workflow flags still merge when loaded.
+    // Match /workflow page: batch_workflow_steps is the source of truth once loaded.
     const isWorkflowComplete = () => {
-        if (!batch) return false;
-
-        const cardinalComplete = Boolean(workflowState?.cardinalGenerated || batch.cardinalFileGenerated);
-        const cardinalSent = Boolean(workflowState?.cardinalSent || batch.cardinalSubmittedAt);
-        const debitMemosCreated = Boolean(workflowState?.debitMemosCreated || batch.totalDebitMemos > 0);
-
-        const allRasSent =
-            batchMemos.length > 0 &&
-            batchMemos.every(
-                memo =>
-                    memo.raRequestedAt ||
-                    memo.raStatus === 'requested' ||
-                    memo.raStatus === 'received' ||
-                    memo.raStatus === 'shipped'
-            );
-        const raComplete = Boolean(workflowState?.raRequested || allRasSent);
-
-        return cardinalComplete && cardinalSent && debitMemosCreated && raComplete;
+        if (!workflowState) return false;
+        return (
+            workflowState.cardinalGenerated &&
+            workflowState.cardinalSent &&
+            workflowState.debitMemosCreated &&
+            workflowState.raRequested
+        );
     };
 
     // ─────────────────────────────────────────────────────────

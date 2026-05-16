@@ -39,16 +39,8 @@ BEGIN
     RETURN jsonb_build_object('error', true, 'code', 400, 'message', 'Email is required');
   END IF;
 
-  IF EXISTS (SELECT 1 FROM pharmacy WHERE email = LOWER(TRIM(p_email))) THEN
-    RETURN jsonb_build_object('error', true, 'code', 409, 'message', 'A pharmacy with this email already exists');
-  END IF;
-  IF EXISTS (SELECT 1 FROM pharmacy_branch_invites
-             WHERE email = LOWER(TRIM(p_email)) AND status = 'pending' AND expires_at > NOW()) THEN
-    RETURN jsonb_build_object('error', true, 'code', 409, 'message', 'A pending branch invitation already exists for this email');
-  END IF;
-  IF EXISTS (SELECT 1 FROM pharmacy_invites
-             WHERE email = LOWER(TRIM(p_email)) AND status = 'pending' AND expires_at > NOW()) THEN
-    RETURN jsonb_build_object('error', true, 'code', 409, 'message', 'A pending pharmacy invitation already exists for this email');
+  IF public.email_is_in_use(LOWER(TRIM(p_email))) THEN
+    RETURN jsonb_build_object('error', true, 'code', 409, 'message', 'An account with this email already exists');
   END IF;
 
   IF p_service_type NOT IN ('full_service', 'self_service') THEN

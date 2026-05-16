@@ -114,6 +114,7 @@ export type GroupFedexShipmentPayload = {
         packages: { trackingNumber: string; hasLabel: boolean }[];
     };
     labels: Record<string, string>;
+    fedExTestMode?: boolean;
 };
 
 export const createGroupFedexShipment = createAsyncThunk<

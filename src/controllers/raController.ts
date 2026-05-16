@@ -220,6 +220,7 @@ export const createDebitMemoFedexShipmentHandler = catchAsync(
           })),
         },
         labels: labelsMap,
+        fedExTestMode: fedexService.isFedExSandbox(),
       },
     });
   }

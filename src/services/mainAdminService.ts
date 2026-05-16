@@ -333,7 +333,7 @@ export const createBuyingGroup = async (params: {
   if (error) throw new AppError(`Failed to create buying group: ${error.message}`, 500);
 
   const result = data as any;
-  if (result?.error) throw new AppError(result.message, 400);
+  if (result?.error) throw new AppError(result.message, result.code || 400);
 
   return result;
 };
@@ -369,7 +369,7 @@ export const updateBuyingGroup = async (groupId: string, params: {
   if (error) throw new AppError(`Failed to update buying group: ${error.message}`, 500);
 
   const result = data as any;
-  if (result?.error) throw new AppError(result.message, 400);
+  if (result?.error) throw new AppError(result.message, result.code || 400);
 
   return result;
 };
@@ -382,7 +382,7 @@ export const deleteBuyingGroup = async (groupId: string) => {
   if (error) throw new AppError(`Failed to delete buying group: ${error.message}`, 500);
 
   const result = data as any;
-  if (result?.error) throw new AppError(result.message, 400);
+  if (result?.error) throw new AppError(result.message, result.code || 400);
 
   return result;
 };
@@ -422,7 +422,7 @@ export const upsertBuyingGroupDomain = async (
   if (error) throw new AppError(`Failed to save domain: ${error.message}`, 500);
 
   const result = data as any;
-  if (result?.error) throw new AppError(result.message, 400);
+  if (result?.error) throw new AppError(result.message, result.code || 400);
 
   // Clear tenant cache so new domain config takes effect immediately
   const { clearTenantCache } = await import('./tenantService');

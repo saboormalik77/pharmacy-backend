@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../utils/appError';
 import bcrypt from 'bcryptjs';
+import { assertEmailAvailable } from './emailUniquenessService';
 
 // ============================================================
 // Interfaces
@@ -236,23 +237,7 @@ export const createProcessor = async (
 
   const email = input.email.toLowerCase().trim();
 
-  const { data: existingProcessor } = await sb
-    .from('processors')
-    .select('id')
-    .eq('email', email)
-    .maybeSingle();
-  if (existingProcessor) {
-    throw new AppError('A processor with this email already exists', 409);
-  }
-
-  const { data: existingAdmin } = await sb
-    .from('admin')
-    .select('id')
-    .eq('email', email)
-    .maybeSingle();
-  if (existingAdmin) {
-    throw new AppError('An admin user with this email already exists', 409);
-  }
+  await assertEmailAvailable(sb, email);
 
   const passwordHash = await bcrypt.hash(input.password, 10);
 
@@ -332,15 +317,15 @@ export const updateProcessor = async (
   }
 
   if (dbUpdates.email) {
-    const { data: existing } = await sb
+    const { data: proc } = await sb
       .from('processors')
-      .select('id')
-      .eq('email', dbUpdates.email)
-      .neq('id', processorId)
+      .select('admin_user_id')
+      .eq('id', processorId)
       .maybeSingle();
-    if (existing) {
-      throw new AppError('A processor with this email already exists', 409);
-    }
+    await assertEmailAvailable(sb, dbUpdates.email, {
+      processorId,
+      adminId: proc?.admin_user_id ?? undefined,
+    });
   }
 
   let updateQuery = sb

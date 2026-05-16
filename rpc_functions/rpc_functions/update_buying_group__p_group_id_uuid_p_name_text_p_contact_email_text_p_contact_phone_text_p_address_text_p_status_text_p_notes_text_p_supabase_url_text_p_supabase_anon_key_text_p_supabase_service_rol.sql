@@ -28,14 +28,14 @@ BEGIN
     END IF;
   END IF;
 
-  IF p_contact_email IS NOT NULL AND EXISTS (SELECT 1 FROM admin WHERE email = p_contact_email AND id != p_group_id) THEN
-    RETURN jsonb_build_object('error', true, 'message', 'Email already exists');
+  IF p_contact_email IS NOT NULL AND public.email_is_in_use(LOWER(TRIM(p_contact_email)), p_exclude_admin_id => p_group_id) THEN
+    RETURN jsonb_build_object('error', true, 'code', 409, 'message', 'An account with this email already exists');
   END IF;
 
   UPDATE admin
   SET
     name          = COALESCE(p_name, name),
-    email         = COALESCE(p_contact_email, email),
+    email         = COALESCE(LOWER(TRIM(p_contact_email)), email),
     contact_phone = CASE WHEN p_contact_phone IS NOT NULL THEN p_contact_phone ELSE contact_phone END,
     address       = CASE WHEN p_address IS NOT NULL THEN p_address ELSE address END,
     notes         = CASE WHEN p_notes IS NOT NULL THEN p_notes ELSE notes END,

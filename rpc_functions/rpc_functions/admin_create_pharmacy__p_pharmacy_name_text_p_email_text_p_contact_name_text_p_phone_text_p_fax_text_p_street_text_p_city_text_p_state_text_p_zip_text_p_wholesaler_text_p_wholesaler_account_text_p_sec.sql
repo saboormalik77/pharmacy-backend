@@ -23,14 +23,8 @@ BEGIN
     RETURN jsonb_build_object('error', true, 'code', 400, 'message', 'Email is required');
   END IF;
 
-  -- Check if email already exists in pharmacy table
-  IF EXISTS (SELECT 1 FROM pharmacy WHERE email = LOWER(TRIM(p_email))) THEN
-    RETURN jsonb_build_object('error', true, 'code', 409, 'message', 'A pharmacy with this email already exists');
-  END IF;
-
-  -- Check if email already has a pending invite
-  IF EXISTS (SELECT 1 FROM pharmacy_invites WHERE email = LOWER(TRIM(p_email)) AND status = 'pending' AND expires_at > NOW()) THEN
-    RETURN jsonb_build_object('error', true, 'code', 409, 'message', 'A pending invitation already exists for this email');
+  IF public.email_is_in_use(LOWER(TRIM(p_email))) THEN
+    RETURN jsonb_build_object('error', true, 'code', 409, 'message', 'An account with this email already exists');
   END IF;
 
   -- Validate service type

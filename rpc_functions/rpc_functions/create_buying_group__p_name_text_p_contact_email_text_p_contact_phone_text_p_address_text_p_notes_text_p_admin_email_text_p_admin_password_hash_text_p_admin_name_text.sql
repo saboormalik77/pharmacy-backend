@@ -16,10 +16,10 @@ DECLARE
   v_email    TEXT;
   v_name     TEXT;
 BEGIN
-  v_email := COALESCE(p_admin_email, p_contact_email);
+  v_email := LOWER(TRIM(COALESCE(p_admin_email, p_contact_email)));
   v_name  := p_name;
 
-  IF v_email IS NULL THEN
+  IF v_email IS NULL OR v_email = '' THEN
     RETURN jsonb_build_object('error', true, 'message', 'Email is required');
   END IF;
 
@@ -27,8 +27,8 @@ BEGIN
     RETURN jsonb_build_object('error', true, 'message', 'Password is required');
   END IF;
 
-  IF EXISTS (SELECT 1 FROM admin WHERE email = v_email) THEN
-    RETURN jsonb_build_object('error', true, 'message', 'Email already exists');
+  IF public.email_is_in_use(v_email) THEN
+    RETURN jsonb_build_object('error', true, 'code', 409, 'message', 'An account with this email already exists');
   END IF;
 
   -- Create admin record — now includes contact_phone, address, notes

@@ -61,6 +61,12 @@ export interface SchedulePickupResult {
 let cachedToken: string | null = null;
 let tokenExpiresAt: number = 0;
 
+/** True when using FedEx sandbox (labels show TEST LABEL / SAMPLE — not valid for shipping). */
+export function isFedExSandbox(): boolean {
+  const apiUrl = process.env.FEDEX_API_URL || 'https://apis-sandbox.fedex.com';
+  return apiUrl.includes('sandbox');
+}
+
 function getFedExConfig() {
   const apiKey = process.env.FEDEX_API_KEY;
   const secretKey = process.env.FEDEX_SECRET_KEY;
