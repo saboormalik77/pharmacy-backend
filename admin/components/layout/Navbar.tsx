@@ -13,6 +13,7 @@ import {
     ProcessorNotification,
 } from '@/lib/store/processorNotificationsSlice';
 import { fetchSettings } from '@/lib/store/settingsSlice';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface NavbarProps {
     onToggleSidebar: () => void;
@@ -22,7 +23,8 @@ interface NavbarProps {
 export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
+    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+    const { hasPermission } = usePermissions();
     const { notifications, isLoadingNotifications } = useAppSelector((state) => state.recentActivity);
     const {
         notifications: processorNotifications,
@@ -350,12 +352,14 @@ export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
                                     <p className="text-sm text-gray-500">{user?.email || 'admin@pharmadmin.com'}</p>
                                 </div>
                                 <div className="py-1">
+                                    {hasPermission('settings') && (
                                     <button onClick={() => {
                                         router.push('/settings')
                                         setShowProfile(false)
                                     }} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                                         <Settings className="w-4 h-4" />Settings
                                     </button>
+                                    )}
                                     <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
                                         <LogOut className="w-4 h-4" />Logout
                                     </button>

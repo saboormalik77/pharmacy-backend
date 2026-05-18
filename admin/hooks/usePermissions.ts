@@ -12,7 +12,6 @@ export function usePermissions() {
     // Processor UI is not permission-gated.
     if (isProcessor) return true;
     if (isSuperAdmin) return true;
-    if (perm === 'dashboard') return true;
     return permissions.includes(perm);
   };
 

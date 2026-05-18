@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { logoutUser } from '@/lib/store/authSlice';
+import { getFirstAllowedRoute } from '@/lib/utils/firstAllowedRoute';
 
 // Pages that don't require authentication
 const PUBLIC_PAGES = ['/login', '/forgot-password', '/reset-password'];
@@ -31,7 +32,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useAppDispatch();
-  const { isAuthenticated, isLoading, token } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, isLoading, token, user } = useAppSelector((state) => state.auth);
   const isPublicPage = PUBLIC_PAGES.includes(pathname);
 
   // ── Auto-logout when JWT expires ─────────────────────────────
@@ -65,9 +66,9 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     if (!isAuthenticated && !isPublicPage) {
       window.location.href = '/login';
     } else if (isAuthenticated && isPublicPage) {
-      router.push('/');
+      router.push(getFirstAllowedRoute(user ?? null));
     }
-  }, [isAuthenticated, isLoading, isPublicPage, router]);
+  }, [isAuthenticated, isLoading, isPublicPage, router, user]);
 
   // Show loading state while checking auth
   if (isLoading && !isAuthenticated && !isPublicPage) {

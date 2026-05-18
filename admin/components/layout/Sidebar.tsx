@@ -8,6 +8,7 @@ import {
     BarChart3,
     Settings,
     UserCog,
+    Users,
     ClipboardList,
     Scan,
     Truck,
@@ -29,6 +30,7 @@ const adminSidebarLinks = [
     { href: '/settings', icon: Settings, label: 'Settings', permission: 'settings' },
     { href: '/processors', icon: UserCog, label: 'Processors', permission: 'processors' },
     { href: '/service-requests', icon: Truck, label: 'Service Requests', permission: 'service_requests' },
+    { href: '/sub-admins', icon: Users, label: 'Team Members', permission: 'sub_admins' },
 ];
 
 // Processor navigation (for role = 'processor')
@@ -50,7 +52,7 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggleCollapse
     const pathname = usePathname();
     const dispatch = useAppDispatch();
     const { user } = useAppSelector((state) => state.auth);
-    const { hasPermission, isSuperAdmin } = usePermissions();
+    const { hasPermission } = usePermissions();
     const { settings } = useAppSelector((state) => state.settings);
     const [cachedBranding, setCachedBranding] = useState<{ businessName: string | null; logoUrl: string | null } | null>(null);
 
@@ -89,15 +91,20 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggleCollapse
 
     // Choose navigation links based on user role, filtered by permissions
     const rawLinks = user?.role === 'processor' ? processorSidebarLinks : adminSidebarLinks;
+    const isBuyingGroupAdmin = user?.buying_group_id !== null && user?.role === 'super_admin';
+
     const sidebarLinks = rawLinks.filter((link) => {
-        // Hide service requests for buying group users, but allow processors to see them
+        // Hide service requests for buying group admins (processors can still see it)
         if (link.href === '/service-requests' && user?.buying_group_id && user?.role !== 'processor') {
             return false;
         }
-        
+        // Sub-admins page is only for buying group admins — hide from MainAdmin and processors
+        if (link.href === '/sub-admins' && !isBuyingGroupAdmin) {
+            return false;
+        }
+
         const perm = (link as any).permission as string | undefined;
         if (!perm) return true;
-        if (perm === 'admins' && !isSuperAdmin) return false;
         return hasPermission(perm);
     });
 

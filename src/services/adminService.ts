@@ -10,9 +10,8 @@ const authAdmin = supabaseAdmin?.auth?.admin;
 
 // All available admin permissions (mirrors sidebar sections)
 export const ALL_ADMIN_PERMISSIONS = [
-  'dashboard', 'pharmacies', 'distributors', 'marketplace', 'documents',
-  'payments', 'payout_hub', 'analytics', 'settings', 'admins',
-  'processors', 'policies', 'ndc_pricing', 'tbd_items', 'destruction', 'warehouse',
+  'dashboard', 'pharmacies', 'analytics', 'settings',
+  'processors', 'service_requests', 'sub_admins',
 ] as const;
 
 export type AdminPermission = typeof ALL_ADMIN_PERMISSIONS[number];

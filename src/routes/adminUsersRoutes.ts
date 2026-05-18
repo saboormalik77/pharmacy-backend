@@ -376,9 +376,7 @@ router.get('/permissions', (_req, res) => {
   res.json({
     status: 'success',
     data: {
-      permissions: ALL_ADMIN_PERMISSIONS.filter(
-        (p) => p !== 'admins' && p !== 'dashboard'
-      ),
+      permissions: ALL_ADMIN_PERMISSIONS,
     },
   });
 });

@@ -10,6 +10,7 @@ import { loginUser, clearError } from '@/lib/store/authSlice';
 import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen';
 import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen';
 import { validateEmail, validateRequired } from '@/lib/validation';
+import { getFirstAllowedRoute } from '@/lib/utils/firstAllowedRoute';
 
 interface AdminBranding {
   logoUrl: string | null;
@@ -28,7 +29,7 @@ interface TenantInfo {
 export default function LoginPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { isAuthenticated, isLoading, error: authError } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, isLoading, error: authError, user } = useAppSelector((state) => state.auth);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -130,12 +131,12 @@ export default function LoginPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated — go to first allowed page
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push('/');
+      router.push(getFirstAllowedRoute(user ?? null));
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, router, user]);
 
   // Clear error when component mounts or when authError changes
   useEffect(() => {
@@ -190,8 +191,8 @@ export default function LoginPage() {
       const result = await dispatch(loginUser({ email, password }));
       
       if (loginUser.fulfilled.match(result)) {
-        // Navigation will be handled by ProtectedRoute
-        router.push('/');
+        const loggedInUser = (result.payload as any)?.user ?? null;
+        router.push(getFirstAllowedRoute(loggedInUser));
       } else {
         // Set error without causing any refresh
         const errorMessage = result.payload as string || 'Invalid credentials. Please try again.';

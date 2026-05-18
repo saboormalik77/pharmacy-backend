@@ -10,6 +10,8 @@ import { fetchDashboard } from '@/lib/store/dashboardSlice';
 import { fetchRecentActivity, Activity } from '@/lib/store/recentActivitySlice';
 import { fetchMyStores } from '@/lib/store/returnTransactionsSlice';
 import { formatRelativeTime } from '@/lib/utils';
+import { usePermissions } from '@/hooks/usePermissions';
+import { getFirstAllowedRoute } from '@/lib/utils/firstAllowedRoute';
 
 // Processor Dashboard Component
 function ProcessorDashboard() {
@@ -123,11 +125,19 @@ return (
 export default function Dashboard() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { data, isLoading } = useAppSelector((state) => state.dashboard);
+  const { data } = useAppSelector((state) => state.dashboard);
   const { recentActivity, isLoadingRecentActivity } = useAppSelector((state) => state.recentActivity);
   const { user } = useAppSelector((state) => state.auth);
+  const { hasPermission, isSuperAdmin, isProcessor: isProcessorPerm } = usePermissions();
 
   const isProcessor = user?.role === 'processor';
+
+  // Redirect sub-admins without dashboard permission to their first allowed route
+  useEffect(() => {
+    if (!isSuperAdmin && !isProcessorPerm && !hasPermission('dashboard')) {
+      router.replace(getFirstAllowedRoute(user ?? null));
+    }
+  }, [isSuperAdmin, isProcessorPerm, hasPermission, user, router]);
 
   // Always call hooks before any early return (Rules of Hooks)
   useEffect(() => {
