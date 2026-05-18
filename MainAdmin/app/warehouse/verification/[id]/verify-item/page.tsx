@@ -765,14 +765,6 @@ export default function VerifyItemPage() {
                                                             ${resolvedEffectivePrice!.toFixed(2)}
                                                         </span>
                                                     </div>
-                                                    {/* {resolvedPrice.estimatedStorePrice != null && (
-                                                        <div className="flex justify-between sm:block">
-                                                            <span style={{ color: 'var(--on-surface-variant)' }}>Est. Store Price:</span>
-                                                            <span className="ml-2 font-mono" style={{ color: 'var(--on-surface)' }}>
-                                                                ${resolvedPrice.estimatedStorePrice.toFixed(2)}
-                                                            </span>
-                                                        </div>
-                                                    )} */}
                                                     {resolvedPrice.priceSource && (
                                                         <div className="flex justify-between sm:block">
                                                             <span style={{ color: 'var(--on-surface-variant)' }}>Source:</span>
@@ -855,18 +847,6 @@ export default function VerifyItemPage() {
                                                 style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                             />
                                         </div>
-                                        {/* <div>
-                                            <label className="block text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--on-surface)' }}>Est. Store Price ($)</label>
-                                            <input
-                                                type="text"
-                                                readOnly
-                                                value={priceForm.estimatedStorePrice != null ? priceForm.estimatedStorePrice.toFixed(2) : ''}
-                                                placeholder="—"
-                                                className="w-full px-3 py-2 text-sm border rounded-[4px] bg-[var(--surface-container-low)]"
-                                                style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
-                                            />
-                                            <p className="text-[10px] mt-0.5" style={{ color: 'var(--outline)' }}>70% of current (30% less)</p>
-                                        </div> */}
                                         <div>
                                             <label className="block text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--on-surface)' }}>Last Reimbursement ($)</label>
                                             <input

@@ -30,15 +30,6 @@ const warehouseSections = [
         description: 'Verify received returns item-by-item. Check conditions, report damaged or missing items, track surplus.',
         tone: { chipBg: 'var(--surface-container-low)', icon: 'var(--secondary)' },
     },
-    // {
-    //     href: '/warehouse/surplus',
-    //     icon: Archive,
-    //     label: 'Surplus Inventory',
-    //     description: 'View and manage surplus items found during verification. Track storage locations and status.',
-    //     color: 'text-cyan-600',
-    //     bg: 'bg-cyan-50',
-    //     border: 'border-cyan-100',
-    // },
     {
         href: '/warehouse/batches',
         icon: Layers,

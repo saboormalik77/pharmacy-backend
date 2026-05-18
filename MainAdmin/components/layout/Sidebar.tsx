@@ -9,7 +9,6 @@ import { usePermissions } from '@/hooks/usePermissions';
 const warehouseSubRoutes = [
     '/warehouse/receiving',
     '/warehouse/verification',
-    '/warehouse/surplus',
     '/warehouse/batches',
     '/warehouse/debit-memos',
     '/warehouse/ra-tracking',
