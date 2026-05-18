@@ -83,28 +83,6 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
 
     if (!supabaseAdmin) throw new AppError('Supabase admin client not configured', 500);
 
-    // FedEx API group shipments store PDF labels on the group — return those instead of the
-    // internal HTML "packing slip" used for manual tracking-only shipments.
-    const { data: groupRow, error: groupRowErr } = await supabaseAdmin
-      .from('shipment_groups')
-      .select('id, fedex_labels, outbound_tracking, fedex_shipment_id')
-      .eq('id', id)
-      .single();
-
-    if (!groupRowErr && groupRow) {
-      const fedexLabels = parseShipmentGroupFedexLabels(groupRow.fedex_labels);
-      if (fedexLabels) {
-        const html = buildFedexLabelsPrintHtml(groupRow, fedexLabels, {
-          fedExSandbox: isFedExSandbox(),
-        });
-        res.set({
-          'Content-Type': 'text/html; charset=utf-8',
-          'Content-Disposition': `inline; filename="fedex-labels-${groupRow.id}.html"`,
-        });
-        return res.send(html);
-      }
-    }
-
     const details = await shipmentGroupService.getShipmentGroupDetails(id);
     const group = details.group;
     const memos = details.memos;
@@ -169,21 +147,6 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
       }
     }
 
-    let barcodeDataUrl = '';
-    try {
-      const bc = generateBarcode(group.outboundTracking, {
-        format: 'CODE128',
-        width: 2,
-        height: 60,
-        displayValue: true,
-        fontSize: 12,
-        margin: 5,
-      });
-      barcodeDataUrl = `data:image/png;base64,${bc.buffer.toString('base64')}`;
-    } catch {
-      /* optional */
-    }
-
     const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const cityLine = (city: string, state: string, zip: string) =>
       [city, state, zip].filter(Boolean).join(', ');
@@ -194,6 +157,66 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
           `${esc(m.memoNumber || '')} — ${esc(m.pharmacyName || '')} — RA ${esc(m.raNumber || '—')} — ${m.totalItems ?? 0} items`
       )
       .join('<br/>');
+
+    const boxCount = Math.max(1, group.boxCount || 1);
+
+    const packageTracking: Record<string, string> =
+      group.packageTracking && typeof group.packageTracking === 'object'
+        ? (group.packageTracking as Record<string, string>)
+        : {};
+
+    const buildBarcode = async (trackingNum: string): Promise<string> => {
+      try {
+        const bc = generateBarcode(trackingNum, {
+          format: 'CODE128',
+          width: 2,
+          height: 60,
+          displayValue: true,
+          fontSize: 12,
+          margin: 5,
+        });
+        return `data:image/png;base64,${bc.buffer.toString('base64')}`;
+      } catch {
+        return '';
+      }
+    };
+
+    const labelBlocks = await Promise.all(
+      Array.from({ length: boxCount }, async (_, i) => {
+        const pkgNum = i + 1;
+        const pkgTracking = packageTracking[`package${pkgNum}`] || group.outboundTracking || '';
+        const barcodeDataUrl = await buildBarcode(pkgTracking);
+        return `
+<div class="label" style="${pkgNum < boxCount ? 'page-break-after:always;' : ''}">
+  <div class="pkg-info">GROUP SHIPMENT — Package ${pkgNum} of ${boxCount} — ${memos.length} debit memo${memos.length !== 1 ? 's' : ''}</div>
+  <div class="label-box">
+    <div class="label-heading">From - Shipper</div>
+    <div class="label-name">${esc(fromName)}</div>
+    ${fromContact && fromContact !== fromName ? `<div class="label-line">${esc(fromContact)}</div>` : ''}
+    ${fromStreet ? `<div class="label-line">${esc(fromStreet)}</div>` : ''}
+    ${cityLine(fromCity, fromState, fromZip) ? `<div class="label-line">${esc(cityLine(fromCity, fromState, fromZip))}</div>` : ''}
+    ${fromPhone ? `<div class="label-line">Phone: ${esc(fromPhone)}</div>` : ''}
+  </div>
+  <div class="label-box">
+    <div class="label-heading">To - Recipient</div>
+    <div class="label-name">${esc(toName)}</div>
+    ${toContact ? `<div class="label-line">${esc(toContact)}</div>` : ''}
+    ${toStreet ? `<div class="label-line">${esc(toStreet)}</div>` : ''}
+    ${cityLine(toCity, toState, toZip) ? `<div class="label-line">${esc(cityLine(toCity, toState, toZip))}</div>` : ''}
+    ${toPhone ? `<div class="label-line">Phone: ${esc(toPhone)}</div>` : ''}
+  </div>
+  <div class="barcode-section">
+    ${barcodeDataUrl ? `<img src="${barcodeDataUrl}" alt="barcode">` : ''}
+  </div>
+  <div class="tracking-text">${esc(pkgTracking)}</div>
+  <div class="memo-info">
+    <strong>Memos in this shipment:</strong><br/>${memoLines}
+  </div>
+</div>`;
+      })
+    );
+
+    const labelPages = labelBlocks.join('\n');
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -219,32 +242,7 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
 <script>window.onload=function(){setTimeout(function(){window.print();},400);}</script>
 </head>
 <body>
-<div class="label">
-  <div class="pkg-info">GROUP SHIPMENT — ${memos.length} debit memo${memos.length !== 1 ? 's' : ''}</div>
-  <div class="label-box">
-    <div class="label-heading">From - Shipper</div>
-    <div class="label-name">${esc(fromName)}</div>
-    ${fromContact && fromContact !== fromName ? `<div class="label-line">${esc(fromContact)}</div>` : ''}
-    ${fromStreet ? `<div class="label-line">${esc(fromStreet)}</div>` : ''}
-    ${cityLine(fromCity, fromState, fromZip) ? `<div class="label-line">${esc(cityLine(fromCity, fromState, fromZip))}</div>` : ''}
-    ${fromPhone ? `<div class="label-line">Phone: ${esc(fromPhone)}</div>` : ''}
-  </div>
-  <div class="label-box">
-    <div class="label-heading">To - Recipient</div>
-    <div class="label-name">${esc(toName)}</div>
-    ${toContact ? `<div class="label-line">${esc(toContact)}</div>` : ''}
-    ${toStreet ? `<div class="label-line">${esc(toStreet)}</div>` : ''}
-    ${cityLine(toCity, toState, toZip) ? `<div class="label-line">${esc(cityLine(toCity, toState, toZip))}</div>` : ''}
-    ${toPhone ? `<div class="label-line">Phone: ${esc(toPhone)}</div>` : ''}
-  </div>
-  <div class="barcode-section">
-    ${barcodeDataUrl ? `<img src="${barcodeDataUrl}" alt="barcode">` : ''}
-  </div>
-  <div class="tracking-text">${esc(group.outboundTracking)}</div>
-  <div class="memo-info">
-    <strong>Memos in this shipment:</strong><br/>${memoLines}
-  </div>
-</div>
+${labelPages}
 </body>
 </html>`;
 

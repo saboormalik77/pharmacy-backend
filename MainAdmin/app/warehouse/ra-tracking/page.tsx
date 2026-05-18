@@ -399,13 +399,14 @@ export default function RATrackingPage() {
             const token = cookieUtils.getAuthToken();
             const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
             const url = `${baseUrl}/admin/shipment-groups/${encodeURIComponent(groupId)}/fedex-labels/${packageNumber}/download?format=print`;
-            // Use format=print to get an HTML page with embedded PDF that auto-prints
             const res = await fetch(url, {
                 headers: { Authorization: `Bearer ${token}`, Accept: 'text/html' },
             });
             if (!res.ok) {
-                const err = await res.json().catch(() => ({ message: 'Print failed' }));
-                throw new Error(err.message || 'Print failed');
+                // FedEx PDF not stored (sandbox mode or older shipment) — fall back to the
+                // same HTML packing-slip / FedEx-PDF chain that the listing uses.
+                await printGroupLabels(groupId, { skipLoadingState: true });
+                return;
             }
             const htmlContent = await res.text();
             const printWindow = window.open('', '_blank');
@@ -1064,13 +1065,21 @@ export default function RATrackingPage() {
                                                             {g.shippedAt ? formatDate(g.shippedAt) : '—'}
                                                         </td>
                                                         <td className="px-3 py-3 text-sm font-medium capitalize" style={{ color: 'var(--foreground)' }}>{g.destination || '—'}</td>
-                                                        <td className="px-3 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{g.outboundTracking || '—'}</td>
+                                                        <td className="px-3 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>
+                                                            {g.packageTracking && Object.keys(g.packageTracking).length > 0
+                                                                ? Object.entries(g.packageTracking)
+                                                                    .sort(([a], [b]) => a.localeCompare(b))
+                                                                    .map(([key, val]) => (
+                                                                        <div key={key} className="text-xs leading-5">{val}</div>
+                                                                    ))
+                                                                : (g.outboundTracking || '—')}
+                                                        </td>
                                                         <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{g.boxCount ?? 1}</td>
                                                         <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{row.memos?.length ?? g.totalMemos ?? 0}</td>
                                                         <td className="px-3 py-3 text-right">
                                                             <button
                                                                 type="button"
-                                                                onClick={() => printGroupLabels(g.id)}
+                                                                onClick={() => printShipmentGroupLabel(g.id)}
                                                                 disabled={printGroupLabelLoading === g.id}
                                                                 className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors hover:bg-primary-50/40 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                                                 style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}
@@ -1497,7 +1506,7 @@ export default function RATrackingPage() {
                                             <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Package Tracking Numbers:</p>
                                             <button
                                                 type="button"
-                                                onClick={() => printAllFedexLabels(groupShipGroupId)}
+                                                onClick={() => printShipmentGroupLabel(groupShipGroupId!)}
                                                 disabled={printGroupLabelLoading === groupShipGroupId}
                                                 className="flex items-center gap-1 px-2 py-1 text-xs rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-50/40 cursor-pointer"
                                                 style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--secondary)', borderColor: 'var(--outline-variant)' }}

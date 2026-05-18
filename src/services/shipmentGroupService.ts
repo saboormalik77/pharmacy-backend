@@ -26,6 +26,7 @@ export interface ShipmentGroup {
   totalMemos: number;
   fedexShipmentId: string | null;
   fedexLabels: any | null;
+  packageTracking: Record<string, string> | null;
   notes: string | null;
   createdAt: string;
   updatedAt: string;
@@ -42,6 +43,7 @@ export interface ShipGroupRequest {
   shippedAt?: string;
   fedexShipmentId?: string;
   fedexLabels?: any;
+  packageTracking?: Record<string, string>;
 }
 
 // ============================================================
@@ -90,6 +92,7 @@ export const shipMemoGroup = async (
       : {}),
     p_fedex_shipment_id: request.fedexShipmentId || null,
     p_fedex_labels: request.fedexLabels || null,
+    p_package_tracking: request.packageTracking || null,
   });
   handleRpcError(data, error, 'Failed to ship memo group');
   return data.data;
@@ -233,17 +236,16 @@ export const createShipmentGroupFedexShipment = async (
     return acc;
   }, {} as Record<string, string>);
 
-  // Debug logging to verify labels are being stored
-  console.log('FedEx labels to store:', {
-    packageCount: fedexResult.packages.length,
-    labelsFound: Object.keys(labelsMap).length,
-    labelSizes: Object.entries(labelsMap).map(([k, v]) => `${k}: ${v ? v.length : 0} chars`),
-  });
+  const packageTrackingMap = fedexResult.packages.reduce((acc, p, i) => {
+    if (p.trackingNumber) acc[`package${i + 1}`] = p.trackingNumber;
+    return acc;
+  }, {} as Record<string, string>);
 
   await shipMemoGroup(groupId, {
     outboundTracking: fedexResult.masterTrackingNumber,
     fedexShipmentId: fedexResult.shipmentId,
     fedexLabels: labelsMap as unknown as Record<string, string>,
+    packageTracking: Object.keys(packageTrackingMap).length > 0 ? packageTrackingMap : undefined,
   });
 
   const after = await getShipmentGroupDetails(groupId);

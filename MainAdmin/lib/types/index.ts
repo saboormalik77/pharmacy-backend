@@ -1334,6 +1334,7 @@ export interface ShipmentGroup {
     totalMemos: number;
     fedexShipmentId: string | null;
     fedexLabels: any | null;
+    packageTracking: Record<string, string> | null;
     notes: string | null;
     createdAt: string;
     updatedAt: string;
