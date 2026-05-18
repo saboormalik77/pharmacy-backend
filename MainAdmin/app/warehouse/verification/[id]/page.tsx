@@ -31,19 +31,13 @@ import {
     assignReturnsToBatch,
     fetchUsedBatchMonths,
 } from '@/lib/store/batchSlice';
-import {
-    scanBarcode,
-    // Removed unused imports: updateTransactionItem, moveItemToWineCellar, resolveTransactionItem
-} from '@/lib/store/returnTransactionsSlice';
-// import { checkReturnability } from '@/lib/store/policiesSlice'; // Moved to dedicated verification page
+import { scanBarcode } from '@/lib/store/returnTransactionsSlice';
 import type {
     VerificationV2Item,
-    WarehouseSurplusItem,
     WarehouseDiscrepancy,
     CompleteVerificationSummary,
     BarcodeScanResponse,
     ReturnBatch,
-    ReturnabilityCheckResult,
     WineCellarItem,
 } from '@/lib/types';
 import {
@@ -146,29 +140,11 @@ export default function VerificationSessionPage() {
     const [itemsTablePage, setItemsTablePage] = useState(1);
     const [surplusTablePage, setSurplusTablePage] = useState(1);
     const [discrepanciesTablePage, setDiscrepanciesTablePage] = useState(1);
-    
-    // Reverse distributors
-    const [reverseDistributors, setReverseDistributors] = useState<Array<{id: string; name: string; email: string}>>([]);
-    const [loadingDistributors, setLoadingDistributors] = useState(false);
 
     // Box count step
     const [needsBoxCount, setNeedsBoxCount] = useState(false);
     const [boxCount, setBoxCount] = useState('');
     const [boxResult, setBoxResult] = useState<{ expectedBoxes: number; receivedBoxes: number; boxCountMatch: boolean } | null>(null);
-
-    // Verify item modal - state moved to dedicated page
-    // const [verifyingItem, setVerifyingItem] = useState<VerificationV2Item | null>(null);
-    // const [verifyStatus, setVerifyStatus] = useState('');
-    // const [verifyActualQty, setVerifyActualQty] = useState('');
-    // const [verifyNotes, setVerifyNotes] = useState('');
-    // Policy and routing state moved to dedicated verification page
-    // const [policyResult, setPolicyResult] = useState<ReturnabilityCheckResult | null>(null);
-    // const [isPolicyChecking, setIsPolicyChecking] = useState(false);
-    // const [disposition, setDisposition] = useState<'returnable' | 'wine_cellar' | 'destruction'>('returnable');
-    // const [returnStatus, setReturnStatus] = useState<'returnable' | 'non_returnable'>('returnable');
-    // const [nonReturnableRoute, setNonReturnableRoute] = useState<'wine_cellar' | 'destruction'>('destruction');
-    // const [wineCellarDate, setWineCellarDate] = useState('');
-    // const [manualDestination, setManualDestination] = useState('');
 
     // Item scanner (verification tab)
     const [itemScanMode, setItemScanMode] = useState<'camera' | 'input'>('camera');
@@ -260,21 +236,6 @@ export default function VerificationSessionPage() {
         }
     }, [activeTab, itemScanMode]);
 
-    // Verification routing functions moved to dedicated page
-    // const resetVerificationRoutingState = useCallback(() => { ... }, []);
-    // const fetchReverseDistributors = useCallback(async () => { ... }, [reverseDistributors.length, showToast]);
-
-    // Policy check useEffect moved to dedicated verification page
-    /*
-    useEffect(() => {
-        if (!verifyingItem || verifyStatus !== 'correct') {
-            setIsPolicyChecking(false);
-            return;
-        }
-        // ... (policy checking logic moved to dedicated page)
-    }, [dispatch, verifyingItem, verifyStatus]);
-    */
-
     // Calculate policy counts - moved here to avoid React Hooks order violation
     const policyCounts = useMemo(() => {
         if (!v2Summary?.items) {
@@ -321,10 +282,6 @@ export default function VerificationSessionPage() {
             showToast((result.payload as string) || 'Failed to start verification', 'error');
         }
     };
-
-    // Verification functions moved to dedicated page
-    // const openVerifyItem = (item: VerificationV2Item) => { ... };
-    // const closeVerifyModal = () => { ... };
 
     const runPhysicalVerification = async (
         itemId: string,
@@ -844,23 +801,6 @@ export default function VerificationSessionPage() {
                                 <p className="text-lg font-bold" style={{ color: '#000000' }}>{v2Summary ? (policyCounts.nonReturnable + policyCounts.wineCellar + policyCounts.destruction) : ((completedSummary.damagedItems ?? 0) + (completedSummary.missingItems ?? 0) + (completedSummary.wrongItems ?? 0))}</p>
                             </div>
                         </div>
-                        {/* Hidden verification stats - showing only routing-focused summary now
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            {([
-                                { label: 'Total Items', value: completedSummary.totalItems, color: 'text-gray-900' },
-                                { label: 'Correct', value: completedSummary.correctItems, color: 'text-green-700' },
-                                { label: 'Damaged', value: completedSummary.damagedItems, color: 'text-red-700' },
-                                { label: 'Missing', value: completedSummary.missingItems, color: 'text-gray-500' },
-                                { label: 'Wrong Items', value: completedSummary.wrongItems, color: 'text-orange-700' },
-                                { label: 'Surplus', value: completedSummary.surplusItems, color: 'text-blue-700' },
-                            ]).map(s => (
-                                <div key={s.label} className="p-3 rounded-[4px] border border-gray-200 bg-gray-50">
-                                    <p className="text-[10px] text-gray-500">{s.label}</p>
-                                    <p className={`text-xl font-bold ${s.color}`}>{s.value ?? 0}</p>
-                                </div>
-                            ))}
-                        </div>
-                        */}
                         {completedSummary.correctItemsValue != null && (
                             <div className="p-3 rounded-[4px] border text-center" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
                                 <p className="text-xs font-medium" style={{ color: 'var(--on-secondary-container)' }}>Correct Items Value</p>
@@ -1675,11 +1615,6 @@ export default function VerificationSessionPage() {
                         {showCompleteConfirm ? (
                             <div className="space-y-3">
                                 <h3 className="font-bold text-xs text-gray-900">Confirm Complete Verification</h3>
-                                {/* <div className="grid grid-cols-3 gap-2 text-[11px]">
-                                    <div className="p-2 bg-green-50 rounded border border-green-200"><span className="text-green-700">Correct:</span> <strong>{counts.correct}</strong></div>
-                                    <div className="p-2 bg-red-50 rounded border border-red-200"><span className="text-red-700">Damaged:</span> <strong>{counts.damaged}</strong></div>
-                                    <div className="p-2 bg-gray-50 rounded border border-gray-200"><span className="text-gray-600">Missing:</span> <strong>{counts.missing}</strong></div>
-                                </div> */}
                                 <div>
                                     <label className="text-[10px] font-medium text-gray-700">Completion Notes (optional)</label>
                                     <textarea rows={2} value={completeNotes} onChange={e => setCompleteNotes(e.target.value)} placeholder="Summary notes..."

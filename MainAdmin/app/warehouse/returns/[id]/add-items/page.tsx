@@ -102,7 +102,6 @@ export default function AddItemsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
     const [lastWarning, setLastWarning] = useState('');
-    const [lastClassification, setLastClassification] = useState<{ item: string; status: string; policyCheck?: ReturnabilityCheckResult; wineCellarItem?: any } | null>(null);
     const [scannedPrices, setScannedPrices] = useState<ScannedPrices | null>(null);
     const [preCheckResult, setPreCheckResult] = useState<ReturnabilityCheckResult | null>(null);
     const [isPreChecking, setIsPreChecking] = useState(false);
@@ -166,40 +165,6 @@ export default function AddItemsPage() {
         setForm(prev => ({ ...prev, [field]: value }));
         setFormErrors(prev => { const next = new Set(prev); next.delete(field as string); return next; });
     }, []);
-
-    const estimatedValue = (() => {
-        const price = parseFloat(form.standardPrice) || 0;
-        if (price <= 0) return 0;
-        const pkgSize = parseFloat(form.fullPackageSize) || 0;
-        const qtyNum = parseFloat(form.fullPackageQtyReturned) || 0;
-
-        if (!form.fullPackageQtyReturned.trim() || qtyNum <= 0 || pkgSize <= 0) return price;
-
-        const pct = form.qtyMode === 'units'
-            ? Math.min(100, (qtyNum / pkgSize) * 100)
-            : Math.min(100, qtyNum);
-
-        return price * (pct / 100);
-    })();
-
-    /** Same rules as Est. Value, but list price is reduced by 30% first (matches DB `estimated_store_value`). */
-    const estimatedStoreValue = (() => {
-        const price = parseFloat(form.standardPrice) || 0;
-        if (price <= 0) return 0;
-        const storeBase = price * 0.70;
-        const pkgSize = parseFloat(form.fullPackageSize) || 0;
-        const qtyNum = parseFloat(form.fullPackageQtyReturned) || 0;
-
-        if (!form.fullPackageQtyReturned.trim() || qtyNum <= 0 || pkgSize <= 0) {
-            return Math.round(storeBase * 100) / 100;
-        }
-
-        const pct = form.qtyMode === 'units'
-            ? Math.min(100, (qtyNum / pkgSize) * 100)
-            : Math.min(100, qtyNum);
-
-        return Math.round(storeBase * (pct / 100) * 100) / 100;
-    })();
 
     // ── Barcode scan handler ───────────────────────────────────
 
@@ -576,13 +541,6 @@ export default function AddItemsPage() {
                 setLastWarning('');
             }
 
-            setLastClassification({
-                item: name,
-                status: savedItem?.returnStatus || form.returnStatus,
-                policyCheck: pc,
-                wineCellarItem: wcItem ?? undefined,
-            });
-
             setForm({ ...EMPTY_FORM });
             setFormErrors(new Set());
             setManualDestination('');
@@ -647,7 +605,6 @@ export default function AddItemsPage() {
 
         if (addToWineCellarDirect.fulfilled.match(result)) {
             showToast(`${name} moved to Wine Cellar. Expected return: ${wineCellarDate}.`);
-            setLastClassification({ item: name, status: 'non_returnable', policyCheck: undefined, wineCellarItem: result.payload });
         } else {
             showToast(friendlyError(result.payload as string), 'error');
             return;
@@ -677,7 +634,6 @@ export default function AddItemsPage() {
         setScannedPrices(null);
         setScanError('');
         setLastWarning('');
-        setLastClassification(null);
         setPreCheckResult(null);
         setIsPreChecking(false);
         setPolicyAutoCheck(null);
@@ -842,7 +798,6 @@ export default function AddItemsPage() {
                                         <div><span className="text-[var(--on-surface-variant)]">NDC:</span> <span className="font-semibold text-[var(--on-surface)] font-mono">{item.ndc || '—'}</span></div>
                                         <div><span className="text-[var(--on-surface-variant)]">Lot:</span> <span className="font-medium text-[var(--on-surface)]">{item.lotNumber || '—'}</span></div>
                                         <div><span className="text-[var(--on-surface-variant)]">Exp:</span> <span className="font-medium text-[var(--on-surface)]">{item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : '—'}</span></div>
-                                        {/* <div><span className="text-[var(--on-surface-variant)]">Value:</span> <span className="font-bold text-green-600">${item.estimatedValue?.toFixed(2) || '0.00'}</span></div> */}
                                         {item.manufacturer && (
                                             <div className="col-span-2"><span className="text-[var(--on-surface-variant)]">Manufacturer:</span> <span className="font-medium text-[var(--on-surface)]">{item.manufacturer}</span></div>
                                         )}
@@ -1028,74 +983,7 @@ export default function AddItemsPage() {
                 )}
             </div>
 
-            {/* Classification Result (after save) */}
-            {/* {lastClassification && (
-                <div className={`rounded-[4px] border px-3 py-2 ${
-                    lastClassification.wineCellarItem ? 'bg-[var(--tertiary-container)] border-[var(--tertiary)]' :
-                    lastClassification.status === 'returnable' ? 'bg-green-50 border-green-300' :
-                    lastClassification.status === 'non_returnable' ? 'bg-[var(--error-container)] border-[var(--error)]' :
-                    'bg-yellow-50 border-yellow-300'
-                }`}>
-                    <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-start gap-2">
-                            <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                lastClassification.wineCellarItem ? 'bg-purple-200' :
-                                lastClassification.status === 'returnable' ? 'bg-green-200' :
-                                lastClassification.status === 'non_returnable' ? 'bg-red-200' : 'bg-yellow-200'
-                            }`}>
-                                {lastClassification.wineCellarItem ? <Archive className="w-3.5 h-3.5 text-[var(--tertiary)]" /> :
-                                 lastClassification.status === 'returnable' ? <CheckCircle className="w-3.5 h-3.5 text-green-700" /> :
-                                 lastClassification.status === 'non_returnable' ? <X className="w-3.5 h-3.5 text-red-700" /> :
-                                 <AlertTriangle className="w-3.5 h-3.5 text-yellow-700" />}
-                            </div>
-                            <div>
-                                <p className={`text-xs font-bold ${
-                                    lastClassification.wineCellarItem ? 'text-[var(--on-tertiary-container)]' :
-                                    lastClassification.status === 'returnable' ? 'text-green-800' :
-                                    lastClassification.status === 'non_returnable' ? '' : 'text-yellow-800'
-                                }`} style={lastClassification.status === 'non_returnable' ? { color: '#000000' } : {}}>
-                                    {lastClassification.item} — {
-                                        lastClassification.wineCellarItem ? 'MOVED TO WINE CELLAR' :
-                                        lastClassification.status === 'returnable' ? 'RETURNABLE' :
-                                        lastClassification.status === 'non_returnable' ? 'NON-RETURNABLE' : 'TBD (Needs Research)'
-                                    }
-                                </p>
-                                {lastClassification.wineCellarItem && (
-                                    <div className="mt-0.5 text-[10px] space-y-0.5 text-[var(--tertiary)]">
-                                        <p className="font-medium">✓ Shelved in Wine Cellar</p>
-                                        {lastClassification.policyCheck?.expectedReturnableDate && (
-                                            <p>Returnable from: <span className="font-semibold">{lastClassification.policyCheck.expectedReturnableDate}</span></p>
-                                        )}
-                                    </div>
-                                )}
-                                {!lastClassification.wineCellarItem && lastClassification.policyCheck && (
-                                    <div className="mt-0.5 text-[10px] space-y-0.5">
-                                        {lastClassification.policyCheck.destination && (
-                                            <p className={lastClassification.status === 'returnable' ? 'text-green-700' : 'text-[var(--on-primary-container)]'}>
-                                                Destination: <span className="font-semibold capitalize">{lastClassification.policyCheck.destination}</span>
-                                            </p>
-                                        )}
-                                        {lastClassification.policyCheck.reason && lastClassification.status !== 'returnable' && (
-                                            <p className={lastClassification.status === 'non_returnable' ? 'text-red-700' : 'text-yellow-700'}>
-                                                Reason: {lastClassification.policyCheck.reason.replace(/_/g, ' ')}
-                                            </p>
-                                        )}
-                                        {lastClassification.policyCheck.manufacturerName && (
-                                            <p className="text-[var(--on-surface-variant)]">Policy: {lastClassification.policyCheck.manufacturerName}</p>
-                                        )}
-                                    </div>
-                                )}
-                                {!lastClassification.policyCheck && lastClassification.status === 'tbd' && (
-                                    <p className="text-[10px] text-yellow-700 mt-0.5">No policy data. Needs manual research.</p>
-                                )}
-                            </div>
-                        </div>
-                        <button onClick={() => setLastClassification(null)} className="text-[var(--outline)] hover:text-[var(--on-primary-container)] flex-shrink-0">
-                            <X className="w-3.5 h-3.5" />
-                        </button>
-                    </div>
-                </div>
-            )} */}
+            {/* Classification Result (after save) — shown via toast */}
 
             {/* Product Form */}
             <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow px-4 py-3">
@@ -1172,10 +1060,6 @@ export default function AddItemsPage() {
                     return (
                         <>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            {/* <div>
-                                <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">Price ($)</label>
-                                <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => updateField('standardPrice', e.target.value)} placeholder="0.00" className="w-full px-2 py-1 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
-                            </div> */}
                             <div>
                                 <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">Pkg Size</label>
                                 <input type="number" min="1" value={form.fullPackageSize} onChange={e => updateField('fullPackageSize', e.target.value)} placeholder="e.g. 60" className="w-full px-2 py-1 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
@@ -1197,16 +1081,6 @@ export default function AddItemsPage() {
                                 )}
                             </div>
                         </div>
-                        {/* <div className="grid grid-cols-2 gap-2 mt-2">
-                            <div>
-                                <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">Est. Value</label>
-                                <input type="text" readOnly value={`$${estimatedValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-[var(--outline-variant)] rounded bg-[var(--surface-container-low)] text-[var(--on-surface)] font-medium" />
-                            </div>
-                            <div>
-                                <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">Est. Store Value <span className="text-gray-400 font-normal">(−30%)</span></label>
-                                <input type="text" readOnly value={`$${estimatedStoreValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-[var(--outline-variant)] rounded bg-[var(--surface-container-low)] text-[var(--on-surface)] font-medium" />
-                            </div>
-                        </div> */}
                         </>
                     );
                 })()}

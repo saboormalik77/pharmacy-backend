@@ -8,7 +8,6 @@ import {
     VerificationV2Summary,
     StartVerificationResult,
     CompleteVerificationSummary,
-    WarehouseSurplusItem,
 } from '@/lib/types';
 
 // ── State ─────────────────────────────────────────────────────
@@ -23,8 +22,6 @@ export interface WarehouseState {
     discrepancies: WarehouseDiscrepancy[];
     verificationSummary: VerificationSummary | null;
     v2Summary: VerificationV2Summary | null;
-    allSurplus: WarehouseSurplusItem[];
-    allSurplusPagination: { total: number; totalPages: number } | null;
     isLoading: boolean;
     isActionLoading: boolean;
     error: string | null;
@@ -40,8 +37,6 @@ const initialState: WarehouseState = {
     discrepancies: [],
     verificationSummary: null,
     v2Summary: null,
-    allSurplus: [],
-    allSurplusPagination: null,
     isLoading: false,
     isActionLoading: false,
     error: null,
@@ -328,47 +323,6 @@ export const addSurplus = createAsyncThunk<
     }
 });
 
-export const fetchSurplusForReturn = createAsyncThunk<
-    SurplusItem[],
-    { transactionId: string; status?: string },
-    { rejectValue: string }
->('warehouse/fetchSurplusForReturn', async ({ transactionId, status }, { rejectWithValue }) => {
-    try {
-        const { apiClient } = await import('@/lib/api/apiClient');
-        const query: Record<string, string> = {};
-        if (status) query.status = status;
-        const res = await apiClient.get<{ status: string; data: SurplusItem[] }>(
-            `/admin/warehouse/${transactionId}/surplus`, true, query
-        );
-        return res.data;
-    } catch (err: any) {
-        return rejectWithValue(err?.message || 'Failed to fetch surplus items');
-    }
-});
-
-export const fetchAllSurplus = createAsyncThunk<
-    { data: WarehouseSurplusItem[]; total: number; totalPages: number },
-    { search?: string; status?: string; page?: number; limit?: number } | void,
-    { rejectValue: string }
->('warehouse/fetchAllSurplus', async (params, { rejectWithValue }) => {
-    try {
-        const { apiClient } = await import('@/lib/api/apiClient');
-        const query: Record<string, string> = {};
-        if (params) {
-            if (params.search) query.search = params.search;
-            if (params.status) query.status = params.status;
-            if (params.page) query.page = String(params.page);
-            if (params.limit) query.limit = String(params.limit);
-        }
-        const res = await apiClient.get<{ status: string; data: WarehouseSurplusItem[]; total: number; totalPages: number }>(
-            '/admin/warehouse/surplus', true, query
-        );
-        return { data: res.data, total: res.total, totalPages: res.totalPages };
-    } catch (err: any) {
-        return rejectWithValue(err?.message || 'Failed to fetch surplus items');
-    }
-});
-
 export const completeVerification = createAsyncThunk<
     { data: any; summary: CompleteVerificationSummary },
     { transactionId: string; notes?: string },
@@ -521,16 +475,7 @@ const warehouseSlice = createSlice({
                 const updated = action.payload;
                 state.discrepancies = state.discrepancies.map(d => d.id === updated.id ? updated : d);
             })
-            .addCase(resolveDiscrepancy.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
-
-            // fetchAllSurplus
-            .addCase(fetchAllSurplus.pending, (state) => { state.isLoading = true; state.error = null; })
-            .addCase(fetchAllSurplus.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.allSurplus = action.payload.data;
-                state.allSurplusPagination = { total: action.payload.total, totalPages: action.payload.totalPages };
-            })
-            .addCase(fetchAllSurplus.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });
+            .addCase(resolveDiscrepancy.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; });
     },
 });
 

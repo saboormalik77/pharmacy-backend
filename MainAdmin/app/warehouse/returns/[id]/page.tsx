@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, AlertCircle, X, Play, CheckCircle, Lock,
-    Trash2, Edit, ClipboardList, Building2, UserCog, Package, Truck, Clock,
+    Trash2, Edit, ClipboardList, Building2, UserCog, Package, Truck,
     Plus, Search, ScanLine, Archive, FileText, Download, AlertTriangle, Printer, QrCode,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
@@ -866,22 +866,6 @@ export default function ReturnDetailPage() {
                         <Badge variant={badge.variant}><span className="text-[10px]">{badge.label}</span></Badge>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                        {/* {canDoAction(tx, 'edit') && (
-                            <button
-                                onClick={() => setEditModal(true)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40"
-                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
-                            >
-                                <Edit className="w-3 h-3" /> {isLocked ? 'Edit Notes' : 'Edit'}
-                            </button>
-                        )} */}
-                        {/* Pause hidden on scan / return detail page — restore if needed
-                        {canDoAction(tx, 'pause') && canEdit && (
-                            <button onClick={() => checkActionWithToast('pause return', () => setActionModal('pause'))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 transition-colors">
-                                <Pause className="w-3 h-3" /> Pause
-                            </button>
-                        )}
-                        */}
                         {canDoAction(tx, 'resume') && canEdit && (
                             <button onClick={() => checkActionWithToast('resume return', () => setActionModal('resume'))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40" style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}>
                                 <Play className="w-3 h-3" /> Resume
@@ -897,7 +881,6 @@ export default function ReturnDetailPage() {
                                 <Lock className="w-3 h-3" /> Finalize
                             </button>
                         )}
-                        {/* Print Job Sheet - Available for completed/finalized transactions with tracking */}
                         {(tx.status === 'completed' || tx.status === 'finalized') && (tx.fedexTracking || (tx.packageTracking && Object.keys(tx.packageTracking).length > 0)) && (
                             <button
                                 onClick={printJobSheet}
@@ -993,10 +976,6 @@ export default function ReturnDetailPage() {
                             <dt className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Returnable Value</dt>
                             <dd className="text-[11px] font-semibold" style={{ color: 'var(--secondary)' }}>{formatCurrency(nonWcReturnableValue)}</dd>
                         </div>
-                        {/* <div className="flex justify-between">
-                            <dt className="text-[11px] text-gray-500">Non-Returnable Value</dt>
-                            <dd className="text-[11px] font-semibold text-red-700">{formatCurrency(nonWcNonReturnableValue)}</dd>
-                        </div> */}
                         <div className="flex justify-between pt-1.5 border-t" style={{ borderColor: 'var(--outline-variant)' }}>
                             <dt className="text-[11px] font-medium" style={{ color: 'var(--on-surface-variant)' }}>Total Value</dt>
                             <dd className="text-[11px] font-bold" style={{ color: 'var(--foreground)' }}>{formatCurrency(nonWcTotalValue)}</dd>
@@ -1018,28 +997,12 @@ export default function ReturnDetailPage() {
                                 <dt className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Pickup Confirmation</dt>
                                 <dd className="text-[11px]" style={{ color: 'var(--foreground)' }}>{tx.fedexPickupConfirmation || '—'}</dd>
                             </div>
-                            {/* Commented out as requested:
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Time In</dt>
-                                <dd className="text-[11px] text-gray-900">{tx.timeIn ? formatDate(tx.timeIn) : '—'}</dd>
-                            </div>
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Time Out</dt>
-                                <dd className="text-[11px] text-gray-900">{tx.timeOut ? formatDate(tx.timeOut) : '—'}</dd>
-                            </div>
-                            */}
                             {tx.receivedInWarehouseDate && (
                                 <div className="flex justify-between">
                                     <dt className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Received in Warehouse</dt>
                                     <dd className="text-[11px]" style={{ color: 'var(--foreground)' }}>{formatDate(tx.receivedInWarehouseDate)}</dd>
                                 </div>
                             )}
-                            {/* Commented out as requested:
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">Verified Integrity</dt>
-                                <dd className="text-[11px] text-gray-900">{tx.verifiedIntegrity ? 'Yes' : 'No'}</dd>
-                            </div>
-                            */}
                         {tx.boxCount != null && (
                             <div className="flex justify-between">
                                 <dt className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Box Count</dt>
@@ -1127,8 +1090,8 @@ export default function ReturnDetailPage() {
                     </div>
                 </div>
             ) : (
-                /* Layout without Shipping & Processing: 3 cards in one row */
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                /* Layout without Shipping & Processing */
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {/* General Information */}
                     <div className="rounded-[4px] shadow-sm border px-5 py-4 hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <h2 className="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
@@ -1186,33 +1149,7 @@ export default function ReturnDetailPage() {
                         <ReturnTransactionStoreAndProcessorDl tx={tx} variant="emerald" />
                     </div>
 
-                    {/* Items & Values */}
-                    {/* <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-[4px] shadow-sm border border-amber-100 px-5 py-4 hover:shadow-md transition-shadow">
-                        <h2 className="text-xs font-bold text-amber-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <div className="p-1.5 bg-amber-100 rounded-[4px]">
-                                <Package className="w-4 h-4 text-amber-600" />
-                            </div>
-                            Items & Values
-                        </h2>
-                        <dl className="space-y-2.5">
-                            <div className="flex justify-between items-center">
-                                <dt className="text-xs text-amber-700 font-medium">Total Items</dt>
-                                <dd className="text-xs font-bold text-gray-800">{nonWcReturnableAndTbdItemsCount}</dd>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <dt className="text-xs text-amber-700 font-medium">Returnable Value</dt>
-                                <dd className="text-xs font-bold" style={{ color: 'var(--secondary)' }}>{formatCurrency(nonWcReturnableValue)}</dd>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <dt className="text-xs text-amber-700 font-medium">Non-Returnable Value</dt>
-                                <dd className="text-xs font-bold text-red-700">{formatCurrency(nonWcNonReturnableValue)}</dd>
-                            </div>
-                            <div className="flex justify-between items-center pt-2 border-t border-amber-200">
-                                <dt className="text-xs text-amber-800 font-bold">Total Value</dt>
-                                <dd className="text-sm font-black text-gray-900 bg-white/70 px-2 py-0.5 rounded">{formatCurrency(nonWcTotalValue)}</dd>
-                            </div>
-                        </dl>
-                    </div> */}
+
                 </div>
             )}
 
@@ -1232,14 +1169,6 @@ export default function ReturnDetailPage() {
                             {pdfLoading === 'manifest' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                             Download Manifest
                         </button>
-                        {/* <button
-                            onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
-                            disabled={pdfLoading === 'dea-form-222'}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-[4px] text-sm text-orange-700 font-medium transition-colors disabled:opacity-50"
-                        >
-                            {pdfLoading === 'dea-form-222' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
-                            DEA Form 222
-                        </button> */}
                     </div>
                     {tx.manifestGeneratedAt && (
                         <p className="text-[10px] mt-2" style={{ color: 'var(--on-surface-variant)' }}>Manifest last generated: {formatDate(tx.manifestGeneratedAt)}</p>
@@ -1272,27 +1201,7 @@ export default function ReturnDetailPage() {
                     )}
                 </div>
 
-                {/* Summary Bar */}
-                {/* {nonWcItems.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
-                        <div className="bg-gray-50 rounded px-2.5 py-1.5 text-center">
-                            <p className="text-[10px] text-gray-500">Items</p>
-                            <p className="text-xs font-bold text-gray-900">{nonWcReturnableAndTbdItemsCount}</p>
-                        </div>
-                        <div className="bg-green-50 rounded px-2.5 py-1.5 text-center">
-                            <p className="text-[10px] text-green-600">Returnable</p>
-                            <p className="text-xs font-bold text-green-800">{formatCurrency(nonWcReturnableValue)}</p>
-                        </div>
-                        <div className="bg-red-50 rounded px-2.5 py-1.5 text-center">
-                            <p className="text-[10px] text-red-600">Non-Returnable</p>
-                            <p className="text-xs font-bold text-red-800">{formatCurrency(nonWcNonReturnableValue)}</p>
-                        </div>
-                        <div className="bg-blue-50 rounded px-2.5 py-1.5 text-center">
-                            <p className="text-[10px] text-blue-600">Total Value</p>
-                            <p className="text-xs font-bold text-blue-800">{formatCurrency(nonWcTotalValue)}</p>
-                        </div>
-                    </div>
-                )} */}
+
 
                 {/* Items Filters */}
                 <div className="flex flex-col sm:flex-row gap-1.5 mb-2">
@@ -1351,9 +1260,6 @@ export default function ReturnDetailPage() {
                                     <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] w-16">Pkg Size</th>
                                     <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] w-20">Qty Returned</th>
                                     <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] w-28">Serial#</th>
-                                    {/* <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Price</th>
-                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Value</th> */}
-                                    {/* <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Store Value</th> */}
                                     <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Expires</th>
                                     <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Status</th>
                                     <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Destination</th>
@@ -1387,15 +1293,6 @@ export default function ReturnDetailPage() {
                                                     {item.serialNumber || '—'}
                                                 </span>
                                             </td>
-                                            {/* <td className="px-3 py-3 text-xs text-right text-gray-900">
-                                                {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
-                                            </td>
-                                            <td className="px-3 py-3 text-xs text-right font-medium text-gray-900">
-                                                {item.estimatedValue != null ? formatCurrency(item.estimatedValue) : '—'}
-                                            </td> */}
-                                            {/* <td className="px-3 py-3 text-xs text-right font-medium text-gray-900">
-                                                {item.estimatedStoreValue != null ? formatCurrency(item.estimatedStoreValue) : '—'}
-                                            </td> */}
                                             <td className="px-3 py-3 text-xs whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
                                                 {item.expirationDate ? formatDate(item.expirationDate) : '—'}
                                             </td>
