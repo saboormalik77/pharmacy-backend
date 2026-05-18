@@ -17,6 +17,13 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { apiClient } from '@/lib/api/client';
 import { getToken } from '@/lib/utils/cookies';
 import { NON_RETURNABLE_REASONS, formatNonReturnableReason } from '@/lib/constants/nonReturnableReasons';
+import {
+    formatPartialReturnDetail,
+    formatUnitsReturnedForForm,
+    getPackageKindFromUnits,
+    getReturnItemPackageKind,
+    getReturnItemUnitsReturned,
+} from '@/lib/utils/returnItemQuantity';
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -341,9 +348,7 @@ export default function ReturnDetailPage() {
         if (editItemModal) {
             setEditItemForm({
                 fullPackageSize: editItemModal.fullPackageSize ? String(editItemModal.fullPackageSize) : '',
-                fullPackageQtyReturned: (editItemModal.fullPackageQtyReturned ?? editItemModal.quantityReturned)
-                    ? String(editItemModal.fullPackageQtyReturned ?? editItemModal.quantityReturned)
-                    : (editItemModal.quantity ? String(editItemModal.quantity) : ''),
+                fullPackageQtyReturned: formatUnitsReturnedForForm(editItemModal),
                 standardPrice: editItemModal.standardPrice || 0,
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
@@ -1241,14 +1246,25 @@ export default function ReturnDetailPage() {
                                                     <span className="text-xs text-[#000000]">{item.fullPackageSize || '—'}</span>
                                                 </td>
                                                 <td className="px-3 py-2">
-                                                    <span className="text-xs text-[#000000]">
-                                                        {(() => {
-                                                            const qtyReturned = item.fullPackageQtyReturned ?? item.quantityReturned ?? item.quantity;
-                                                            const fullPkgQty = item.fullPackageQtyReturned ?? item.quantityReturned;
-                                                            const displayQty = (fullPkgQty && item.fullPackageSize && fullPkgQty === item.fullPackageSize) ? 1 : qtyReturned;
-                                                            return <>{displayQty}{item.isPartial && <span className="text-orange-500 font-semibold ml-0.5">P</span>}</>;
-                                                        })()}
-                                                    </span>
+                                                    {(() => {
+                                                        const units = getReturnItemUnitsReturned(item);
+                                                        const kind = getReturnItemPackageKind(item);
+                                                        const partialDetail = formatPartialReturnDetail(item);
+                                                        return (
+                                                            <div className="flex flex-col gap-0.5 items-start">
+                                                                <span className="text-xs font-medium text-[#000000]">{units || '—'}</span>
+                                                                {kind === 'full' && (
+                                                                    <Badge variant="success"><span className="text-[10px]">Full Package</span></Badge>
+                                                                )}
+                                                                {kind === 'partial' && (
+                                                                    <Badge variant="warning"><span className="text-[10px]">Partial</span></Badge>
+                                                                )}
+                                                                {partialDetail && (
+                                                                    <span className="text-[10px] text-[#505454]">{partialDetail}</span>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })()}
                                                 </td>
                                                 <td className="px-3 py-2">
                                                     <span className="text-xs font-mono text-[#505454]">{item.serialNumber || '—'}</span>
@@ -1530,7 +1546,7 @@ export default function ReturnDetailPage() {
                                     <label className="block text-xs font-medium text-[#505454] mb-0.5">Quantity</label>
                                     <div className="grid grid-cols-2 gap-2 text-xs">
                                         <div>
-                                            <label className="block text-[10px] text-[#6b7280] mb-0.5">Pkg Size</label>
+                                            <label className="block text-[10px] text-[#6b7280] mb-0.5">Package Size (units/pkg)</label>
                                             <div className="text-center py-1.5 bg-[#f5f2f1] border border-[#e2e2e2] rounded">
                                                 {editItemForm.fullPackageSize || '—'}
                                             </div>
@@ -1546,14 +1562,35 @@ export default function ReturnDetailPage() {
                                                 className="w-full px-2 py-1.5 text-center text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057]" 
                                             />
                                         </div>
-                                        {/* <div>
-                                            <label className="block text-[10px] text-[#6b7280] mb-0.5">#</label>
-                                            <div className="text-center py-1.5 bg-[#f5f2f1] border border-[#e2e2e2] rounded">
-                                                {editItemForm.fullPackageQtyReturned && editItemForm.fullPackageSize ? 
-                                                    Math.ceil(Number(editItemForm.fullPackageQtyReturned) / Number(editItemForm.fullPackageSize)) : '—'}
-                                            </div>
-                                        </div> */}
                                     </div>
+                                    {editItemForm.fullPackageSize && editItemForm.fullPackageQtyReturned && (() => {
+                                        const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
+                                        const units = parseInt(editItemForm.fullPackageQtyReturned) || 0;
+                                        const kind = getPackageKindFromUnits(pkgSize, units);
+                                        const partialDetail = formatPartialReturnDetail(
+                                            { fullPackageSize: pkgSize, isPartial: kind === 'partial' },
+                                            units,
+                                        );
+                                        return (
+                                            <div className="flex flex-wrap items-center gap-2 pt-1.5">
+                                                {kind === 'full' && (
+                                                    <Badge variant="success">
+                                                        <span className="text-[10px]">Full Package — {units} units</span>
+                                                    </Badge>
+                                                )}
+                                                {kind === 'partial' && (
+                                                    <>
+                                                        <Badge variant="warning">
+                                                            <span className="text-[10px]">Partial Return</span>
+                                                        </Badge>
+                                                        {partialDetail && (
+                                                            <span className="text-[10px] text-[#505454]">{partialDetail}</span>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-[#505454] mb-0.5">Memo</label>

@@ -6,7 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, ScanLine, Keyboard, CheckCircle,
     AlertTriangle, RotateCcw, X, Camera, Archive, ShieldCheck,
-    FileText, Ban, Info, Trash2, ChevronLeft, ChevronRight,
+    FileText, Ban, Info, Trash2, ChevronLeft, ChevronRight, Pencil,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -18,6 +18,7 @@ import {
     addTransactionItem,
     deleteTransactionItem,
     fetchTransactionItems,
+    updateTransactionItem,
 } from '@/lib/store/returnTransactionsSlice';
 import { BarcodeScanResponse, ReturnabilityCheckResult, ReturnTransactionItem } from '@/lib/types';
 import { apiClient } from '@/lib/api/apiClient';
@@ -25,6 +26,13 @@ import {
     NON_RETURNABLE_REASONS,
     isValidNonReturnableReason,
 } from '@/lib/constants/nonReturnableReasons';
+import {
+    formatUnitsReturnedForForm,
+    formatPartialReturnDetail,
+    getPackageKindFromUnits,
+    getReturnItemPackageKind,
+    getReturnItemUnitsReturned,
+} from '@/lib/utils/returnItemQuantity';
 
 // Dynamically imported so it only loads in the browser (uses WebRTC APIs)
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
@@ -42,6 +50,58 @@ const DEA_SCHEDULE_OPTIONS = [
 
 /** Session product list tab: items per page */
 const PRODUCTS_LIST_PAGE_SIZE = 6;
+
+type SessionEditItemForm = {
+    expirationDate: string;
+    fullPackageSize: string;
+    fullPackageQtyReturned: string;
+    partialPercentage: string;
+    memo: string;
+};
+
+const EMPTY_SESSION_EDIT_FORM: SessionEditItemForm = {
+    expirationDate: '',
+    fullPackageSize: '',
+    fullPackageQtyReturned: '',
+    partialPercentage: '',
+    memo: '',
+};
+
+function toDateInputValue(iso?: string | null): string {
+    if (!iso) return '';
+    const match = String(iso).match(/^(\d{4}-\d{2}-\d{2})/);
+    return match ? match[1] : '';
+}
+
+function buildSessionItemUpdatePayload(form: SessionEditItemForm): Record<string, unknown> {
+    const pkgSize = parseInt(form.fullPackageSize, 10) || 0;
+    const qtyReturned = parseInt(form.fullPackageQtyReturned, 10) || 0;
+
+    if (qtyReturned <= 0) {
+        throw new Error('Quantity returned must be greater than 0');
+    }
+    if (pkgSize > 0 && qtyReturned > pkgSize) {
+        throw new Error('Quantity returned cannot exceed package size');
+    }
+
+    const payload: Record<string, unknown> = {};
+    if (form.expirationDate) payload.expirationDate = form.expirationDate;
+    if (pkgSize > 0) payload.fullPackageSize = pkgSize;
+    payload.fullPackageQtyReturned = qtyReturned;
+
+    if (pkgSize > 0 && qtyReturned < pkgSize) {
+        payload.quantity = 1;
+        payload.isPartial = true;
+        payload.partialPercentage = Math.round((qtyReturned / pkgSize) * 10000) / 100;
+    } else {
+        payload.quantity = qtyReturned >= pkgSize && pkgSize > 0 ? Math.floor(qtyReturned / pkgSize) : qtyReturned;
+        payload.isPartial = false;
+        payload.partialPercentage = null;
+    }
+
+    payload.memo = form.memo;
+    return payload;
+}
 
 const EMPTY_FORM = {
     ndc: '', ndc10: '', gtin: '', proprietaryName: '', genericName: '',
@@ -121,6 +181,8 @@ export default function AddItemsPage() {
     // Manual destination when no policy found
     const [manualDestination, setManualDestination] = useState('');
     const [reverseDistributors, setReverseDistributors] = useState<{ id: string; name: string; email: string }[]>([]);
+    const [editItemModal, setEditItemModal] = useState<ReturnTransactionItem | null>(null);
+    const [editItemForm, setEditItemForm] = useState<SessionEditItemForm>({ ...EMPTY_SESSION_EDIT_FORM });
 
     // Fetch reverse distributors once on mount for the manual destination dropdown
     useEffect(() => {
@@ -155,6 +217,26 @@ export default function AddItemsPage() {
             setItemCount(items.length);
         }
     }, [items]);
+
+    useEffect(() => {
+        if (!editItemModal) return;
+        const pkgSize = editItemModal.fullPackageSize ?? 0;
+        const units = getReturnItemUnitsReturned(editItemModal);
+        const kind = getReturnItemPackageKind(editItemModal);
+        const pct =
+            editItemModal.partialPercentage != null
+                ? String(editItemModal.partialPercentage)
+                : kind === 'partial' && pkgSize > 0 && units > 0
+                  ? String(Math.round((units / pkgSize) * 10000) / 100)
+                  : '';
+        setEditItemForm({
+            expirationDate: toDateInputValue(editItemModal.expirationDate),
+            fullPackageSize: pkgSize ? String(pkgSize) : '',
+            fullPackageQtyReturned: formatUnitsReturnedForForm(editItemModal),
+            partialPercentage: pct,
+            memo: editItemModal.memo || '',
+        });
+    }, [editItemModal]);
 
     useEffect(() => {
         const maxPage = Math.max(1, Math.ceil(recentlyAddedItems.length / PRODUCTS_LIST_PAGE_SIZE));
@@ -584,6 +666,30 @@ export default function AddItemsPage() {
         }
     };
 
+    const handleUpdateSessionItem = async () => {
+        if (!editItemModal || !checkActionAllowed('edit item')) return;
+        try {
+            const payload = buildSessionItemUpdatePayload(editItemForm);
+            const result = await dispatch(
+                updateTransactionItem({
+                    transactionId,
+                    itemId: editItemModal.id,
+                    payload: payload as Record<string, unknown>,
+                }),
+            );
+            if (updateTransactionItem.fulfilled.match(result)) {
+                showToast('Item updated successfully');
+                setEditItemModal(null);
+                dispatch(fetchTransactionItems({ transactionId }));
+            } else {
+                showToast((result.payload as string) || 'Failed to update item', 'error');
+            }
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Failed to update item';
+            showToast(message, 'error');
+        }
+    };
+
     // ── Render ─────────────────────────────────────────────────
 
     if (!tx) {
@@ -727,17 +833,19 @@ export default function AddItemsPage() {
                                                  'Non-Returnable'}
                                             </span>
                                         </Badge>
-                                        {item.isPartial && (
-                                            <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] rounded font-semibold">
-                                                Partial {item.partialPercentage}%
-                                            </span>
+                                        {getReturnItemPackageKind(item) === 'full' && (
+                                            <Badge variant="success"><span className="text-[10px]">Full Package</span></Badge>
+                                        )}
+                                        {getReturnItemPackageKind(item) === 'partial' && (
+                                            <Badge variant="warning"><span className="text-[10px]">Partial</span></Badge>
                                         )}
                                     </div>
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 text-[11px]">
                                         <div><span className="text-gray-500">NDC:</span> <span className="font-semibold text-gray-900 font-mono">{item.ndc || '—'}</span></div>
                                         <div><span className="text-gray-500">Lot:</span> <span className="font-medium text-gray-800">{item.lotNumber || '—'}</span></div>
                                         <div><span className="text-gray-500">Exp:</span> <span className="font-medium text-gray-800">{item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : '—'}</span></div>
-                                        <div><span className="text-gray-500">Serial Number:</span> <span className="font-bold text-gray-600">{item.serialNumber || '0.00'}</span></div>
+                                        <div><span className="text-gray-500">Qty:</span> <span className="font-medium text-gray-800">{getReturnItemUnitsReturned(item) || '—'} units</span></div>
+                                        <div><span className="text-gray-500">Serial Number:</span> <span className="font-medium text-gray-800">{item.serialNumber || '—'}</span></div>
                                         {item.manufacturer && (
                                             <div className="col-span-2"><span className="text-gray-500">Manufacturer:</span> <span className="font-medium text-gray-800">{item.manufacturer}</span></div>
                                         )}
@@ -746,14 +854,28 @@ export default function AddItemsPage() {
                                         )}
                                     </div>
                                 </div>
-                                <button
-                                    onClick={() => handleRemoveRecentItem(item.id)}
-                                    disabled={isItemActionLoading}
-                                    className="flex-shrink-0 p-2 rounded border border-red-300 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    title="Remove this item"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
+                                <div className="flex flex-shrink-0 flex-col gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (checkActionAllowed('edit item')) setEditItemModal(item);
+                                        }}
+                                        disabled={isItemActionLoading || !canEdit}
+                                        className="p-2 rounded border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:border-primary-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title="Edit this item"
+                                    >
+                                        <Pencil className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveRecentItem(item.id)}
+                                        disabled={isItemActionLoading || !canEdit}
+                                        className="p-2 rounded border border-red-300 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title="Remove this item"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -1201,6 +1323,146 @@ export default function AddItemsPage() {
                 </div>
             </div>
             </>
+            )}
+
+            {/* Edit session item modal */}
+            {editItemModal && (
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditItemModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-sm font-semibold text-gray-900">Edit Item — {editItemModal.ndc}</h2>
+                            <button type="button" onClick={() => setEditItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                        </div>
+                        <div className="px-4 py-3 space-y-2.5">
+                            <p className="text-[11px] text-gray-500">{editItemModal.proprietaryName || editItemModal.genericName || '—'}</p>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-0.5">Expiration Date</label>
+                                <input
+                                    type="date"
+                                    value={editItemForm.expirationDate}
+                                    onChange={e => setEditItemForm({ ...editItemForm, expirationDate: e.target.value })}
+                                    disabled={!canEdit}
+                                    className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500 ${!canEdit ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-0.5">Quantity</label>
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <label className="block text-[10px] text-gray-500 mb-0.5">Package Size (units/pkg)</label>
+                                        <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                            {editItemForm.fullPackageSize || '—'}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] text-gray-500 mb-0.5">Qty Returned (units)</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max={editItemForm.fullPackageSize || undefined}
+                                            value={editItemForm.fullPackageQtyReturned}
+                                            onChange={e => {
+                                                const qty = e.target.value;
+                                                const pkgSize = parseInt(editItemForm.fullPackageSize, 10) || 0;
+                                                const units = parseInt(qty, 10) || 0;
+                                                const pct =
+                                                    pkgSize > 0 && units > 0 && units < pkgSize
+                                                        ? String(Math.round((units / pkgSize) * 10000) / 100)
+                                                        : '';
+                                                setEditItemForm({ ...editItemForm, fullPackageQtyReturned: qty, partialPercentage: pct });
+                                            }}
+                                            disabled={!canEdit}
+                                            className={`w-full px-2 py-1.5 text-center text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500 ${!canEdit ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                        />
+                                    </div>
+                                </div>
+                                {editItemForm.fullPackageSize && editItemForm.fullPackageQtyReturned && (() => {
+                                    const pkgSize = parseInt(editItemForm.fullPackageSize, 10) || 0;
+                                    const units = parseInt(editItemForm.fullPackageQtyReturned, 10) || 0;
+                                    const kind = getPackageKindFromUnits(pkgSize, units);
+                                    const partialDetail = formatPartialReturnDetail(
+                                        { fullPackageSize: pkgSize, isPartial: kind === 'partial' },
+                                        units,
+                                    );
+                                    return (
+                                        <div className="flex flex-wrap items-center gap-2 pt-1.5">
+                                            {kind === 'full' && (
+                                                <Badge variant="success">
+                                                    <span className="text-[10px]">Full Package — {units} units</span>
+                                                </Badge>
+                                            )}
+                                            {kind === 'partial' && (
+                                                <>
+                                                    <Badge variant="warning">
+                                                        <span className="text-[10px]">Partial Return</span>
+                                                    </Badge>
+                                                    {partialDetail && (
+                                                        <span className="text-[10px] text-gray-500">{partialDetail}</span>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                            {editItemForm.fullPackageSize &&
+                                editItemForm.fullPackageQtyReturned &&
+                                getPackageKindFromUnits(
+                                    parseInt(editItemForm.fullPackageSize, 10) || 0,
+                                    parseInt(editItemForm.fullPackageQtyReturned, 10) || 0,
+                                ) === 'partial' && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">Partial Percentage</label>
+                                    <input
+                                        type="number"
+                                        min="0.01"
+                                        max="99.99"
+                                        step="0.01"
+                                        value={editItemForm.partialPercentage}
+                                        onChange={e => {
+                                            const pctStr = e.target.value;
+                                            const pkgSize = parseInt(editItemForm.fullPackageSize, 10) || 0;
+                                            const pct = parseFloat(pctStr) || 0;
+                                            const units =
+                                                pkgSize > 0 && pct > 0
+                                                    ? String(Math.min(pkgSize - 1, Math.max(1, Math.round((pct / 100) * pkgSize))))
+                                                    : editItemForm.fullPackageQtyReturned;
+                                            setEditItemForm({
+                                                ...editItemForm,
+                                                partialPercentage: pctStr,
+                                                fullPackageQtyReturned: units,
+                                            });
+                                        }}
+                                        disabled={!canEdit}
+                                        className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500 ${!canEdit ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                    />
+                                </div>
+                            )}
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-0.5">Memo</label>
+                                <textarea
+                                    value={editItemForm.memo}
+                                    onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })}
+                                    rows={2}
+                                    disabled={!canEdit}
+                                    className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none ${!canEdit ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                    placeholder="Optional memo"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                            <button type="button" onClick={() => setEditItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button
+                                type="button"
+                                onClick={handleUpdateSessionItem}
+                                disabled={isItemActionLoading || !canEdit}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors"
+                            >
+                                {isItemActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save Changes'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
         </div>

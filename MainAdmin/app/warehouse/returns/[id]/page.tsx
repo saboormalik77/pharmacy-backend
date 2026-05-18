@@ -37,6 +37,13 @@ import { unassignSingleReturn } from '@/lib/store/batchSlice';
 import { checkReturnability } from '@/lib/store/policiesSlice';
 import { ReturnTransaction, ReturnTransactionItem, WineCellarItem } from '@/lib/types';
 import { apiClient } from '@/lib/api/apiClient';
+import {
+    formatPartialReturnDetail,
+    formatUnitsReturnedForForm,
+    getPackageKindFromUnits,
+    getReturnItemPackageKind,
+    getReturnItemUnitsReturned,
+} from '@/lib/utils/returnItemQuantity';
 
 // ── Helpers ────────────────────────────────────────────────────
 
@@ -442,7 +449,7 @@ export default function ReturnDetailPage() {
         if (editItemModal) {
             setEditItemForm({
                 fullPackageSize: editItemModal.fullPackageSize ? String(editItemModal.fullPackageSize) : '',
-                fullPackageQtyReturned: editItemModal.fullPackageQtyReturned ? String(editItemModal.fullPackageQtyReturned) : (editItemModal.quantity ? String(editItemModal.quantity) : ''),
+                fullPackageQtyReturned: formatUnitsReturnedForForm(editItemModal),
                 standardPrice: editItemModal.standardPrice != null ? String(editItemModal.standardPrice) : '',
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
@@ -1283,9 +1290,23 @@ export default function ReturnDetailPage() {
                                             </td>
                                             <td className="px-3 py-3 text-xs text-center w-20 whitespace-nowrap" style={{ color: 'var(--foreground)' }}>
                                                 {(() => {
-                                                    const qtyReturned = item.fullPackageQtyReturned ?? item.quantity;
-                                                    const displayQty = (item.fullPackageQtyReturned && item.fullPackageSize && item.fullPackageQtyReturned === item.fullPackageSize) ? 1 : qtyReturned;
-                                                    return <>{displayQty}{item.isPartial && <span className="ml-0.5" style={{ color: 'var(--tertiary)' }}>P</span>}</>;
+                                                    const units = getReturnItemUnitsReturned(item);
+                                                    const kind = getReturnItemPackageKind(item);
+                                                    const partialDetail = formatPartialReturnDetail(item);
+                                                    return (
+                                                        <div className="flex flex-col gap-0.5 items-center">
+                                                            <span className="text-xs font-medium" style={{ color: 'var(--foreground)' }}>{units || '—'}</span>
+                                                            {kind === 'full' && (
+                                                                <Badge variant="success"><span className="text-[10px]">Full Package</span></Badge>
+                                                            )}
+                                                            {kind === 'partial' && (
+                                                                <Badge variant="warning"><span className="text-[10px]">Partial</span></Badge>
+                                                            )}
+                                                            {partialDetail && (
+                                                                <span className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{partialDetail}</span>
+                                                            )}
+                                                        </motion.div>
+                                                    );
                                                 })()}
                                             </td>
                                             <td className="px-3 py-3 text-xs font-mono w-28 max-w-[7rem]" style={{ color: 'var(--on-surface-variant)' }}>
@@ -1361,7 +1382,7 @@ export default function ReturnDetailPage() {
                                     <label className="block text-[11px] font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>Quantity</label>
                                     <div className="grid grid-cols-3 gap-2 text-xs">
                                         <div>
-                                            <label className="block text-[10px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>Pkg Size</label>
+                                            <label className="block text-[10px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>Package Size (units/pkg)</label>
                                             <div className="text-center py-1.5 border rounded" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                                                 {editItemForm.fullPackageSize || '—'}
                                             </div>
@@ -1380,10 +1401,16 @@ export default function ReturnDetailPage() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>#</label>
-                                            <div className="text-center py-1.5 border rounded" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
-                                                {editItemForm.fullPackageQtyReturned && editItemForm.fullPackageSize ? 
-                                                    Math.ceil(Number(editItemForm.fullPackageQtyReturned) / Number(editItemForm.fullPackageSize)) : '—'}
+                                            <label className="block text-[10px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>Return Type</label>
+                                            <div className="flex flex-col items-center justify-center gap-1 py-1.5 border rounded min-h-[34px]" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                                {(() => {
+                                                    const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
+                                                    const units = parseInt(editItemForm.fullPackageQtyReturned) || 0;
+                                                    const kind = getPackageKindFromUnits(pkgSize, units);
+                                                    if (kind === 'full') return <Badge variant="success"><span className="text-[10px]">Full</span></Badge>;
+                                                    if (kind === 'partial') return <Badge variant="warning"><span className="text-[10px]">Partial</span></Badge>;
+                                                    return <span className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>—</span>;
+                                                })()}
                                             </div>
                                         </div>
                                     </div>
