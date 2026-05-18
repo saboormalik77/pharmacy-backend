@@ -364,3 +364,75 @@ export const listPaidGroupedByReturn = async (filters: {
     pagination: data.pagination,
   };
 };
+
+// ============================================================
+// Download credit memo file from storage
+// ============================================================
+
+function extractDocumentsStoragePath(fileUrl: string): string {
+  try {
+    const url = new URL(fileUrl);
+    const pathParts = url.pathname.split('/');
+    const documentsIndex = pathParts.findIndex((part) => part === 'documents');
+    if (documentsIndex === -1 || documentsIndex === pathParts.length - 1) {
+      throw new Error('Invalid file URL format');
+    }
+    return pathParts.slice(documentsIndex + 1).join('/').split('?')[0];
+  } catch {
+    const urlParts = fileUrl.split('/');
+    const pathIndex = urlParts.findIndex((part) => part === 'documents');
+    if (pathIndex === -1 || pathIndex === urlParts.length - 1) {
+      throw new AppError('Invalid credit memo file URL format', 400);
+    }
+    return urlParts.slice(pathIndex + 1).join('/').split('?')[0];
+  }
+}
+
+export const downloadCreditMemo = async (
+  debitMemoId: string
+): Promise<{ buffer: Buffer; fileName: string; contentType: string }> => {
+  const sb = ensureAdmin();
+
+  const { data: memo, error } = await sb
+    .from('debit_memos')
+    .select('id, memo_number, credit_memo_url')
+    .eq('id', debitMemoId)
+    .single();
+
+  if (error || !memo) {
+    throw new AppError('Debit memo not found', 404);
+  }
+
+  const creditMemoUrl = (memo as { credit_memo_url: string | null }).credit_memo_url;
+  if (!creditMemoUrl || String(creditMemoUrl).trim() === '') {
+    throw new AppError('No credit memo file on record for this debit memo', 404);
+  }
+
+  const filePath = extractDocumentsStoragePath(creditMemoUrl);
+  const { data: fileData, error: downloadError } = await sb.storage
+    .from('documents')
+    .download(filePath);
+
+  if (downloadError || !fileData) {
+    throw new AppError(
+      `Failed to download credit memo: ${downloadError?.message || 'Unknown error'}`,
+      400
+    );
+  }
+
+  const arrayBuffer = await fileData.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const pathSegments = filePath.split('/');
+  const storedName = pathSegments[pathSegments.length - 1] || 'credit-memo.pdf';
+  const fileName = storedName.includes('-')
+    ? storedName.slice(storedName.indexOf('-') + 1)
+    : storedName;
+  const memoNumber = (memo as { memo_number: string }).memo_number;
+  const safeMemoNumber = String(memoNumber || debitMemoId).replace(/[^a-zA-Z0-9.-]/g, '_');
+
+  return {
+    buffer,
+    fileName: fileName || `credit-memo-${safeMemoNumber}.pdf`,
+    contentType: fileData.type || 'application/pdf',
+  };
+};

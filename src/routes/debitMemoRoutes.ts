@@ -27,6 +27,7 @@ import {
   recordPaymentHandler,
   updatePaymentHandler,
   sendReminderHandler,
+  downloadCreditMemoHandler,
 } from '../controllers/paymentTrackingController';
 
 const router = Router();
@@ -131,6 +132,8 @@ router.get('/unpaid/grouped-by-return', listUnpaidGroupedByReturnHandler);
  *         description: Paid memos grouped by return transaction
  */
 router.get('/paid/grouped-by-return', listPaidGroupedByReturnHandler);
+
+router.get('/:id/credit-memo/download', downloadCreditMemoHandler);
 
 /**
  * @swagger

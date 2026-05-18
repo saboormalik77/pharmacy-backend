@@ -6,7 +6,7 @@ import {
     Search, Loader2, ChevronLeft, ChevronRight, X,
     DollarSign, Clock, AlertCircle, Send, CreditCard,
     TrendingUp, TrendingDown, BarChart3, CheckCircle, FileText, Upload,
-    Sparkles, AlertTriangle, Info, Package,
+    Sparkles, AlertTriangle, Info, Package, Download,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -96,6 +96,7 @@ export default function UnpaidMemosPage() {
     const [reminderEmail, setReminderEmail] = useState('');
 
     const [toasts, setToasts] = useState<Toast[]>([]);
+    const [downloadingCreditMemoId, setDownloadingCreditMemoId] = useState<string | null>(null);
 
     const addToast = useCallback((message: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message, type }]);
@@ -103,6 +104,47 @@ export default function UnpaidMemosPage() {
     const removeToast = useCallback((id: string) => {
         setToasts(prev => prev.filter(t => t.id !== id));
     }, []);
+
+    const handleDownloadCreditMemo = async (memo: DebitMemo) => {
+        if (!memo.creditMemoUrl) {
+            addToast('No credit memo file available for this memo', 'warning');
+            return;
+        }
+        setDownloadingCreditMemoId(memo.id);
+        try {
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            const token = cookieUtils.getAuthToken();
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            const res = await fetch(
+                `${baseUrl}/admin/debit-memos/${encodeURIComponent(memo.id)}/credit-memo/download`,
+                { headers: { Authorization: `Bearer ${token}` } },
+            );
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ message: 'Download failed' }));
+                throw new Error(err.message || 'Download failed');
+            }
+            const blob = await res.blob();
+            const disposition = res.headers.get('Content-Disposition');
+            let fileName = `credit-memo-${memo.memoNumber}.pdf`;
+            if (disposition) {
+                const match = disposition.match(/filename="?([^";\n]+)"?/);
+                if (match?.[1]) fileName = match[1];
+            }
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (e: unknown) {
+            const message = e instanceof Error ? e.message : 'Failed to download credit memo';
+            addToast(message, 'error');
+        } finally {
+            setDownloadingCreditMemoId(null);
+        }
+    };
 
     // Fetch unpaid on tab + filter changes (grouped by return)
     useEffect(() => {
@@ -750,6 +792,7 @@ export default function UnpaidMemosPage() {
                                                         <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Asked</th>
                                                         <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Received</th>
                                                         <th className="text-center px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Status</th>
+                                                        <th className="text-center px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Credit Memo</th>
                                                         <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Actions</th>
                                                     </tr>
                                                 </thead>
@@ -765,6 +808,26 @@ export default function UnpaidMemosPage() {
                                                                 <Badge variant="success">
                                                                     <span className="text-[10px]">paid</span>
                                                                 </Badge>
+                                                            </td>
+                                                            <td className="px-3 py-2 text-center">
+                                                                {memo.creditMemoUrl ? (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleDownloadCreditMemo(memo)}
+                                                                        disabled={downloadingCreditMemoId === memo.id}
+                                                                        className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40 disabled:opacity-50"
+                                                                        style={{ backgroundColor: 'var(--surface-container-lowest)', color: 'var(--secondary)', borderColor: 'var(--outline-variant)' }}
+                                                                    >
+                                                                        {downloadingCreditMemoId === memo.id ? (
+                                                                            <Loader2 className="w-3 h-3 animate-spin" />
+                                                                        ) : (
+                                                                            <Download className="w-3 h-3" />
+                                                                        )}
+                                                                        Download
+                                                                    </button>
+                                                                ) : (
+                                                                    <span className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>—</span>
+                                                                )}
                                                             </td>
                                                             <td className="px-3 py-2">
                                                                 <div className="flex items-center justify-end">

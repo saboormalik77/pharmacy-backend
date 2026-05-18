@@ -356,3 +356,18 @@ export const listPaidGroupedByReturnHandler = catchAsync(
     });
   }
 );
+
+// ============================================================
+// GET /api/admin/debit-memos/:id/credit-memo/download — Download credit memo PDF
+// ============================================================
+export const downloadCreditMemoHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const fileData = await paymentTrackingService.downloadCreditMemo(req.params.id);
+
+    res.setHeader('Content-Type', fileData.contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${fileData.fileName}"`);
+    res.setHeader('Content-Length', fileData.buffer.length);
+
+    res.status(200).send(fileData.buffer);
+  }
+);

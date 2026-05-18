@@ -36,6 +36,7 @@ AS $function$
     'paymentReceivedAt',  d.payment_received_at,
     'paymentReference',   d.payment_reference,
     'paymentNotes',       d.payment_notes,
+    'creditMemoUrl',      d.credit_memo_url,
     'createdAt',          d.created_at,
     'updatedAt',          d.updated_at
   );

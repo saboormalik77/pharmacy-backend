@@ -74,6 +74,7 @@ BEGIN
                 'paymentReceivedAt', dm.payment_received_at,
                 'paymentReference',  dm.payment_reference,
                 'paymentNotes',      dm.payment_notes,
+                'creditMemoUrl',     dm.credit_memo_url,
                 'createdAt',         dm.created_at,
                 'updatedAt',         dm.updated_at
               )
