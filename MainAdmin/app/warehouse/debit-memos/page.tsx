@@ -21,6 +21,7 @@ import {
     clearError, clearCurrentMemo,
 } from '@/lib/store/batchSlice';
 import { DebitMemo, DebitMemoItem, ReturnWithMemos } from '@/lib/types';
+import { sumMemosTotalAskValue, sumMemosTotalItems } from '@/lib/utils/paymentTracking';
 
 const PAYMENT_OPTIONS = [
     { value: '', label: 'All Payments' },
@@ -339,10 +340,10 @@ export default function DebitMemosPage() {
                                             {returnGroup.totalMemos} memo{returnGroup.totalMemos === 1 ? '' : 's'}
                                         </span>
                                         <span>·</span>
-                                        <span>{returnGroup.totalItems} items</span>
+                                        <span>{sumMemosTotalItems(returnGroup.memos)} items</span>
                                         <span>·</span>
                                         <span className="font-medium" style={{ color: 'var(--foreground)' }}>
-                                            {formatCurrency(returnGroup.totalAskValue)} ask
+                                            {formatCurrency(sumMemosTotalAskValue(returnGroup.memos))} ask
                                         </span>
                                     </div>
                                 </div>

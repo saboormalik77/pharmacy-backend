@@ -25,6 +25,7 @@ import {
     clearError as clearGroupError,
 } from '@/lib/store/shipmentGroupSlice';
 import { DebitMemo, RAEmailTemplate, ReturnWithMemos } from '@/lib/types';
+import { sumMemosTotalAskValue, sumMemosTotalItems } from '@/lib/utils/paymentTracking';
 
 // ── Helpers ────────────────────────────────────────────────────
 
@@ -862,10 +863,10 @@ export default function RATrackingPage() {
                                             {returnGroup.totalMemos} memo{returnGroup.totalMemos === 1 ? '' : 's'}
                                         </span>
                                         <span>·</span>
-                                        <span>{returnGroup.totalItems} items</span>
+                                        <span>{sumMemosTotalItems(returnGroup.memos)} items</span>
                                         <span>·</span>
                                         <span className="font-medium" style={{ color: 'var(--foreground)' }}>
-                                            {formatCurrency(returnGroup.totalAskValue)} ask
+                                            {formatCurrency(sumMemosTotalAskValue(returnGroup.memos))} ask
                                         </span>
                                     </div>
                                 </div>

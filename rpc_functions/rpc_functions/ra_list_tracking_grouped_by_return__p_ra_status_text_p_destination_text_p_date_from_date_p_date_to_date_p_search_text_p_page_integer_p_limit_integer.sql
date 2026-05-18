@@ -85,8 +85,58 @@ BEGIN
           'status',         rt.status,
           'returnCreatedAt', rt.created_at,
           'totalMemos',     COUNT(DISTINCT dm.id),
-          'totalItems',     SUM(dm.total_items),
-          'totalAskValue',  SUM(dm.total_ask_value),
+          'totalItems',     (
+            SELECT COALESCE(SUM(t.total_items), 0)
+              FROM (
+                SELECT DISTINCT dm2.id, dm2.total_items
+                  FROM debit_memos dm2
+                  JOIN debit_memo_items dmi2 ON dmi2.debit_memo_id = dm2.id
+                  JOIN return_transaction_items rti2 ON rti2.id = dmi2.transaction_item_id
+                 WHERE rti2.transaction_id = rt.id
+                   AND (p_destination IS NULL OR dm2.destination = p_destination)
+                   AND (p_ra_status IS NULL OR dm2.ra_status = p_ra_status)
+                   AND (p_date_from IS NULL OR dm2.created_at >= p_date_from)
+                   AND (p_date_to IS NULL OR dm2.created_at <= p_date_to + INTERVAL '1 day')
+                   AND (
+                     p_search IS NULL
+                     OR dm2.memo_number  ILIKE '%' || p_search || '%'
+                     OR dm2.labeler_name ILIKE '%' || p_search || '%'
+                     OR dm2.ra_number    ILIKE '%' || p_search || '%'
+                     OR rt.license_plate ILIKE '%' || p_search || '%'
+                     OR EXISTS (
+                       SELECT 1 FROM pharmacy p
+                        WHERE p.id = rt.pharmacy_id
+                          AND p.pharmacy_name ILIKE '%' || p_search || '%'
+                     )
+                   )
+              ) t
+          ),
+          'totalAskValue',  (
+            SELECT COALESCE(SUM(t.total_ask_value), 0)
+              FROM (
+                SELECT DISTINCT dm2.id, dm2.total_ask_value
+                  FROM debit_memos dm2
+                  JOIN debit_memo_items dmi2 ON dmi2.debit_memo_id = dm2.id
+                  JOIN return_transaction_items rti2 ON rti2.id = dmi2.transaction_item_id
+                 WHERE rti2.transaction_id = rt.id
+                   AND (p_destination IS NULL OR dm2.destination = p_destination)
+                   AND (p_ra_status IS NULL OR dm2.ra_status = p_ra_status)
+                   AND (p_date_from IS NULL OR dm2.created_at >= p_date_from)
+                   AND (p_date_to IS NULL OR dm2.created_at <= p_date_to + INTERVAL '1 day')
+                   AND (
+                     p_search IS NULL
+                     OR dm2.memo_number  ILIKE '%' || p_search || '%'
+                     OR dm2.labeler_name ILIKE '%' || p_search || '%'
+                     OR dm2.ra_number    ILIKE '%' || p_search || '%'
+                     OR rt.license_plate ILIKE '%' || p_search || '%'
+                     OR EXISTS (
+                       SELECT 1 FROM pharmacy p
+                        WHERE p.id = rt.pharmacy_id
+                          AND p.pharmacy_name ILIKE '%' || p_search || '%'
+                     )
+                   )
+              ) t
+          ),
           'memos',          COALESCE(
             jsonb_agg(
               DISTINCT jsonb_build_object(

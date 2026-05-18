@@ -15,9 +15,12 @@ import { useDebounce } from '@/lib/hooks/useDebounce';
 import {
     fetchUnpaidMemos, fetchUnpaidGroupedByReturn, recordPayment, updatePayment, sendPaymentReminder,
     fetchAskVsReceived, fetchManufacturerSummary, fetchPaidMemos, fetchPaidGroupedByReturn, clearError, clearAiAnalysis,
+    ReturnWithPaidMemos,
+    ReturnWithUnpaidMemos,
 } from '@/lib/store/paymentTrackingSlice';
 import { DebitMemo, AskVsReceivedRow, ManufacturerPaymentSummary, ReturnWithMemos } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
+import { getMemoOutstanding, sumMemosAmountReceived, sumMemosOutstanding } from '@/lib/utils/paymentTracking';
 import { apiClient } from '@/lib/api/apiClient';
 
 const PAGE_SIZE = 10;
@@ -538,7 +541,7 @@ export default function UnpaidMemosPage() {
                             </div>
                         ) : (
                             <div>
-                                {unpaidGroupedReturns.map((returnGroup) => (
+                                {unpaidGroupedReturns.map((returnGroup: ReturnWithUnpaidMemos) => (
                                     <div
                                         key={returnGroup.returnId}
                                         className="border-b last:border-b-0"
@@ -573,7 +576,7 @@ export default function UnpaidMemosPage() {
                                                 </span>
                                                 <span>·</span>
                                                 <span className="font-medium" style={{ color: 'var(--error)' }}>
-                                                    {fmt((returnGroup as any).totalOutstanding)} outstanding
+                                                    {fmt(sumMemosOutstanding(returnGroup.memos))} outstanding
                                                 </span>
                                             </div>
                                         </div>
@@ -596,7 +599,7 @@ export default function UnpaidMemosPage() {
                                                 </thead>
                                                 <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                                     {returnGroup.memos.map(memo => {
-                                                        const outstanding = (memo as any).outstandingAmount ?? (memo.amountRequested - memo.amountReceived);
+                                                        const outstanding = getMemoOutstanding(memo);
                                                         const days = (memo as any).daysOutstanding ?? 0;
                                                         return (
                                                             <tr key={memo.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
@@ -741,7 +744,7 @@ export default function UnpaidMemosPage() {
                             </div>
                         ) : (
                             <div>
-                                {paidGroupedReturns.map((returnGroup) => (
+                                {paidGroupedReturns.map((returnGroup: ReturnWithPaidMemos) => (
                                     <div
                                         key={returnGroup.returnId}
                                         className="border-b last:border-b-0"
@@ -776,7 +779,7 @@ export default function UnpaidMemosPage() {
                                                 </span>
                                                 <span>·</span>
                                                 <span className="font-medium" style={{ color: 'var(--secondary)' }}>
-                                                    {fmt((returnGroup as any).totalReceived)} received
+                                                    {fmt(sumMemosAmountReceived(returnGroup.memos))} received
                                                 </span>
                                             </div>
                                         </div>
