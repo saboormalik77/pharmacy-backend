@@ -20,6 +20,35 @@ import {
     FetchPoliciesParams,
 } from '@/lib/store/policiesSlice';
 import { ManufacturerPolicyCreatePayload, ManufacturerPolicy, ReturnPolicyCreatePayload, PolicyNotePayload } from '@/lib/types';
+import {
+    LABELER_TYPES, LABELER_TYPE_LABELS,
+    REIMBURSEMENT_TYPES, REIMBURSEMENT_TYPE_LABELS,
+    RETURN_WINDOW_LABELS,
+    validateLabelerForm,
+    normaliseLabelerPayload,
+    roundDiscountRate,
+    validateMonthsExpiration,
+    validateLabelerId,
+    validateLabelerType,
+    validateAveragePayPercent,
+    validateAverageDaysToPay,
+    validateLabelerName,
+    validateAddressLine,
+    validateCity,
+    validateState,
+    validateZip,
+    validateContactName,
+    validateUSPhone,
+    validateEmail,
+    validateNotes,
+    validateDestination,
+    validatePolicyNumber,
+    validatePolicyDescription,
+    validateDiscountRate,
+    validateReimbursementType,
+    validateReturnWindowMode,
+    type LabelerFormErrors,
+} from '@/lib/validation/labeler';
 
 interface ReverseDistributorOption {
     id: string;
@@ -35,16 +64,28 @@ const US_STATES = [
 
 const INITIAL_RETURN_POLICY = {
     destination: '', autoRaEmail: '', policyNumber: undefined as number | undefined,
-    policyDescription: '', discountRate: undefined as number | undefined,
-    partialsAccepted: false, reimbursementType: 'batch' as 'batch' | 'per_item',
-    returnableWithinPolicyPeriod: true,
+    policyDescription: '',
+    monthsBeforeExpiration: undefined as number | undefined,
+    monthsAfterExpiration: undefined as number | undefined,
+    discountRate: undefined as number | undefined,
+    partialsAccepted: false as boolean,
+    reimbursementType: 'batch' as string,
+    returnableWithinPolicyPeriod: 'standard' as string,
 };
 
 const INITIAL_PARTIAL_POLICY = {
     policyNumber: undefined as number | undefined,
     policyDescription: '',
-    returnableWithinPolicyPeriod: true,
+    monthsBeforeExpiration: undefined as number | undefined,
+    monthsAfterExpiration: undefined as number | undefined,
+    returnableWithinPolicyPeriod: 'standard' as string,
 };
+
+function errClass(hasError: boolean): string {
+    return hasError
+        ? 'border-red-400 focus:ring-red-400'
+        : 'border-[var(--outline-variant)] focus:ring-primary-500';
+}
 
 export default function PoliciesPage() {
     const router = useRouter();
@@ -66,6 +107,7 @@ export default function PoliciesPage() {
     const [newReturnPolicy, setNewReturnPolicy] = useState({ ...INITIAL_RETURN_POLICY });
     const [partialPolicy, setPartialPolicy] = useState({ ...INITIAL_PARTIAL_POLICY });
     const [newNote, setNewNote] = useState('');
+    const [formErrors, setFormErrors] = useState<LabelerFormErrors>({});
 
     const [reverseDistributors, setReverseDistributors] = useState<ReverseDistributorOption[]>([]);
     const [loadingDistributors, setLoadingDistributors] = useState(false);
@@ -90,6 +132,65 @@ export default function PoliciesPage() {
     };
     const removeToast = (id: string) => setToasts(prev => prev.filter(t => t.id !== id));
 
+    /** Validate a single field on change. Empty value clears the error without showing "required". */
+    const validateOnChange = useCallback((
+        key: keyof LabelerFormErrors,
+        rawValue: string | number | undefined | null,
+    ) => {
+        if (rawValue == null || rawValue === '') {
+            setFormErrors(prev => ({ ...prev, [key]: '' }));
+            return;
+        }
+        const s = String(rawValue);
+        const asFloat = typeof rawValue === 'number' ? rawValue : parseFloat(s);
+        const asInt   = typeof rawValue === 'number' ? rawValue : parseInt(s, 10);
+        let result: { valid: boolean; error: string | null } = { valid: true, error: null };
+        switch (key) {
+            case 'labelerId':                    result = validateLabelerId(s); break;
+            case 'labelerType':                  result = validateLabelerType(s); break;
+            case 'averagePayPercent':            result = validateAveragePayPercent(asFloat); break;
+            case 'averageDaysToPay':             result = validateAverageDaysToPay(asInt); break;
+            case 'manufacturerName':             result = validateLabelerName(s); break;
+            case 'address1':                     result = validateAddressLine(s, 'Address 1'); break;
+            case 'address2':                     result = validateAddressLine(s, 'Address 2'); break;
+            case 'city':                         result = validateCity(s); break;
+            case 'state':                        result = validateState(s); break;
+            case 'zip':                          result = validateZip(s); break;
+            case 'mainContact':                  result = validateContactName(s, 'Main Contact'); break;
+            case 'mainPhone':                    result = validateUSPhone(s, 'Main Phone'); break;
+            case 'fax':                          result = validateUSPhone(s, 'Fax'); break;
+            case 'creditRequestEmail':           result = validateEmail(s, 'Credit Request Email'); break;
+            case 'contact2Name':                 result = validateContactName(s, 'Contact 2'); break;
+            case 'contact2Phone':                result = validateUSPhone(s, 'Phone 2'); break;
+            case 'contact2Email':                result = validateEmail(s, 'Email 2'); break;
+            case 'notes':                        result = validateNotes(s); break;
+            case 'autoRaEmail':                  result = validateEmail(s, 'Auto RA Email'); break;
+            case 'destination':                  result = validateDestination(s, reverseDistributors.map(d => d.name)); break;
+            case 'policyNumber':                 result = validatePolicyNumber(s); break;
+            case 'policyDescription':            result = validatePolicyDescription(s); break;
+            case 'monthsBeforeExpiration':       result = validateMonthsExpiration(asInt, 'Months Before Expiration'); break;
+            case 'monthsAfterExpiration':        result = validateMonthsExpiration(asInt, 'Months After Expiration'); break;
+            case 'discountRate':                 result = validateDiscountRate(asFloat); break;
+            case 'reimbursementType':            result = validateReimbursementType(s); break;
+            case 'returnableWithinPolicyPeriod': result = validateReturnWindowMode(s); break;
+            case 'partialPolicyNumber':               result = validatePolicyNumber(s, 'Partial Policy #'); break;
+            case 'partialPolicyDescription':          result = validatePolicyDescription(s, 'Partial Policy Description'); break;
+            case 'partialMonthsBeforeExpiration':     result = validateMonthsExpiration(asInt, 'Partial Months Before Expiration'); break;
+            case 'partialMonthsAfterExpiration':      result = validateMonthsExpiration(asInt, 'Partial Months After Expiration'); break;
+            case 'partialReturnWindowMode':           result = validateReturnWindowMode(s); break;
+        }
+        setFormErrors(prev => ({ ...prev, [key]: result.valid ? '' : result.error ?? '' }));
+    }, [reverseDistributors]);
+
+    const closeAddModal = () => {
+        setAddModal(false);
+        setNewPolicy({ labelerId: '', manufacturerName: '', labelerType: 'generic' });
+        setNewReturnPolicy({ ...INITIAL_RETURN_POLICY });
+        setPartialPolicy({ ...INITIAL_PARTIAL_POLICY });
+        setNewNote('');
+        setFormErrors({});
+    };
+
     useEffect(() => {
         const params: FetchPoliciesParams = { page, limit: 10 };
         if (debouncedSearch) params.search = debouncedSearch;
@@ -101,46 +202,94 @@ export default function PoliciesPage() {
     useEffect(() => { setPage(1); }, [debouncedSearch, labelerType, destination]);
 
     const handleAdd = async () => {
-        if (!newPolicy.labelerId.trim()) {
-            showToast('Labeler ID is required.', 'error');
-            return;
-        }
-        if (newPolicy.labelerId.trim().length > 10) {
-            showToast('Labeler ID must be 10 characters or fewer (e.g. 00032).', 'error');
-            return;
-        }
-        if (!newPolicy.manufacturerName.trim()) {
-            showToast('Manufacturer Name is required.', 'error');
-            return;
-        }
-        const returnFieldsFilled =
-            newReturnPolicy.autoRaEmail ||
-            newReturnPolicy.policyNumber ||
-            newReturnPolicy.policyDescription ||
-            newReturnPolicy.discountRate != null;
-        if (returnFieldsFilled && !newReturnPolicy.destination) {
-            showToast('Please select a Destination in the Labeler Return Information section.', 'error');
-            return;
-        }
-        if (newReturnPolicy.discountRate != null && (newReturnPolicy.discountRate < 0 || newReturnPolicy.discountRate > 1)) {
-            showToast('Discount Rate must be between 0 and 1 (e.g. 0.30 for 30%).', 'error');
-            return;
-        }
+        const errors = validateLabelerForm(
+            {
+                labelerId:          newPolicy.labelerId,
+                labelerType:        newPolicy.labelerType ?? 'generic',
+                averagePayPercent:  newPolicy.averagePayPercent,
+                averageDaysToPay:   newPolicy.averageDaysToPay,
+                manufacturerName:   newPolicy.manufacturerName,
+                address1:           newPolicy.address1,
+                address2:           newPolicy.address2,
+                city:               newPolicy.city,
+                state:              newPolicy.state,
+                zip:                newPolicy.zip,
+                mainContact:        newPolicy.mainContact,
+                mainPhone:          newPolicy.mainPhone,
+                fax:                newPolicy.fax,
+                creditRequestEmail: newPolicy.creditRequestEmail,
+                contact2Name:       newPolicy.contact2Name,
+                contact2Phone:      newPolicy.contact2Phone,
+                contact2Email:      newPolicy.contact2Email,
+                notes:              newNote,
+            },
+            {
+                destination:                    newReturnPolicy.destination,
+                autoRaEmail:                    newReturnPolicy.autoRaEmail,
+                policyNumber:                   newReturnPolicy.policyNumber,
+                policyDescription:              newReturnPolicy.policyDescription,
+                monthsBeforeExpiration:         newReturnPolicy.monthsBeforeExpiration,
+                monthsAfterExpiration:          newReturnPolicy.monthsAfterExpiration,
+                discountRate:                   newReturnPolicy.discountRate,
+                partialsAccepted:               newReturnPolicy.partialsAccepted,
+                reimbursementType:              newReturnPolicy.reimbursementType,
+                returnableWithinPolicyPeriod:   newReturnPolicy.returnableWithinPolicyPeriod,
+            },
+            {
+                policyNumber:                   partialPolicy.policyNumber,
+                policyDescription:              partialPolicy.policyDescription,
+                monthsBeforeExpiration:         partialPolicy.monthsBeforeExpiration,
+                monthsAfterExpiration:          partialPolicy.monthsAfterExpiration,
+                returnableWithinPolicyPeriod:   partialPolicy.returnableWithinPolicyPeriod,
+            },
+            { validDestinations: reverseDistributors.map(d => d.name) },
+        );
 
-        const result = await dispatch(createPolicy(newPolicy));
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            showToast(Object.values(errors)[0]!, 'error');
+            return;
+        }
+        setFormErrors({});
+
+        // Normalise before sending to API
+        const normalised = normaliseLabelerPayload({
+            labelerId:          newPolicy.labelerId,
+            labelerType:        newPolicy.labelerType ?? 'generic',
+            averagePayPercent:  newPolicy.averagePayPercent,
+            averageDaysToPay:   newPolicy.averageDaysToPay,
+            manufacturerName:   newPolicy.manufacturerName,
+            address1:           newPolicy.address1,
+            address2:           newPolicy.address2,
+            city:               newPolicy.city,
+            state:              newPolicy.state,
+            zip:                newPolicy.zip,
+            mainContact:        newPolicy.mainContact,
+            mainPhone:          newPolicy.mainPhone,
+            fax:                newPolicy.fax,
+            creditRequestEmail: newPolicy.creditRequestEmail,
+            contact2Name:       newPolicy.contact2Name,
+            contact2Phone:      newPolicy.contact2Phone,
+            contact2Email:      newPolicy.contact2Email,
+            notes:              newNote,
+        });
+
+        const result = await dispatch(createPolicy(normalised as ManufacturerPolicyCreatePayload));
         if (createPolicy.fulfilled.match(result)) {
             const createdId = result.payload?.id;
 
             if (createdId && newReturnPolicy.destination) {
                 const rpPayload: ReturnPolicyCreatePayload = {
-                    destination: newReturnPolicy.destination,
-                    autoRaEmail: newReturnPolicy.autoRaEmail || undefined,
-                    policyNumber: newReturnPolicy.policyNumber,
-                    policyDescription: newReturnPolicy.policyDescription || undefined,
-                    discountRate: newReturnPolicy.discountRate,
-                    partialsAccepted: false,
-                    reimbursementType: newReturnPolicy.reimbursementType,
-                    returnableWithinPolicyPeriod: newReturnPolicy.returnableWithinPolicyPeriod,
+                    destination:                  newReturnPolicy.destination,
+                    autoRaEmail:                  newReturnPolicy.autoRaEmail || undefined,
+                    policyNumber:                 newReturnPolicy.policyNumber,
+                    policyDescription:            newReturnPolicy.policyDescription || undefined,
+                    monthsBeforeExpiration:       newReturnPolicy.monthsBeforeExpiration,
+                    monthsAfterExpiration:        newReturnPolicy.monthsAfterExpiration,
+                    discountRate:                 newReturnPolicy.discountRate != null ? roundDiscountRate(newReturnPolicy.discountRate) : undefined,
+                    partialsAccepted:             false,
+                    reimbursementType:            newReturnPolicy.reimbursementType as ReturnPolicyCreatePayload['reimbursementType'],
+                    returnableWithinPolicyPeriod: newReturnPolicy.returnableWithinPolicyPeriod === 'standard',
                 };
                 const rpResult = await dispatch(addReturnPolicy({ policyId: createdId, payload: rpPayload }));
                 if (addReturnPolicy.rejected.match(rpResult)) {
@@ -149,14 +298,16 @@ export default function PoliciesPage() {
 
                 if (newReturnPolicy.partialsAccepted) {
                     const partialPayload: ReturnPolicyCreatePayload = {
-                        destination: newReturnPolicy.destination,
-                        autoRaEmail: newReturnPolicy.autoRaEmail || undefined,
-                        policyNumber: partialPolicy.policyNumber,
-                        policyDescription: partialPolicy.policyDescription || undefined,
-                        discountRate: newReturnPolicy.discountRate,
-                        partialsAccepted: true,
-                        reimbursementType: newReturnPolicy.reimbursementType,
-                        returnableWithinPolicyPeriod: partialPolicy.returnableWithinPolicyPeriod,
+                        destination:                  newReturnPolicy.destination,
+                        autoRaEmail:                  newReturnPolicy.autoRaEmail || undefined,
+                        policyNumber:                 partialPolicy.policyNumber,
+                        policyDescription:            partialPolicy.policyDescription || undefined,
+                        monthsBeforeExpiration:       partialPolicy.monthsBeforeExpiration,
+                        monthsAfterExpiration:        partialPolicy.monthsAfterExpiration,
+                        discountRate:                 newReturnPolicy.discountRate != null ? roundDiscountRate(newReturnPolicy.discountRate) : undefined,
+                        partialsAccepted:             true,
+                        reimbursementType:            newReturnPolicy.reimbursementType as ReturnPolicyCreatePayload['reimbursementType'],
+                        returnableWithinPolicyPeriod: partialPolicy.returnableWithinPolicyPeriod === 'standard',
                     };
                     const partialResult = await dispatch(addReturnPolicy({ policyId: createdId, payload: partialPayload }));
                     if (addReturnPolicy.rejected.match(partialResult)) {
@@ -171,11 +322,7 @@ export default function PoliciesPage() {
             }
 
             showToast(`Policy for ${newPolicy.manufacturerName} created!`);
-            setAddModal(false);
-            setNewPolicy({ labelerId: '', manufacturerName: '', labelerType: 'generic' });
-            setNewReturnPolicy({ ...INITIAL_RETURN_POLICY });
-            setPartialPolicy({ ...INITIAL_PARTIAL_POLICY });
-            setNewNote('');
+            closeAddModal();
             dispatch(fetchPolicies({ page, limit: 10 }));
         } else {
             showToast(result.payload as string || 'Failed to create policy', 'error');
@@ -373,11 +520,12 @@ export default function PoliciesPage() {
                 )}
             </div>
 
+            {/* ── Add Labeler Modal ─────────────────────────────────────── */}
             {addModal && (
                 <div
                     className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[100] p-4 overflow-y-auto"
                     style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
-                    onClick={() => setAddModal(false)}
+                    onClick={closeAddModal}
                     role="presentation"
                 >
                     <div
@@ -388,6 +536,7 @@ export default function PoliciesPage() {
                         aria-modal="true"
                         aria-labelledby="add-labeler-modal-title"
                     >
+                        {/* Header */}
                         <div
                             className="px-4 py-3 flex-shrink-0 border-b flex items-center justify-between gap-2"
                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
@@ -410,7 +559,7 @@ export default function PoliciesPage() {
                             </div>
                             <button
                                 type="button"
-                                onClick={() => setAddModal(false)}
+                                onClick={closeAddModal}
                                 className="p-1 rounded-[4px] hover:bg-primary-50/40 cursor-pointer shrink-0"
                                 style={{ color: 'var(--outline)' }}
                                 aria-label="Close"
@@ -418,9 +567,13 @@ export default function PoliciesPage() {
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
+
+                        {/* Body */}
                         <div className="px-5 py-4 overflow-y-auto flex-1 min-h-0 space-y-4">
 
+                            {/* Row 1: Labeler ID / Type / Avg Pay % / Avg Days */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                {/* Labeler ID */}
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">
                                         Labeler ID <span className="text-red-500">*</span>
@@ -429,113 +582,306 @@ export default function PoliciesPage() {
                                     <input
                                         type="text"
                                         value={newPolicy.labelerId}
-                                        onChange={e => setNewPolicy({ ...newPolicy, labelerId: e.target.value })}
+                                        onChange={e => {
+                                            setNewPolicy({ ...newPolicy, labelerId: e.target.value });
+                                            validateOnChange('labelerId', e.target.value);
+                                        }}
                                         placeholder="e.g. 00032"
                                         maxLength={10}
-                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                                            newPolicy.labelerId.length > 10
-                                                ? 'border-red-400 focus:ring-red-400'
-                                                : 'border-[var(--outline-variant)]'
-                                        }`}
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.labelerId)}`}
                                     />
-                                    {newPolicy.labelerId.length > 0 && (
-                                        <p className="text-[10px] text-[var(--outline)] mt-0.5">{newPolicy.labelerId.length}/10</p>
-                                    )}
+                                    {formErrors.labelerId
+                                        ? <p className="text-[10px] text-red-500 mt-0.5">{formErrors.labelerId}</p>
+                                        : newPolicy.labelerId.length > 0 && <p className="text-[10px] text-[var(--outline)] mt-0.5">{newPolicy.labelerId.length}/10</p>
+                                    }
                                 </div>
+
+                                {/* Labeler Type */}
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Labeler Type</label>
-                                    <select value={newPolicy.labelerType || 'generic'} onChange={e => setNewPolicy({ ...newPolicy, labelerType: e.target.value as 'generic' | 'brand' })} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                        <option value="generic">Generic</option>
-                                        <option value="brand">Brand</option>
+                                    <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">
+                                        Labeler Type <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        value={newPolicy.labelerType || 'generic'}
+                                        onChange={e => {
+                                            setNewPolicy({ ...newPolicy, labelerType: e.target.value as ManufacturerPolicyCreatePayload['labelerType'] });
+                                            validateOnChange('labelerType', e.target.value);
+                                        }}
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.labelerType)}`}
+                                    >
+                                        {LABELER_TYPES.map(t => (
+                                            <option key={t} value={t}>{LABELER_TYPE_LABELS[t]}</option>
+                                        ))}
                                     </select>
+                                    {formErrors.labelerType && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.labelerType}</p>}
                                 </div>
+
+                                {/* Average Pay Percent */}
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Average Pay Percent</label>
                                     <div className="flex items-center gap-1">
-                                        <input type="number" step="0.1" value={newPolicy.averagePayPercent ?? ''} onChange={e => setNewPolicy({ ...newPolicy, averagePayPercent: e.target.value ? parseFloat(e.target.value) : undefined })} placeholder="%" className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            max="100"
+                                            value={newPolicy.averagePayPercent ?? ''}
+                                            onChange={e => {
+                                                const v = e.target.value ? parseFloat(e.target.value) : undefined;
+                                                setNewPolicy({ ...newPolicy, averagePayPercent: v });
+                                                validateOnChange('averagePayPercent', v ?? null);
+                                            }}
+                                            placeholder="0–100"
+                                            className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.averagePayPercent)}`}
+                                        />
                                         <span className="text-xs text-[var(--on-surface-variant)]">%</span>
                                     </div>
+                                    {formErrors.averagePayPercent && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.averagePayPercent}</p>}
                                 </div>
+
+                                {/* Average Days to Pay */}
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Average Days to Pay</label>
-                                    <input type="number" value={newPolicy.averageDaysToPay ?? ''} onChange={e => setNewPolicy({ ...newPolicy, averageDaysToPay: e.target.value ? parseInt(e.target.value) : undefined })} placeholder="e.g. 297" className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="9999"
+                                        value={newPolicy.averageDaysToPay ?? ''}
+                                        onChange={e => {
+                                            const v = e.target.value ? parseInt(e.target.value) : undefined;
+                                            setNewPolicy({ ...newPolicy, averageDaysToPay: v });
+                                            validateOnChange('averageDaysToPay', v ?? null);
+                                        }}
+                                        placeholder="e.g. 297"
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.averageDaysToPay)}`}
+                                    />
+                                    {formErrors.averageDaysToPay && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.averageDaysToPay}</p>}
                                 </div>
                             </div>
 
+                            {/* Labeler Name */}
                             <div>
-                                <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Labeler Name <span className="text-red-500">*</span></label>
-                                <input type="text" value={newPolicy.manufacturerName} onChange={e => setNewPolicy({ ...newPolicy, manufacturerName: e.target.value })} placeholder="e.g. AbbVie Inc." className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">
+                                    Labeler Name <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newPolicy.manufacturerName}
+                                    onChange={e => {
+                                        setNewPolicy({ ...newPolicy, manufacturerName: e.target.value });
+                                        validateOnChange('manufacturerName', e.target.value);
+                                    }}
+                                    placeholder="e.g. AbbVie Inc."
+                                    className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.manufacturerName)}`}
+                                />
+                                {formErrors.manufacturerName && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.manufacturerName}</p>}
                             </div>
 
+                            {/* Address 1 / Address 2 */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Address 1</label>
-                                    <input type="text" value={newPolicy.address1 || ''} onChange={e => setNewPolicy({ ...newPolicy, address1: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input
+                                        type="text"
+                                        value={newPolicy.address1 || ''}
+                                        onChange={e => {
+                                            setNewPolicy({ ...newPolicy, address1: e.target.value });
+                                            validateOnChange('address1', e.target.value);
+                                        }}
+                                        maxLength={150}
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.address1)}`}
+                                    />
+                                    {formErrors.address1 && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.address1}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Address 2</label>
-                                    <input type="text" value={newPolicy.address2 || ''} onChange={e => setNewPolicy({ ...newPolicy, address2: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input
+                                        type="text"
+                                        value={newPolicy.address2 || ''}
+                                        onChange={e => {
+                                            setNewPolicy({ ...newPolicy, address2: e.target.value });
+                                            validateOnChange('address2', e.target.value);
+                                        }}
+                                        maxLength={150}
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.address2)}`}
+                                    />
+                                    {formErrors.address2 && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.address2}</p>}
                                 </div>
                             </div>
 
+                            {/* City / State / Zip */}
                             <div className="grid grid-cols-3 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">City</label>
-                                    <input type="text" value={newPolicy.city || ''} onChange={e => setNewPolicy({ ...newPolicy, city: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input
+                                        type="text"
+                                        value={newPolicy.city || ''}
+                                        onChange={e => {
+                                            setNewPolicy({ ...newPolicy, city: e.target.value });
+                                            validateOnChange('city', e.target.value);
+                                        }}
+                                        maxLength={100}
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.city)}`}
+                                    />
+                                    {formErrors.city && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.city}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">State</label>
-                                    <select value={newPolicy.state || ''} onChange={e => setNewPolicy({ ...newPolicy, state: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    <select
+                                        value={newPolicy.state || ''}
+                                        onChange={e => {
+                                            setNewPolicy({ ...newPolicy, state: e.target.value });
+                                            validateOnChange('state', e.target.value);
+                                        }}
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.state)}`}
+                                    >
                                         <option value="">Select</option>
                                         {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                                     </select>
+                                    {formErrors.state && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.state}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Zip</label>
-                                    <input type="text" value={newPolicy.zip || ''} onChange={e => setNewPolicy({ ...newPolicy, zip: e.target.value })} maxLength={10} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">ZIP</label>
+                                    <input
+                                        type="text"
+                                        value={newPolicy.zip || ''}
+                                        onChange={e => {
+                                            setNewPolicy({ ...newPolicy, zip: e.target.value });
+                                            validateOnChange('zip', e.target.value);
+                                        }}
+                                        placeholder="e.g. 12345 or 12345-6789"
+                                        maxLength={10}
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.zip)}`}
+                                    />
+                                    {formErrors.zip && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.zip}</p>}
                                 </div>
                             </div>
 
+                            {/* Main Contact / Main Phone / Fax */}
                             <div className="grid grid-cols-3 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Main Contact</label>
-                                    <input type="text" value={newPolicy.mainContact || ''} onChange={e => setNewPolicy({ ...newPolicy, mainContact: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input
+                                        type="text"
+                                        value={newPolicy.mainContact || ''}
+                                        onChange={e => {
+                                            setNewPolicy({ ...newPolicy, mainContact: e.target.value });
+                                            validateOnChange('mainContact', e.target.value);
+                                        }}
+                                        maxLength={100}
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.mainContact)}`}
+                                    />
+                                    {formErrors.mainContact && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.mainContact}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Main Phone</label>
-                                    <input type="text" value={newPolicy.mainPhone || ''} onChange={e => setNewPolicy({ ...newPolicy, mainPhone: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input
+                                        type="text"
+                                        value={newPolicy.mainPhone || ''}
+                                        onChange={e => {
+                                            setNewPolicy({ ...newPolicy, mainPhone: e.target.value });
+                                            validateOnChange('mainPhone', e.target.value);
+                                        }}
+                                        placeholder="e.g. (800) 255-5162"
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.mainPhone)}`}
+                                    />
+                                    {formErrors.mainPhone && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.mainPhone}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Fax</label>
-                                    <input type="text" value={newPolicy.fax || ''} onChange={e => setNewPolicy({ ...newPolicy, fax: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input
+                                        type="text"
+                                        value={newPolicy.fax || ''}
+                                        onChange={e => {
+                                            setNewPolicy({ ...newPolicy, fax: e.target.value });
+                                            validateOnChange('fax', e.target.value);
+                                        }}
+                                        placeholder="e.g. (800) 255-5163"
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.fax)}`}
+                                    />
+                                    {formErrors.fax && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.fax}</p>}
                                 </div>
                             </div>
 
+                            {/* Credit Request Email */}
                             <div>
                                 <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Credit Request E-Mail</label>
-                                <input type="email" value={newPolicy.creditRequestEmail || ''} onChange={e => setNewPolicy({ ...newPolicy, creditRequestEmail: e.target.value })} placeholder="e.g. holli.rein@abbvie.com" className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                <input
+                                    type="email"
+                                    value={newPolicy.creditRequestEmail || ''}
+                                    onChange={e => {
+                                        setNewPolicy({ ...newPolicy, creditRequestEmail: e.target.value });
+                                        validateOnChange('creditRequestEmail', e.target.value);
+                                    }}
+                                    placeholder="e.g. holli.rein@abbvie.com"
+                                    className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.creditRequestEmail)}`}
+                                />
+                                {formErrors.creditRequestEmail && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.creditRequestEmail}</p>}
                             </div>
 
+                            {/* Contact 2 / Phone 2 / Email 2 */}
                             <div className="grid grid-cols-3 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Contact 2</label>
-                                    <input type="text" value={newPolicy.contact2Name || ''} onChange={e => setNewPolicy({ ...newPolicy, contact2Name: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input
+                                        type="text"
+                                        value={newPolicy.contact2Name || ''}
+                                        onChange={e => {
+                                            setNewPolicy({ ...newPolicy, contact2Name: e.target.value });
+                                            validateOnChange('contact2Name', e.target.value);
+                                        }}
+                                        maxLength={100}
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.contact2Name)}`}
+                                    />
+                                    {formErrors.contact2Name && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.contact2Name}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Phone 2</label>
-                                    <input type="text" value={newPolicy.contact2Phone || ''} onChange={e => setNewPolicy({ ...newPolicy, contact2Phone: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input
+                                        type="text"
+                                        value={newPolicy.contact2Phone || ''}
+                                        onChange={e => {
+                                            setNewPolicy({ ...newPolicy, contact2Phone: e.target.value });
+                                            validateOnChange('contact2Phone', e.target.value);
+                                        }}
+                                        placeholder="e.g. (800) 255-5162"
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.contact2Phone)}`}
+                                    />
+                                    {formErrors.contact2Phone && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.contact2Phone}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">E-Mail 2</label>
-                                    <input type="email" value={newPolicy.contact2Email || ''} onChange={e => setNewPolicy({ ...newPolicy, contact2Email: e.target.value })} placeholder="e.g. gpopharm@abbvie.com" className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input
+                                        type="email"
+                                        value={newPolicy.contact2Email || ''}
+                                        onChange={e => {
+                                            setNewPolicy({ ...newPolicy, contact2Email: e.target.value });
+                                            validateOnChange('contact2Email', e.target.value);
+                                        }}
+                                        placeholder="e.g. gpopharm@abbvie.com"
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.contact2Email)}`}
+                                    />
+                                    {formErrors.contact2Email && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.contact2Email}</p>}
                                 </div>
                             </div>
 
+                            {/* Notes */}
                             <div>
                                 <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Notes</label>
-                                <textarea rows={3} value={newNote} onChange={e => setNewNote(e.target.value)} placeholder="e.g. 1/18/2022 - SB - norvir tricor humira creon depakote kaletra no credit per policy 1% synthroid credit if mfg s/dated" className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+                                <textarea
+                                    rows={3}
+                                    value={newNote}
+                                    onChange={e => {
+                                        setNewNote(e.target.value);
+                                        validateOnChange('notes', e.target.value);
+                                    }}
+                                    placeholder="e.g. 1/18/2022 - SB - norvir tricor humira creon depakote kaletra no credit per policy 1% synthroid credit if mfg s/dated"
+                                    className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 resize-none ${errClass(!!formErrors.notes)}`}
+                                />
+                                {formErrors.notes && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.notes}</p>}
                             </div>
 
+                            {/* ── Labeler Return Information ─────────────── */}
                             <div
                                 className="rounded-[4px] p-4 space-y-3 border-l-4 border border-solid"
                                 style={{
@@ -544,13 +890,11 @@ export default function PoliciesPage() {
                                     borderLeftColor: 'var(--secondary)',
                                 }}
                             >
-                                <h3
-                                    className="text-xs font-bold uppercase tracking-wider"
-                                    style={{ color: 'var(--foreground)' }}
-                                >
+                                <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--foreground)' }}>
                                     Labeler Return Information
                                 </h3>
 
+                                {/* Destination / Auto RA Email */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
                                         <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Destination</label>
@@ -558,15 +902,11 @@ export default function PoliciesPage() {
                                             <select
                                                 value={newReturnPolicy.destination}
                                                 onChange={e => {
-                                                    const selected = reverseDistributors.find(d => d.name === e.target.value);
-                                                    setNewReturnPolicy({
-                                                        ...newReturnPolicy,
-                                                        destination: e.target.value,
-                                                        autoRaEmail: selected?.email || '',
-                                                    });
+                                                    setNewReturnPolicy({ ...newReturnPolicy, destination: e.target.value });
+                                                    validateOnChange('destination', e.target.value);
                                                 }}
-                                                className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border"
-                                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }}
+                                                className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.destination)}`}
+                                                style={{ backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }}
                                             >
                                                 <option value="">
                                                     {loadingDistributors ? 'Loading...' : 'Select'}
@@ -579,40 +919,119 @@ export default function PoliciesPage() {
                                                 <Loader2 className="w-3 h-3 animate-spin absolute right-7 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--outline)' }} />
                                             )}
                                         </div>
+                                        {formErrors.destination && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.destination}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>
                                             Auto RA E-Mail
-                                            {newReturnPolicy.autoRaEmail && (
-                                                <span className="ml-1 text-[10px] font-normal" style={{ color: 'var(--secondary)' }}>(auto-filled)</span>
-                                            )}
                                         </label>
                                         <input
                                             type="email"
                                             value={newReturnPolicy.autoRaEmail}
-                                            readOnly
-                                            placeholder="Auto-filled from selected destination"
-                                            className="w-full px-2.5 py-1.5 text-xs rounded-[4px] cursor-not-allowed border"
-                                            style={{
-                                                borderColor: 'var(--outline-variant)',
-                                                backgroundColor: 'var(--surface-container-high)',
-                                                color: 'var(--foreground)',
+                                            onChange={e => {
+                                                setNewReturnPolicy({ ...newReturnPolicy, autoRaEmail: e.target.value });
+                                                validateOnChange('autoRaEmail', e.target.value);
                                             }}
+                                            placeholder="e.g. returns@inmar.com"
+                                            className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.autoRaEmail)}`}
+                                            style={!formErrors.autoRaEmail ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
                                         />
+                                        {formErrors.autoRaEmail && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.autoRaEmail}</p>}
                                     </div>
                                 </div>
 
+                                {/* Policy # / Policy Description */}
                                 <div className="grid grid-cols-3 gap-3">
                                     <div>
                                         <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy #</label>
-                                        <input type="number" value={newReturnPolicy.policyNumber ?? ''} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, policyNumber: e.target.value ? parseInt(e.target.value) : undefined })} placeholder="e.g. 1" className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }} />
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={newReturnPolicy.policyNumber ?? ''}
+                                            onChange={e => {
+                                                const v = e.target.value ? parseInt(e.target.value) : undefined;
+                                                setNewReturnPolicy({ ...newReturnPolicy, policyNumber: v });
+                                                validateOnChange('policyNumber', e.target.value);
+                                            }}
+                                            placeholder="e.g. 1"
+                                            className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.policyNumber)}`}
+                                            style={!formErrors.policyNumber ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
+                                        />
+                                        {formErrors.policyNumber && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.policyNumber}</p>}
                                     </div>
                                     <div className="col-span-2">
                                         <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy Description</label>
-                                        <input type="text" value={newReturnPolicy.policyDescription} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, policyDescription: e.target.value })} placeholder="e.g. 6 Months Prior to 12 Months Post Drug Expiration" className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }} />
+                                        <input
+                                            type="text"
+                                            value={newReturnPolicy.policyDescription}
+                                            onChange={e => {
+                                                setNewReturnPolicy({ ...newReturnPolicy, policyDescription: e.target.value });
+                                                validateOnChange('policyDescription', e.target.value);
+                                            }}
+                                            placeholder="e.g. 6 Months Prior to 12 Months Post Drug Expiration"
+                                            maxLength={500}
+                                            className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.policyDescription)}`}
+                                            style={!formErrors.policyDescription ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
+                                        />
+                                        {formErrors.policyDescription && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.policyDescription}</p>}
                                     </div>
                                 </div>
 
+                                {/* Months Before / After Expiration */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>
+                                            Months Before Expiration <span className="text-red-500">*</span>
+                                            <span className="ml-1 text-[10px] font-normal" style={{ color: 'var(--on-surface-variant)' }}>whole number</span>
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="999"
+                                            step="1"
+                                            value={newReturnPolicy.monthsBeforeExpiration ?? ''}
+                                            onChange={e => {
+                                                const v = e.target.value ? parseInt(e.target.value) : undefined;
+                                                setNewReturnPolicy({ ...newReturnPolicy, monthsBeforeExpiration: v });
+                                                validateOnChange('monthsBeforeExpiration', v ?? null);
+                                            }}
+                                            placeholder="e.g. 6"
+                                            className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.monthsBeforeExpiration)}`}
+                                            style={!formErrors.monthsBeforeExpiration ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
+                                        />
+                                        {formErrors.monthsBeforeExpiration
+                                            ? <p className="text-[10px] text-red-500 mt-0.5">{formErrors.monthsBeforeExpiration}</p>
+                                            : <p className="text-[10px] mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>How many months before expiry the item is returnable</p>
+                                        }
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>
+                                            Months After Expiration <span className="text-red-500">*</span>
+                                            <span className="ml-1 text-[10px] font-normal" style={{ color: 'var(--on-surface-variant)' }}>whole number</span>
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="999"
+                                            step="1"
+                                            value={newReturnPolicy.monthsAfterExpiration ?? ''}
+                                            onChange={e => {
+                                                const v = e.target.value ? parseInt(e.target.value) : undefined;
+                                                setNewReturnPolicy({ ...newReturnPolicy, monthsAfterExpiration: v });
+                                                validateOnChange('monthsAfterExpiration', v ?? null);
+                                            }}
+                                            placeholder="e.g. 12"
+                                            className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.monthsAfterExpiration)}`}
+                                            style={!formErrors.monthsAfterExpiration ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
+                                        />
+                                        {formErrors.monthsAfterExpiration
+                                            ? <p className="text-[10px] text-red-500 mt-0.5">{formErrors.monthsAfterExpiration}</p>
+                                            : <p className="text-[10px] mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>How many months after expiry the item is still returnable</p>
+                                        }
+                                    </div>
+                                </div>
+
+                                {/* Discount Rate / Partials / Reimbursement */}
                                 <div className="grid grid-cols-3 gap-3">
                                     <div>
                                         <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>
@@ -621,109 +1040,224 @@ export default function PoliciesPage() {
                                         </label>
                                         <input
                                             type="number"
-                                            step="0.01"
+                                            step="0.0001"
                                             min="0"
                                             max="1"
                                             value={newReturnPolicy.discountRate ?? ''}
-                                            onChange={e => setNewReturnPolicy({ ...newReturnPolicy, discountRate: e.target.value ? parseFloat(e.target.value) : undefined })}
+                                            onChange={e => {
+                                                const v = e.target.value ? parseFloat(e.target.value) : undefined;
+                                                setNewReturnPolicy({ ...newReturnPolicy, discountRate: v });
+                                                validateOnChange('discountRate', v ?? null);
+                                            }}
                                             placeholder="e.g. 0.30"
-                                            className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                                                newReturnPolicy.discountRate != null && (newReturnPolicy.discountRate < 0 || newReturnPolicy.discountRate > 1)
-                                                    ? 'border-red-400 focus:ring-red-400'
-                                                    : ''
-                                            }`}
-                                            style={
-                                                newReturnPolicy.discountRate != null && (newReturnPolicy.discountRate < 0 || newReturnPolicy.discountRate > 1)
-                                                    ? undefined
-                                                    : { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }
-                                            }
+                                            className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.discountRate)}`}
+                                            style={!formErrors.discountRate ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
                                         />
-                                        <p className="text-[10px] mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>
-                                            {newReturnPolicy.discountRate != null && newReturnPolicy.discountRate >= 0 && newReturnPolicy.discountRate <= 1
-                                                ? `= ${(newReturnPolicy.discountRate * 100).toFixed(0)}%`
-                                                : newReturnPolicy.discountRate != null
-                                                    ? <span className="text-red-500">Must be 0–1 (e.g. 0.30 for 30%)</span>
-                                                    : 'e.g. 0.30 = 30%'}
-                                        </p>
+                                        {formErrors.discountRate
+                                            ? <p className="text-[10px] text-red-500 mt-0.5">{formErrors.discountRate}</p>
+                                            : newReturnPolicy.discountRate != null && newReturnPolicy.discountRate >= 0 && newReturnPolicy.discountRate <= 1
+                                                ? <p className="text-[10px] mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>= {(newReturnPolicy.discountRate * 100).toFixed(0)}%</p>
+                                                : <p className="text-[10px] mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>e.g. 0.30 = 30%</p>
+                                        }
                                     </div>
                                     <div>
                                         <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Partials?</label>
-                                        <select value={newReturnPolicy.partialsAccepted ? 'yes' : 'no'} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, partialsAccepted: e.target.value === 'yes' })} className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }}>
+                                        <select
+                                            value={newReturnPolicy.partialsAccepted ? 'yes' : 'no'}
+                                            onChange={e => setNewReturnPolicy({ ...newReturnPolicy, partialsAccepted: e.target.value === 'yes' })}
+                                            className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border"
+                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }}
+                                        >
                                             <option value="yes">YES</option>
                                             <option value="no">NO</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Reimbursement</label>
-                                        <select value={newReturnPolicy.reimbursementType} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, reimbursementType: e.target.value as 'batch' | 'per_item' })} className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }}>
-                                            <option value="batch">BATCH</option>
-                                            <option value="per_item">PER ITEM</option>
+                                        <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>
+                                            Reimbursement <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            value={newReturnPolicy.reimbursementType}
+                                            onChange={e => {
+                                                setNewReturnPolicy({ ...newReturnPolicy, reimbursementType: e.target.value });
+                                                validateOnChange('reimbursementType', e.target.value);
+                                            }}
+                                            className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.reimbursementType)}`}
+                                            style={!formErrors.reimbursementType ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
+                                        >
+                                            {REIMBURSEMENT_TYPES.map(t => (
+                                                <option key={t} value={t}>{REIMBURSEMENT_TYPE_LABELS[t]}</option>
+                                            ))}
                                         </select>
+                                        {formErrors.reimbursementType && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.reimbursementType}</p>}
                                     </div>
                                 </div>
+
+                                {/* Return window mode */}
                                 <div>
-                                    <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Return window mode</label>
-                                    <p className="text-[10px] mb-1 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>Standard: returnable inside the months-before/after window (too early → Wine Cellar). Inverted: returnable outside that window; inside → Wine Cellar until the day after the window ends.</p>
+                                    <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>
+                                        Return window mode <span className="text-red-500">*</span>
+                                    </label>
+                                    <p className="text-[10px] mb-1 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>
+                                        Standard: returnable inside the months-before/after window (too early → Wine Cellar). Inverted: returnable outside that window; inside → Wine Cellar until the day after the window ends.
+                                    </p>
                                     <select
-                                        value={newReturnPolicy.returnableWithinPolicyPeriod ? 'yes' : 'no'}
-                                        onChange={e => setNewReturnPolicy({ ...newReturnPolicy, returnableWithinPolicyPeriod: e.target.value === 'yes' })}
-                                        className="w-full max-w-xs px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border"
-                                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }}
+                                        value={newReturnPolicy.returnableWithinPolicyPeriod}
+                                        onChange={e => {
+                                            setNewReturnPolicy({ ...newReturnPolicy, returnableWithinPolicyPeriod: e.target.value });
+                                            validateOnChange('returnableWithinPolicyPeriod', e.target.value);
+                                        }}
+                                        className={`w-full max-w-xs px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.returnableWithinPolicyPeriod)}`}
+                                        style={!formErrors.returnableWithinPolicyPeriod ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
                                     >
-                                        <option value="yes">Standard — returnable in window</option>
-                                        <option value="no">Inverted — Wine Cellar in window</option>
+                                        {Object.entries(RETURN_WINDOW_LABELS).map(([val, label]) => (
+                                            <option key={val} value={val}>{label}</option>
+                                        ))}
                                     </select>
+                                    {formErrors.returnableWithinPolicyPeriod && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.returnableWithinPolicyPeriod}</p>}
                                 </div>
 
+                                {/* Partial Return Policy (conditional) */}
                                 {newReturnPolicy.partialsAccepted && (
                                     <div
                                         className="rounded-[4px] p-3 space-y-3 border"
-                                        style={{
-                                            backgroundColor: 'var(--surface-container-lowest)',
-                                            borderColor: 'var(--outline-variant)',
-                                        }}
+                                        style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                                     >
                                         <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--foreground)' }}>
                                             Partial Return Policy
                                         </h4>
-
                                         <p className="text-[10px] leading-snug" style={{ color: 'var(--on-surface-variant)' }}>
                                             Configure separate policy details for partial returns
                                         </p>
-
                                         <div className="grid grid-cols-3 gap-3">
                                             <div>
                                                 <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy #</label>
-                                                <input type="number" value={partialPolicy.policyNumber ?? ''} onChange={e => setPartialPolicy({ ...partialPolicy, policyNumber: e.target.value ? parseInt(e.target.value) : undefined })} placeholder="e.g. 2" className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }} />
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    value={partialPolicy.policyNumber ?? ''}
+                                                    onChange={e => {
+                                                        setPartialPolicy({ ...partialPolicy, policyNumber: e.target.value ? parseInt(e.target.value) : undefined });
+                                                        validateOnChange('partialPolicyNumber', e.target.value);
+                                                    }}
+                                                    placeholder="e.g. 2"
+                                                    className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.partialPolicyNumber)}`}
+                                                    style={!formErrors.partialPolicyNumber ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
+                                                />
+                                                {formErrors.partialPolicyNumber && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.partialPolicyNumber}</p>}
                                             </div>
                                             <div className="col-span-2">
                                                 <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy Description</label>
-                                                <input type="text" value={partialPolicy.policyDescription} onChange={e => setPartialPolicy({ ...partialPolicy, policyDescription: e.target.value })} placeholder="e.g. Partial returns accepted for tablets only" className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }} />
+                                                <input
+                                                    type="text"
+                                                    value={partialPolicy.policyDescription}
+                                                    onChange={e => {
+                                                        setPartialPolicy({ ...partialPolicy, policyDescription: e.target.value });
+                                                        validateOnChange('partialPolicyDescription', e.target.value);
+                                                    }}
+                                                    placeholder="e.g. Partial returns accepted for tablets only"
+                                                    maxLength={500}
+                                                    className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.partialPolicyDescription)}`}
+                                                    style={!formErrors.partialPolicyDescription ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
+                                                />
+                                                {formErrors.partialPolicyDescription && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.partialPolicyDescription}</p>}
+                                            </div>
+                                        </div>
+                                        {/* Partial Months Before / After Expiration */}
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>
+                                                    Months Before Expiration <span className="text-red-500">*</span>
+                                                    <span className="ml-1 text-[10px] font-normal" style={{ color: 'var(--on-surface-variant)' }}>whole number</span>
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    max="999"
+                                                    step="1"
+                                                    value={partialPolicy.monthsBeforeExpiration ?? ''}
+                                                    onChange={e => {
+                                                        const v = e.target.value ? parseInt(e.target.value) : undefined;
+                                                        setPartialPolicy({ ...partialPolicy, monthsBeforeExpiration: v });
+                                                        validateOnChange('partialMonthsBeforeExpiration', v ?? null);
+                                                    }}
+                                                    placeholder="e.g. 6"
+                                                    className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.partialMonthsBeforeExpiration)}`}
+                                                    style={!formErrors.partialMonthsBeforeExpiration ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
+                                                />
+                                                {formErrors.partialMonthsBeforeExpiration
+                                                    ? <p className="text-[10px] text-red-500 mt-0.5">{formErrors.partialMonthsBeforeExpiration}</p>
+                                                    : <p className="text-[10px] mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>How many months before expiry the item is returnable</p>
+                                                }
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>
+                                                    Months After Expiration <span className="text-red-500">*</span>
+                                                    <span className="ml-1 text-[10px] font-normal" style={{ color: 'var(--on-surface-variant)' }}>whole number</span>
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    max="999"
+                                                    step="1"
+                                                    value={partialPolicy.monthsAfterExpiration ?? ''}
+                                                    onChange={e => {
+                                                        const v = e.target.value ? parseInt(e.target.value) : undefined;
+                                                        setPartialPolicy({ ...partialPolicy, monthsAfterExpiration: v });
+                                                        validateOnChange('partialMonthsAfterExpiration', v ?? null);
+                                                    }}
+                                                    placeholder="e.g. 12"
+                                                    className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.partialMonthsAfterExpiration)}`}
+                                                    style={!formErrors.partialMonthsAfterExpiration ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
+                                                />
+                                                {formErrors.partialMonthsAfterExpiration
+                                                    ? <p className="text-[10px] text-red-500 mt-0.5">{formErrors.partialMonthsAfterExpiration}</p>
+                                                    : <p className="text-[10px] mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>How many months after expiry the item is still returnable</p>
+                                                }
                                             </div>
                                         </div>
 
                                         <div>
                                             <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Return window mode</label>
                                             <select
-                                                value={partialPolicy.returnableWithinPolicyPeriod ? 'yes' : 'no'}
-                                                onChange={e => setPartialPolicy({ ...partialPolicy, returnableWithinPolicyPeriod: e.target.value === 'yes' })}
-                                                className="w-full max-w-xs px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border"
-                                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }}
+                                                value={partialPolicy.returnableWithinPolicyPeriod}
+                                                onChange={e => {
+                                                    setPartialPolicy({ ...partialPolicy, returnableWithinPolicyPeriod: e.target.value });
+                                                    validateOnChange('partialReturnWindowMode', e.target.value);
+                                                }}
+                                                className={`w-full max-w-xs px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.partialReturnWindowMode)}`}
+                                                style={!formErrors.partialReturnWindowMode ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
                                             >
-                                                <option value="yes">Standard — returnable in window</option>
-                                                <option value="no">Inverted — Wine Cellar in window</option>
+                                                {Object.entries(RETURN_WINDOW_LABELS).map(([val, label]) => (
+                                                    <option key={val} value={val}>{label}</option>
+                                                ))}
                                             </select>
+                                            {formErrors.partialReturnWindowMode && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.partialReturnWindowMode}</p>}
                                         </div>
                                     </div>
                                 )}
                             </div>
                         </div>
+
+                        {/* Footer */}
                         <div
                             className="flex justify-end gap-2 px-4 py-3 border-t flex-shrink-0"
                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                         >
-                            <button type="button" onClick={() => setAddModal(false)} className="px-3 py-1.5 text-xs font-medium bg-white border rounded-[4px] transition-colors hover:bg-primary-50/40 cursor-pointer" style={{ color: 'var(--on-surface)', borderColor: 'var(--outline-variant)' }}>Cancel</button>
-                            <button type="button" onClick={handleAdd} disabled={isActionLoading} className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[4px] disabled:opacity-50 transition-colors inline-flex items-center cursor-pointer disabled:cursor-not-allowed">
+                            <button
+                                type="button"
+                                onClick={closeAddModal}
+                                className="px-3 py-1.5 text-xs font-medium bg-white border rounded-[4px] transition-colors hover:bg-primary-50/40 cursor-pointer"
+                                style={{ color: 'var(--on-surface)', borderColor: 'var(--outline-variant)' }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleAdd}
+                                disabled={isActionLoading}
+                                className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[4px] disabled:opacity-50 transition-colors inline-flex items-center cursor-pointer disabled:cursor-not-allowed"
+                            >
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />Creating...</> : 'Save labeler'}
                             </button>
                         </div>
@@ -731,19 +1265,27 @@ export default function PoliciesPage() {
                 </div>
             )}
 
+            {/* ── Delete Confirm Modal ──────────────────────────────────── */}
             {deleteModal && (
                 <div
                     className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
                     style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                     onClick={() => setDeleteModal(null)}
                 >
-                    <div className="rounded-[4px] max-w-md w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div
+                        className="rounded-[4px] max-w-md w-full shadow-xl border"
+                        style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+                        onClick={e => e.stopPropagation()}
+                    >
                         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h2 className="font-heading text-body font-semibold" style={{ color: 'var(--foreground)' }}>Delete Policy</h2>
                             <button onClick={() => setDeleteModal(null)} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-6">
-                            <p style={{ color: 'var(--on-surface-variant)' }}>Delete policy for <strong>{deleteModal.manufacturerName}</strong> (Labeler: {deleteModal.labelerId})? This will also remove all related return policies, exceptions, and notes.</p>
+                            <p style={{ color: 'var(--on-surface-variant)' }}>
+                                Delete policy for <strong>{deleteModal.manufacturerName}</strong> (Labeler: {deleteModal.labelerId})?
+                                This will also remove all related return policies, exceptions, and notes.
+                            </p>
                         </div>
                         <div className="flex justify-end gap-2 p-5 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <Button variant="outline" onClick={() => setDeleteModal(null)}>Cancel</Button>

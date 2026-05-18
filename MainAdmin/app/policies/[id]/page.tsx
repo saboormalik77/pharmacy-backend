@@ -131,7 +131,7 @@ export default function PolicyDetailPage() {
                 monthsAfterExpiration: editRPModal.monthsAfterExpiration ?? undefined,
                 discountRate: editRPModal.discountRate ?? undefined,
                 partialsAccepted: editRPModal.partialsAccepted,
-                reimbursementType: (editRPModal.reimbursementType as 'batch' | 'per_item') || undefined,
+                reimbursementType: (editRPModal.reimbursementType as 'batch' | 'credit' | 'check' | 'ach') || undefined,
                 autoRaEmail: editRPModal.autoRaEmail || '',
                 policyNumber: editRPModal.policyNumber ?? undefined,
                 returnableWithinPolicyPeriod: editRPModal.returnableWithinPolicyPeriod !== false,

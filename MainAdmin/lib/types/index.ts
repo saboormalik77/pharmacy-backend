@@ -841,7 +841,7 @@ export interface PolicyNote {
 export interface ManufacturerPolicyCreatePayload {
     labelerId: string;
     manufacturerName: string;
-    labelerType?: 'generic' | 'brand';
+    labelerType?: 'generic' | 'brand' | 'manufacturer' | 'distributor' | 'repackager';
     address1?: string;
     address2?: string;
     city?: string;
@@ -857,6 +857,7 @@ export interface ManufacturerPolicyCreatePayload {
     averagePayPercent?: number;
     averageDaysToPay?: number;
     verifiedDate?: string;
+    notes?: string;
 }
 
 export interface ReturnPolicyCreatePayload {
@@ -869,7 +870,7 @@ export interface ReturnPolicyCreatePayload {
     discountRate?: number;
     partialsAccepted?: boolean;
     partialDosageForms?: string[];
-    reimbursementType?: 'batch' | 'per_item';
+    reimbursementType?: 'batch' | 'credit' | 'check' | 'ach';
     returnableWithinPolicyPeriod?: boolean;
 }
 
