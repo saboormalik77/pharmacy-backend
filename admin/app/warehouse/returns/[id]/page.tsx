@@ -33,6 +33,13 @@ import { unassignSingleReturn } from '@/lib/store/batchSlice';
 import { ReturnTransaction, ReturnTransactionItem, WineCellarItem } from '@/lib/types';
 import { apiClient } from '@/lib/api/apiClient';
 import {
+    formatPartialReturnDetail,
+    formatUnitsReturnedForForm,
+    getPackageKindFromUnits,
+    getReturnItemPackageKind,
+    getReturnItemUnitsReturned,
+} from '@/lib/utils/returnItemQuantity';
+import {
     NON_RETURNABLE_REASONS,
     formatNonReturnableReason,
     isValidNonReturnableReason,
@@ -468,9 +475,7 @@ export default function ReturnDetailPage() {
         if (editItemModal) {
             setEditItemForm({
                 fullPackageSize: editItemModal.fullPackageSize ? String(editItemModal.fullPackageSize) : '',
-                fullPackageQtyReturned: (editItemModal.fullPackageQtyReturned ?? editItemModal.quantityReturned)
-                    ? String(editItemModal.fullPackageQtyReturned ?? editItemModal.quantityReturned)
-                    : (editItemModal.quantity ? String(editItemModal.quantity) : ''),
+                fullPackageQtyReturned: formatUnitsReturnedForForm(editItemModal),
                 standardPrice: editItemModal.standardPrice != null ? String(editItemModal.standardPrice) : '',
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
@@ -1237,10 +1242,23 @@ export default function ReturnDetailPage() {
                                             </td>
                                             <td className="px-3 py-3 text-sm text-center text-gray-900">
                                                 {(() => {
-                                                    const qtyReturned = item.fullPackageQtyReturned ?? item.quantityReturned ?? item.quantity;
-                                                    const fullPkgQty = item.fullPackageQtyReturned ?? item.quantityReturned;
-                                                    const displayQty = (fullPkgQty && item.fullPackageSize && fullPkgQty === item.fullPackageSize) ? 1 : qtyReturned;
-                                                    return <>{displayQty}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}</>;
+                                                    const units = getReturnItemUnitsReturned(item);
+                                                    const kind = getReturnItemPackageKind(item);
+                                                    const partialDetail = formatPartialReturnDetail(item);
+                                                    return (
+                                                        <div className="flex flex-col gap-0.5 items-center">
+                                                            <span className="text-xs font-medium text-gray-900">{units || '—'}</span>
+                                                            {kind === 'full' && (
+                                                                <Badge variant="success"><span className="text-[10px]">Full Package</span></Badge>
+                                                            )}
+                                                            {kind === 'partial' && (
+                                                                <Badge variant="warning"><span className="text-[10px]">Partial</span></Badge>
+                                                            )}
+                                                            {partialDetail && (
+                                                                <span className="text-[10px] text-gray-500">{partialDetail}</span>
+                                                            )}
+                                                        </div>
+                                                    );
                                                 })()}
                                             </td>
                                             <td className="px-4 py-3 text-sm text-gray-600 font-mono whitespace-nowrap">
@@ -1359,7 +1377,7 @@ export default function ReturnDetailPage() {
                                     <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Quantity</label>
                                     <div className="grid grid-cols-2 gap-2 text-xs">
                                         <div>
-                                            <label className="block text-[10px] text-gray-500 mb-0.5">Pkg Size</label>
+                                            <label className="block text-[10px] text-gray-500 mb-0.5">Package Size (units/pkg)</label>
                                             <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
                                                 {editItemForm.fullPackageSize || '—'}
                                             </div>
@@ -1376,15 +1394,37 @@ export default function ReturnDetailPage() {
                                                 className={`w-full px-2 py-1.5 text-center text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} 
                                             />
                                         </div>
-                                        {/* <div>
-                                            <label className="block text-[10px] text-gray-500 mb-0.5">#</label>
-                                            <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
-                                                {editItemForm.fullPackageQtyReturned && editItemForm.fullPackageSize ? 
-                                                    Math.ceil(Number(editItemForm.fullPackageQtyReturned) / Number(editItemForm.fullPackageSize)) : '—'}
-                                            </div>
-                                        </div> */}
                                     </div>
+                                    {editItemForm.fullPackageSize && editItemForm.fullPackageQtyReturned && (() => {
+                                        const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
+                                        const units = parseInt(editItemForm.fullPackageQtyReturned) || 0;
+                                        const kind = getPackageKindFromUnits(pkgSize, units);
+                                        const partialDetail = formatPartialReturnDetail(
+                                            { fullPackageSize: pkgSize, isPartial: kind === 'partial' },
+                                            units,
+                                        );
+                                        return (
+                                            <div className="flex flex-wrap items-center gap-2 pt-1.5">
+                                                {kind === 'full' && (
+                                                    <Badge variant="success">
+                                                        <span className="text-[10px]">Full Package — {units} units</span>
+                                                    </Badge>
+                                                )}
+                                                {kind === 'partial' && (
+                                                    <>
+                                                        <Badge variant="warning">
+                                                            <span className="text-[10px]">Partial Return</span>
+                                                        </Badge>
+                                                        {partialDetail && (
+                                                            <span className="text-[10px] text-gray-500">{partialDetail}</span>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
+
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Memo</label>
                                     <input type="text" value={editItemForm.memo} onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })} placeholder="Optional memo" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500" />
