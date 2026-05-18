@@ -7,7 +7,6 @@ import {
     Building2,
     BarChart3,
     Settings,
-    Users,
     UserCog,
     ClipboardList,
     Scan,
@@ -22,56 +21,22 @@ import { useEffect, useMemo, useState } from 'react';
 import { fetchSettings } from '@/lib/store/settingsSlice';
 import { useAppDispatch } from '@/lib/store/hooks';
 
-// Warehouse sub-routes that activate the Warehouse sidebar link (when that tab is uncommented)
-const warehouseSubRoutes = [
-    '/warehouse/receiving',
-    '/warehouse/verification',
-    // '/warehouse/surplus',
-    '/warehouse/batches',
-    '/warehouse/debit-memos',
-    '/warehouse/ra-tracking',
-    '/warehouse/returns',
-    '/warehouse/destruction',
-];
-
-// Payout sub-routes that activate the Payout Management sidebar link (when that tab is uncommented)
-const payoutSubRoutes = [
-    '/pharmacy-payments',
-    '/warehouse/unpaid',
-];
-
 // Admin navigation (for super_admin, manager, reviewer, support)
 const adminSidebarLinks = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard', permission: 'dashboard' },
     { href: '/pharmacies', icon: Building2, label: 'Pharmacies', permission: 'pharmacies' },
-    // { href: '/distributors', icon: Warehouse, label: 'Distributors', permission: 'distributors' },
-    // { href: '/marketplace', icon: ShoppingCart, label: 'Marketplace', permission: 'marketplace' },
-    // { href: '/documents', icon: FileText, label: 'Documents', permission: 'documents' },
-    // { href: '/payments', icon: CreditCard, label: 'Payments', permission: 'payments' },
-    // { href: '/payout-hub', icon: CircleDollarSign, label: 'Payout Mgmt', permission: 'payout_hub' },
     { href: '/analytics', icon: BarChart3, label: 'Analytics', permission: 'analytics' },
     { href: '/settings', icon: Settings, label: 'Settings', permission: 'settings' },
-    // { href: '/admins', icon: Users, label: 'Admins', permission: 'admins' },
     { href: '/processors', icon: UserCog, label: 'Processors', permission: 'processors' },
     { href: '/service-requests', icon: Truck, label: 'Service Requests', permission: 'service_requests' },
-    // { href: '/policies', icon: Shield, label: 'Labeler Info', permission: 'policies' },
-    // { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing', permission: 'ndc_pricing' },
-    // { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items', permission: 'tbd_items' },
-    // { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction', permission: 'destruction' },
-    // { href: '/warehouse', icon: Warehouse, label: 'Warehouse', matchPrefix: '/warehouse', permission: 'warehouse' },
 ];
 
-// Processor navigation (for role = 'processor') — Receiving is warehouse-only
+// Processor navigation (for role = 'processor')
 const processorSidebarLinks = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/warehouse/returns', icon: ClipboardList, label: 'Returns' },
     { href: '/warehouse/returns/create', icon: Scan, label: 'Create Return' },
     { href: '/service-requests', icon: Truck, label: 'Service Requests' },
-    // { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing' },
-    // { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
-    // { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction' },
-    // { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
-    // { href: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 interface SidebarProps {
@@ -207,12 +172,7 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggleCollapse
                 <nav className="space-y-1">
                     {sidebarLinks.map((link) => {
                         const Icon = link.icon;
-                        const isActive =
-                            link.href === '/warehouse'
-                                ? pathname === '/warehouse' || warehouseSubRoutes.some(r => pathname.startsWith(r))
-                                : link.href === '/payout-hub'
-                                ? pathname === '/payout-hub' || payoutSubRoutes.some(r => pathname.startsWith(r))
-                                : pathname === link.href;
+                        const isActive = pathname === link.href;
 
                         return (
                             <Link

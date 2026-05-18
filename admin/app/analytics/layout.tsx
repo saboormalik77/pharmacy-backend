@@ -2,14 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, TrendingUp, DollarSign, Package, Clock, Search, Building2 } from 'lucide-react';
+import { BarChart3, TrendingUp, DollarSign, Building2 } from 'lucide-react';
 
 const tabs = [
     { href: '/analytics', label: 'Overview', icon: BarChart3 },
     { href: '/analytics/returns', label: 'Returns', icon: TrendingUp },
     { href: '/analytics/financials', label: 'Financials', icon: DollarSign },
-    // { href: '/analytics/inventory', label: 'Inventory', icon: Package },
-    // { href: '/analytics/price-audit', label: 'Price Audit', icon: Search },
     { href: '/analytics/performance', label: 'Performance', icon: Building2 },
 ];
 
