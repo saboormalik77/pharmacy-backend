@@ -34,6 +34,9 @@ const STATUS_OPTIONS = [
     { value: 'finalized', label: 'Finalized' },
     { value: 'received', label: 'Received' },
     { value: 'closed_out', label: 'Closed Out' },
+    { value: 'not_paid', label: 'Not Paid' },
+    { value: 'partially_paid', label: 'Partially Paid' },
+    { value: 'paid', label: 'Paid' },
 ];
 
 function getStatusBadge(status: string): { variant: 'success' | 'warning' | 'danger' | 'info' | 'default'; label: string } {
@@ -44,6 +47,9 @@ function getStatusBadge(status: string): { variant: 'success' | 'warning' | 'dan
         case 'finalized': return { variant: 'default', label: 'Finalized' };
         case 'received': return { variant: 'success', label: 'Received' };
         case 'closed_out': return { variant: 'default', label: 'Closed Out' };
+        case 'not_paid': return { variant: 'danger', label: 'Not Paid' };
+        case 'partially_paid': return { variant: 'warning', label: 'Partially Paid' };
+        case 'paid': return { variant: 'success', label: 'Paid' };
         default: return { variant: 'default', label: status };
     }
 }

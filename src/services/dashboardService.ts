@@ -504,10 +504,10 @@ export const getReturnDetail = async (pharmacyId: string, returnId: string): Pro
 
   const db = supabaseAdmin;
 
-  // 1. Get the return transaction
+  // 1. Get the return transaction (batch_id needed for pharmacy payment lookup)
   const { data: rtData, error: rtError } = await db
     .from('return_transactions')
-    .select('id, license_plate, status, total_items, total_returnable_value, total_non_returnable_value, created_at')
+    .select('id, license_plate, status, total_items, total_returnable_value, total_non_returnable_value, created_at, batch_id')
     .eq('id', returnId)
     .eq('pharmacy_id', pharmacyId)
     .single();
@@ -540,8 +540,7 @@ export const getReturnDetail = async (pharmacyId: string, returnId: string): Pro
     value: Math.round(value * 100) / 100,
   }));
 
-  // 3. Get expected (ask_price) and received (received_price) values from debit_memo_items
-  //    for this specific return transaction
+  // 3. Get expected (ask_price) and received (received_price) from debit_memo_items — same as before
   const { data: creditData, error: creditError } = await db.rpc('get_return_credit_summary', {
     p_return_id: returnId,
   });
@@ -550,10 +549,7 @@ export const getReturnDetail = async (pharmacyId: string, returnId: string): Pro
   let totalReceived = 0;
 
   if (creditError) {
-    // Fallback: try raw query via return_transaction_items -> debit_memo_items
     console.warn('RPC get_return_credit_summary failed, trying fallback query:', creditError.message);
-    
-    // Get return_transaction_items for this return
     const { data: rtiData, error: rtiError } = await db
       .from('return_transaction_items')
       .select('id')
@@ -561,8 +557,6 @@ export const getReturnDetail = async (pharmacyId: string, returnId: string): Pro
 
     if (!rtiError && rtiData && rtiData.length > 0) {
       const rtiIds = rtiData.map((rti: any) => rti.id);
-      
-      // Get debit_memo_items for these transaction items
       const { data: dmiData, error: dmiError } = await db
         .from('debit_memo_items')
         .select('ask_price, received_price')
@@ -576,12 +570,30 @@ export const getReturnDetail = async (pharmacyId: string, returnId: string): Pro
       }
     }
   } else if (creditData) {
-    // RPC returns { total_ask, total_received }
     totalExpected = Number(creditData.total_ask) || 0;
     totalReceived = Number(creditData.total_received) || 0;
   }
 
-  // 3b. Get pharmacy_payments for FCR vs Manufacturer Direct breakdown ratio
+  // 3b. Gate: only show received if pharmacy payout has been completed for this batch.
+  //     If no pharmacy_payments row with status='paid' exists, received = 0.
+  if (rtData.batch_id) {
+    const { data: paidPayment } = await db
+      .from('pharmacy_payments')
+      .select('id')
+      .eq('batch_id', rtData.batch_id)
+      .eq('pharmacy_id', pharmacyId)
+      .eq('status', 'paid')
+      .limit(1)
+      .maybeSingle();
+
+    if (!paidPayment) {
+      totalReceived = 0;
+    }
+  } else {
+    totalReceived = 0;
+  }
+
+  // 3c. Get pharmacy_payments for FCR vs Manufacturer Direct breakdown ratio
   const { data: paymentsData, error: paymentsError } = await db
     .from('pharmacy_payments')
     .select('included_credit_amount, direct_credit_amount')
@@ -602,10 +614,8 @@ export const getReturnDetail = async (pharmacyId: string, returnId: string): Pro
   const totalReturnableValue = Number(rtData.total_returnable_value) || 0;
   const totalNonReturnableValue = Number(rtData.total_non_returnable_value) || 0;
 
-  // Split expected and received between FCR and Manufacturer Direct based on historical ratio
   const totalRatio = fcrReceivedRatio + manufacturerDirectReceivedRatio;
-  const fcrRatio = totalRatio > 0 ? fcrReceivedRatio / totalRatio : 0.72; // Default 72% FCR if no data
-  
+  const fcrRatio = totalRatio > 0 ? fcrReceivedRatio / totalRatio : 0.72;
   const fcrExpected = Math.round(totalExpected * fcrRatio * 100) / 100;
   const manufacturerDirectExpected = Math.round((totalExpected - fcrExpected) * 100) / 100;
   const fcrReceived = Math.round(totalReceived * fcrRatio * 100) / 100;
