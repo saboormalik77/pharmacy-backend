@@ -185,7 +185,7 @@ export function validateLabelerType(value: string): ValidationResult {
  */
 export function validateAveragePayPercent(value: number | null | undefined): ValidationResult {
     if (value == null || value === undefined || (value as unknown as string) === '')
-        return { valid: false, error: 'Average Pay Percent is required.' };
+        return { valid: true, error: null };
     if (typeof value !== 'number' || isNaN(value))
         return { valid: false, error: 'Average Pay Percent must be a number.' };
     const rounded = Math.round(value * 100) / 100;
@@ -207,7 +207,7 @@ export function roundPayPercent(value: number): number {
  */
 export function validateAverageDaysToPay(value: number | null | undefined): ValidationResult {
     if (value == null || value === undefined || (value as unknown as string) === '')
-        return { valid: false, error: 'Average Days to Pay is required.' };
+        return { valid: true, error: null };
     if (typeof value !== 'number' || isNaN(value))
         return { valid: false, error: 'Average Days to Pay must be a number.' };
     if (!Number.isInteger(value))
@@ -421,7 +421,7 @@ export function validatePolicyDescription(value: string, label = 'Policy Descrip
  */
 export function validateDiscountRate(value: number | null | undefined): ValidationResult {
     if (value == null || (value as unknown as string) === '')
-        return { valid: false, error: 'Discount Rate is required.' };
+        return { valid: true, error: null };
     if (typeof value !== 'number' || isNaN(value))
         return { valid: false, error: 'Discount Rate must be a number.' };
     const rounded = Math.round(value * 10000) / 10000;

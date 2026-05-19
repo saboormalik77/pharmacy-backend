@@ -33,15 +33,6 @@ BEGIN
     RETURN jsonb_build_object('error', true, 'code', 400, 'message', 'Invalid payment_method. Must be: wire, check, zelle, cash');
   END IF;
 
-  -- Check for duplicate pharmacy+batch payment
-  IF p_batch_id IS NOT NULL AND EXISTS (
-    SELECT 1 FROM pharmacy_payments
-    WHERE pharmacy_id = p_pharmacy_id AND batch_id = p_batch_id
-      AND status NOT IN ('failed')
-  ) THEN
-    RETURN jsonb_build_object('error', true, 'code', 409, 'message', 'A payment record already exists for this pharmacy and batch');
-  END IF;
-
   -- Get GPO name from pharmacy (fallback to null if column doesn't exist)
   BEGIN
     SELECT gpo_affiliation INTO v_gpo_name FROM pharmacy WHERE id = p_pharmacy_id;
@@ -62,7 +53,16 @@ BEGIN
   )
   RETURNING * INTO v_payment;
 
-  -- Return success response
+  -- Mark the uncovered paid memos as covered by this new payout
+  IF p_batch_id IS NOT NULL THEN
+    UPDATE debit_memos
+       SET pharmacy_payout_id = v_payment.id
+     WHERE pharmacy_id        = p_pharmacy_id
+       AND batch_id           = p_batch_id
+       AND payment_status    IN ('paid', 'partial')
+       AND pharmacy_payout_id IS NULL;
+  END IF;
+
   RETURN jsonb_build_object(
     'error', false,
     'data', _pharmacy_payment_to_json(v_payment)

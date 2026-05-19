@@ -31,32 +31,23 @@ BEGIN
          )
        )
      )
+     -- At least one pharmacy has at least one manufacturer-paid memo
      AND (
-       NOT (
-         COALESCE(p_exclude_if_no_remaining_pharmacy_payout, FALSE)
-         OR COALESCE(p_all_debit_memos_paid_or_partial, FALSE)
-       )
+       NOT COALESCE(p_all_debit_memos_paid_or_partial, FALSE)
        OR EXISTS (
-         SELECT 1
-           FROM (
-             SELECT DISTINCT pharmacy_id
-               FROM debit_memos
-              WHERE batch_id = b.id
-           ) ph
-          WHERE EXISTS (
-            SELECT 1
-              FROM debit_memos dm
-             WHERE dm.batch_id = b.id
-               AND dm.pharmacy_id = ph.pharmacy_id
-               AND dm.payment_status IN ('paid', 'partial')
-          )
-            AND NOT EXISTS (
-              SELECT 1
-                FROM pharmacy_payments pp
-               WHERE pp.batch_id = b.id
-                 AND pp.pharmacy_id = ph.pharmacy_id
-                 AND pp.status IS DISTINCT FROM 'failed'
-            )
+         SELECT 1 FROM debit_memos dm
+         WHERE dm.batch_id = b.id
+           AND dm.payment_status IN ('paid', 'partial')
+       )
+     )
+     -- At least one paid memo not yet covered by a pharmacy payout
+     AND (
+       NOT COALESCE(p_exclude_if_no_remaining_pharmacy_payout, FALSE)
+       OR EXISTS (
+         SELECT 1 FROM debit_memos dm
+         WHERE dm.batch_id = b.id
+           AND dm.payment_status IN ('paid', 'partial')
+           AND dm.pharmacy_payout_id IS NULL
        )
      );
 
@@ -77,32 +68,23 @@ BEGIN
              )
            )
          )
+         -- At least one pharmacy has at least one manufacturer-paid memo
          AND (
-           NOT (
-             COALESCE(p_exclude_if_no_remaining_pharmacy_payout, FALSE)
-             OR COALESCE(p_all_debit_memos_paid_or_partial, FALSE)
-           )
+           NOT COALESCE(p_all_debit_memos_paid_or_partial, FALSE)
            OR EXISTS (
-             SELECT 1
-               FROM (
-                 SELECT DISTINCT pharmacy_id
-                   FROM debit_memos
-                  WHERE batch_id = b.id
-               ) ph
-              WHERE NOT EXISTS (
-                SELECT 1
-                  FROM debit_memos dm
-                 WHERE dm.batch_id = b.id
-                   AND dm.pharmacy_id = ph.pharmacy_id
-                   AND (dm.payment_status IS NULL OR dm.payment_status NOT IN ('paid', 'partial'))
-              )
-                AND NOT EXISTS (
-                  SELECT 1
-                    FROM pharmacy_payments pp
-                   WHERE pp.batch_id = b.id
-                     AND pp.pharmacy_id = ph.pharmacy_id
-                     AND pp.status IS DISTINCT FROM 'failed'
-                )
+             SELECT 1 FROM debit_memos dm
+             WHERE dm.batch_id = b.id
+               AND dm.payment_status IN ('paid', 'partial')
+           )
+         )
+         -- At least one paid memo not yet covered by a pharmacy payout
+         AND (
+           NOT COALESCE(p_exclude_if_no_remaining_pharmacy_payout, FALSE)
+           OR EXISTS (
+             SELECT 1 FROM debit_memos dm
+             WHERE dm.batch_id = b.id
+               AND dm.payment_status IN ('paid', 'partial')
+               AND dm.pharmacy_payout_id IS NULL
            )
          )
        ORDER BY b.batch_month DESC

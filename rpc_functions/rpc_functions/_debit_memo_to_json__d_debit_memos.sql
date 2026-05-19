@@ -37,6 +37,7 @@ AS $function$
     'paymentReference',   d.payment_reference,
     'paymentNotes',       d.payment_notes,
     'creditMemoUrl',      d.credit_memo_url,
+    'pharmacyPayoutId',   d.pharmacy_payout_id,
     'createdAt',          d.created_at,
     'updatedAt',          d.updated_at
   );

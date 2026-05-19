@@ -1,5 +1,7 @@
--- Migration: Allow batch to appear in payout dropdown when at least one memo is paid
--- (previously required ALL memos to be paid/partial)
+-- Migration: Fix pharmacy payout batch visibility
+-- - Show batch while any pharmacy has more paid memos than recorded payouts
+-- - Hide batch once every pharmacy's payout count >= paid memo count (all done)
+-- - Two flags are now independent AND conditions (not OR'd together)
 -- Run in Supabase Dashboard → SQL Editor
 
 CREATE OR REPLACE FUNCTION public.list_batches(
@@ -35,32 +37,35 @@ BEGIN
          )
        )
      )
+     -- At least one pharmacy has at least one manufacturer-paid memo
      AND (
-       NOT (
-         COALESCE(p_exclude_if_no_remaining_pharmacy_payout, FALSE)
-         OR COALESCE(p_all_debit_memos_paid_or_partial, FALSE)
+       NOT COALESCE(p_all_debit_memos_paid_or_partial, FALSE)
+       OR EXISTS (
+         SELECT 1 FROM debit_memos dm
+         WHERE dm.batch_id = b.id
+           AND dm.payment_status IN ('paid', 'partial')
        )
+     )
+     -- At least one pharmacy still needs a payout: paid memo count > recorded payout count
+     AND (
+       NOT COALESCE(p_exclude_if_no_remaining_pharmacy_payout, FALSE)
        OR EXISTS (
          SELECT 1
            FROM (
-             SELECT DISTINCT pharmacy_id
-               FROM debit_memos
-              WHERE batch_id = b.id
-           ) ph
-          WHERE EXISTS (
-            SELECT 1
-              FROM debit_memos dm
-             WHERE dm.batch_id = b.id
-               AND dm.pharmacy_id = ph.pharmacy_id
-               AND dm.payment_status IN ('paid', 'partial')
-          )
-            AND NOT EXISTS (
-              SELECT 1
-                FROM pharmacy_payments pp
-               WHERE pp.batch_id = b.id
-                 AND pp.pharmacy_id = ph.pharmacy_id
-                 AND pp.status IS DISTINCT FROM 'failed'
-            )
+             SELECT dm.pharmacy_id, COUNT(*) AS paid_count
+               FROM debit_memos dm
+              WHERE dm.batch_id = b.id
+                AND dm.payment_status IN ('paid', 'partial')
+              GROUP BY dm.pharmacy_id
+           ) paid
+           LEFT JOIN (
+             SELECT pp.pharmacy_id, COUNT(*) AS payout_count
+               FROM pharmacy_payments pp
+              WHERE pp.batch_id = b.id
+                AND pp.status IS DISTINCT FROM 'failed'
+              GROUP BY pp.pharmacy_id
+           ) payouts ON payouts.pharmacy_id = paid.pharmacy_id
+          WHERE paid.paid_count > COALESCE(payouts.payout_count, 0)
        )
      );
 
@@ -81,32 +86,35 @@ BEGIN
              )
            )
          )
+         -- At least one pharmacy has at least one manufacturer-paid memo
          AND (
-           NOT (
-             COALESCE(p_exclude_if_no_remaining_pharmacy_payout, FALSE)
-             OR COALESCE(p_all_debit_memos_paid_or_partial, FALSE)
+           NOT COALESCE(p_all_debit_memos_paid_or_partial, FALSE)
+           OR EXISTS (
+             SELECT 1 FROM debit_memos dm
+             WHERE dm.batch_id = b.id
+               AND dm.payment_status IN ('paid', 'partial')
            )
+         )
+         -- At least one pharmacy still needs a payout: paid memo count > recorded payout count
+         AND (
+           NOT COALESCE(p_exclude_if_no_remaining_pharmacy_payout, FALSE)
            OR EXISTS (
              SELECT 1
                FROM (
-                 SELECT DISTINCT pharmacy_id
-                   FROM debit_memos
-                  WHERE batch_id = b.id
-               ) ph
-              WHERE EXISTS (
-                SELECT 1
-                  FROM debit_memos dm
-                 WHERE dm.batch_id = b.id
-                   AND dm.pharmacy_id = ph.pharmacy_id
-                   AND dm.payment_status IN ('paid', 'partial')
-              )
-                AND NOT EXISTS (
-                  SELECT 1
-                    FROM pharmacy_payments pp
-                   WHERE pp.batch_id = b.id
-                     AND pp.pharmacy_id = ph.pharmacy_id
-                     AND pp.status IS DISTINCT FROM 'failed'
-                )
+                 SELECT dm.pharmacy_id, COUNT(*) AS paid_count
+                   FROM debit_memos dm
+                  WHERE dm.batch_id = b.id
+                    AND dm.payment_status IN ('paid', 'partial')
+                  GROUP BY dm.pharmacy_id
+               ) paid
+               LEFT JOIN (
+                 SELECT pp.pharmacy_id, COUNT(*) AS payout_count
+                   FROM pharmacy_payments pp
+                  WHERE pp.batch_id = b.id
+                    AND pp.status IS DISTINCT FROM 'failed'
+                  GROUP BY pp.pharmacy_id
+               ) payouts ON payouts.pharmacy_id = paid.pharmacy_id
+              WHERE paid.paid_count > COALESCE(payouts.payout_count, 0)
            )
          )
        ORDER BY b.batch_month DESC

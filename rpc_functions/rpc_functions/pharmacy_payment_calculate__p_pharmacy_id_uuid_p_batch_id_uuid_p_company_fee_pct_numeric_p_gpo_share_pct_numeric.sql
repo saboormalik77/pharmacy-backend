@@ -35,13 +35,18 @@ BEGIN
   -- Get GPO affiliation from pharmacy
   SELECT gpo_affiliation INTO v_gpo_name FROM pharmacy WHERE id = p_pharmacy_id;
 
-  -- Sum all received payments from debit memos for this pharmacy in this batch
+  -- Sum only memos not yet covered by a prior payout
   SELECT COALESCE(SUM(amount_received), 0), COUNT(*)
     INTO v_total_credit, v_memo_count
   FROM debit_memos
   WHERE pharmacy_id = p_pharmacy_id
     AND batch_id = p_batch_id
-    AND payment_status IN ('paid', 'partial');
+    AND payment_status IN ('paid', 'partial')
+    AND pharmacy_payout_id IS NULL;
+
+  IF v_memo_count = 0 THEN
+    RETURN jsonb_build_object('error', true, 'code', 400, 'message', 'No uncovered paid memos found for this pharmacy in this batch');
+  END IF;
 
   -- Calculate splits
   v_company_fee    := ROUND(v_total_credit * (p_company_fee_pct / 100.0), 2);
