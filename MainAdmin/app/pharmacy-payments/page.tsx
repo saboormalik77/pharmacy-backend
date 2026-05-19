@@ -58,7 +58,7 @@ function CalculatePayoutModal({
   const [batchId, setBatchId] = useState('');
 
   const pharmacyEligible = (p: BatchPharmacy) =>
-    !p.payoutRecorded;
+    p.debitMemosPaidForPayout;
   const eligiblePharmacyCount = batchPharmacies.filter(pharmacyEligible).length;
 
   const handleBatchChange = (value: string) => {
@@ -183,8 +183,8 @@ function CalculatePayoutModal({
                               : 'Select a pharmacy...'}
                       </option>
                       {batchPharmacies.map((p) => (
-                        <option key={p.id} value={p.id} disabled={p.payoutRecorded}>
-                          {p.payoutRecorded ? `${p.name} — payout already recorded` : p.name}
+                        <option key={p.id} value={p.id}>
+                          {p.payoutRecorded ? `${p.name} — prior payout exists` : p.name}
                         </option>
                       ))}
                     </select>
@@ -193,7 +193,7 @@ function CalculatePayoutModal({
                       batchPharmacies.some((p) => p.payoutRecorded) &&
                       eligiblePharmacyCount > 0 && (
                         <p className="text-[10px] text-gray-400 mt-1">
-                          This batch stays listed until every pharmacy has a payout record. Entries with “payout already recorded” are read-only.
+                          Pharmacies marked &quot;prior payout exists&quot; can still receive additional payouts for newly paid memos.
                         </p>
                       )}
                   </>

@@ -570,15 +570,20 @@ export default function ReturnDetailPage() {
                         }
                     }, 2500);
                 } else {
-                    // For individual labels, just ensure window closes after the auto-print completes
+                    // Individual label HTML contains its own auto-print script.
+                    // Don't close the window — let the print dialog appear and the user dismiss it.
                     printWindow.onload = () => {
                         setTimeout(() => {
-                            // Individual labels auto-print, so we just close after delay
                             if (printWindow && !printWindow.closed) {
-                                printWindow.close();
+                                printWindow.print();
                             }
-                        }, 2000);
+                        }, 800);
                     };
+                    setTimeout(() => {
+                        if (printWindow && !printWindow.closed) {
+                            printWindow.print();
+                        }
+                    }, 2500);
                 }
             } else {
                 throw new Error('Unable to open print window. Please check popup blockers.');
@@ -976,28 +981,6 @@ export default function ReturnDetailPage() {
                                 </div>
                             )}
 
-                            {/* FedEx Labels */}
-                            {tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0 && (
-                                <div className="pt-2 border-t border-[#f3f4f6]">
-                                    <dt className="text-xs text-[#6b7280] mb-1 flex items-center gap-1"><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
-                                    <dd className="flex flex-wrap gap-2">
-                                        {Object.keys(tx.fedexLabels).map((key) => {
-                                            const num = key.replace('package', '');
-                                            return (
-                                                <a
-                                                    key={key}
-                                                    href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${num}/download`}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="flex items-center gap-1 px-2 py-1 bg-[#f5f2f1] hover:bg-[#e2e2e2] text-xs text-[#505454] rounded border border-[#e2e2e2] transition-colors"
-                                                >
-                                                    <Download className="w-3 h-3" /> Label {num}
-                                                </a>
-                                            );
-                                        })}
-                                    </dd>
-                                </div>
-                            )}
                         </dl>
                     </div>
 

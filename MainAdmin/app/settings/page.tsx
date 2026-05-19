@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { validatePassword, validatePasswordMatch, validateUSPhoneOptional, validateZipCodeOptional, formatPhoneNumber } from '@/lib/validation';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { usePermissions } from '@/hooks/usePermissions';
 import {
     fetchSettings,
     updateWarehouseAddress,
@@ -17,6 +18,7 @@ export default function SettingsPage() {
     const dispatch = useAppDispatch();
     const { settings, isLoading, isUpdating, isResettingPassword, error } = useAppSelector((state) => state.settings);
     const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+    const { isMainAdmin } = usePermissions();
 
     const [warehouseForm, setWarehouseForm] = useState({
         warehouseName: '',
@@ -193,8 +195,8 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
-                {/* Warehouse / Shipping Address */}
-                <div className="bg-white rounded-[4px] shadow-md p-6">
+                {/* Warehouse / Shipping Address — main admin only */}
+                {isMainAdmin && <div className="bg-white rounded-[4px] shadow-md p-6">
                     <div className="flex items-center gap-3 mb-6">
                         <Warehouse className="w-5 h-5 text-primary-500" />
                         <div>
@@ -330,7 +332,7 @@ export default function SettingsPage() {
                             </div>
                         </div>
                     )}
-                </div>
+                </div>}
 
                 {/* Security Settings - Reset Password */}
                 <div className="bg-white rounded-[4px] shadow px-4 py-3">

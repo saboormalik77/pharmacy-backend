@@ -767,7 +767,7 @@ export default function PoliciesPage() {
                             {/* Main Contact / Main Phone / Fax */}
                             <div className="grid grid-cols-3 gap-3">
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Main Contact</label>
+                                    <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Main Contact Name</label>
                                     <input
                                         type="text"
                                         value={newPolicy.mainContact || ''}
@@ -831,7 +831,7 @@ export default function PoliciesPage() {
                             {/* Contact 2 / Phone 2 / Email 2 */}
                             <div className="grid grid-cols-3 gap-3">
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Contact 2</label>
+                                    <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Contact 2 Name</label>
                                     <input
                                         type="text"
                                         value={newPolicy.contact2Name || ''}
@@ -907,7 +907,7 @@ export default function PoliciesPage() {
                                 {/* Destination / Auto RA Email */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Destination</label>
+                                        <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Destination <span style={{ color: 'var(--error)' }}>*</span></label>
                                         <div className="relative">
                                             <select
                                                 value={newReturnPolicy.destination}

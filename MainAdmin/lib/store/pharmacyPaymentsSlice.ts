@@ -66,6 +66,7 @@ export interface DebitMemo {
     amountRequested: number;
     amountReceived: number;
     paymentStatus: string;
+    pharmacyPayoutId: string | null;
 }
 
 export interface PaymentCalculation {
@@ -257,7 +258,7 @@ export const fetchBatchPharmacies = createAsyncThunk(
                 data: {
                     batch: ReturnBatch;
                     returns: ReturnTransaction[];
-                    debitMemos?: { pharmacyId?: string; pharmacyName?: string; paymentStatus?: string }[];
+                    debitMemos?: { pharmacyId?: string; pharmacyName?: string; paymentStatus?: string; pharmacyPayoutId?: string | null }[];
                 };
             }>(`/admin/batches/${batchId}`, true),
             apiClient.get<{ status: string; data: PharmacyPayment[] }>('/admin/pharmacy-payments', true, {
@@ -292,10 +293,9 @@ export const fetchBatchPharmacies = createAsyncThunk(
 
         const pharmacyMemosPaidForPayout = (pharmacyId: string): boolean => {
             const mine = memos.filter((m) => m.pharmacyId === pharmacyId);
-            if (mine.length === 0) return false;
             return mine.some((m) => {
                 const s = (m.paymentStatus || '').toLowerCase();
-                return s === 'paid' || s === 'partial';
+                return (s === 'paid' || s === 'partial') && !m.pharmacyPayoutId;
             });
         };
 
