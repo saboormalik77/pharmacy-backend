@@ -143,7 +143,9 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggleCollapse
                                     )}
                                 </>
                             )}
-                            <span className="text-sm font-bold text-white">{headerBusinessName || 'PharmAdmin'}</span>
+                            {headerBusinessName && (
+                                <span className="text-sm font-bold text-white truncate">{headerBusinessName}</span>
+                            )}
                         </div>
                         <button
                             onClick={() => {

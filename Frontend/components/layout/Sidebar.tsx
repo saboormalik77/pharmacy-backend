@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
 import { usePharmacyPermissions } from '@/hooks/usePharmacyPermissions'
-import { apiClient } from '@/lib/api/client'
+import { usePharmacyAdminBranding } from '@/lib/hooks/usePharmacyAdminBranding'
 import {
   LayoutDashboard,
   BarChart3,
@@ -24,48 +24,14 @@ interface SidebarProps {
   onClose?: () => void
 }
 
-interface AdminBranding {
-  logoUrl: string | null
-  businessName: string | null
-}
-
 export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname()
   const { hasPermission, hasAnyPermission, isParent, isLoaded, isSigningOut } = usePharmacyPermissions()
-  const [branding, setBranding] = useState<AdminBranding | null>(null)
+  const branding = usePharmacyAdminBranding()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-  }, [])
-
-  useEffect(() => {
-    const fetchBranding = async () => {
-      try {
-        const res = await apiClient.get<AdminBranding>('/pharmacy/admin-branding')
-        if (res.status === 'success' && res.data) {
-          setBranding(res.data)
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('pharmacyAdminBranding', JSON.stringify(res.data))
-            if (res.data.businessName) {
-              document.title = `${res.data.businessName} - Data Analytics Platform`
-            }
-            if (res.data.logoUrl) {
-              let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']")
-              if (!link) {
-                link = document.createElement('link')
-                link.rel = 'icon'
-                document.head.appendChild(link)
-              }
-              link.href = res.data.logoUrl
-            }
-          }
-        }
-      } catch {
-        // ignore
-      }
-    }
-    fetchBranding()
   }, [])
 
   const navItems = [
@@ -143,7 +109,9 @@ export function Sidebar({ onClose }: SidebarProps) {
             <img src={branding.logoUrl} alt="Logo" className="w-8 h-8 rounded-[4px] object-contain flex-shrink-0" />
           )}
           <div className="min-w-0 flex-1">
-            <h2 className="text-base sm:text-lg font-bold text-white truncate">{branding?.businessName || 'PharmAnalytics'}</h2>
+            {branding?.businessName && (
+              <h2 className="text-base sm:text-lg font-bold text-white truncate">{branding.businessName}</h2>
+            )}
           </div>
         </div>
         <button

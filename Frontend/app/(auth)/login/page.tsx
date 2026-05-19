@@ -31,6 +31,27 @@ interface AdminBranding {
   businessName: string | null
 }
 
+interface TenantInfo {
+  buyingGroupId: string
+  domain: string
+  portalType: 'admin' | 'pharmacy' | 'unknown'
+  isActive: boolean
+  buyingGroupName: string
+  logoUrl?: string | null
+}
+
+function applyLoginTitle(businessName: string) {
+  const title = `${businessName} - Data Analytics Platform`
+  document.title = title
+
+  // Next metadata can briefly re-apply during hydration/navigation.
+  const delays = [0, 50, 250, 750, 1500]
+  requestAnimationFrame(() => { document.title = title })
+  delays.forEach((delay) => {
+    window.setTimeout(() => { document.title = title }, delay)
+  })
+}
+
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -50,6 +71,14 @@ function LoginForm() {
   const { tenantChecked, tenantError, validTenant, isLocalHost } =
     usePharmacyPortalTenant()
 
+  const applyBranding = (nextBranding: AdminBranding) => {
+    setBranding(nextBranding)
+    try { localStorage.setItem('pharmacyAdminBranding', JSON.stringify(nextBranding)) } catch { /* ignore */ }
+    if (nextBranding.businessName) {
+      applyLoginTitle(nextBranding.businessName)
+    }
+  }
+
   useEffect(() => {
     try {
       const cached = localStorage.getItem('pharmacyAdminBranding')
@@ -57,11 +86,88 @@ function LoginForm() {
         const parsedBranding = JSON.parse(cached)
         setBranding(parsedBranding)
         if (parsedBranding.businessName) {
-          document.title = `${parsedBranding.businessName} - Data Analytics Platform`
+          applyLoginTitle(parsedBranding.businessName)
         }
       }
     } catch { /* ignore */ }
   }, [])
+
+  useEffect(() => {
+    const syncAutofilledEmail = () => {
+      const input = document.getElementById('email') as HTMLInputElement | null
+      const value = input?.value?.trim()
+      if (value && value !== email) {
+        setEmail(value)
+      }
+    }
+
+    const timers = [100, 500, 1000].map((delay) => window.setTimeout(syncAutofilledEmail, delay))
+    return () => {
+      timers.forEach((timer) => window.clearTimeout(timer))
+    }
+  }, [email])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const fetchFreshTenantBranding = async () => {
+      try {
+        const { apiClient } = await import('@/lib/api/client')
+        const resp = await apiClient.get<{
+          isLocalDev: boolean
+          tenant: TenantInfo | null
+        }>('/auth/tenant-info', { role: 'pharmacy', _: Date.now() }, false)
+
+        if (cancelled) return
+        const tenant = resp.data?.tenant
+        if (!tenant || tenant.portalType !== 'pharmacy') return
+
+        applyBranding({
+          logoUrl: tenant.logoUrl || null,
+          businessName: tenant.buyingGroupName || null,
+        })
+      } catch {
+        // Tenant branding is best-effort; cached branding still renders.
+      }
+    }
+
+    fetchFreshTenantBranding()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail || !normalizedEmail.includes('@')) return
+
+    let cancelled = false
+    const timer = window.setTimeout(async () => {
+      try {
+        const { apiClient } = await import('@/lib/api/client')
+        const resp = await apiClient.get<AdminBranding>(
+          '/pharmacy/admin-branding',
+          { email: normalizedEmail, _: Date.now() },
+          false
+        )
+
+        if (cancelled || !resp.data) return
+        if (!resp.data.businessName && !resp.data.logoUrl) return
+
+        applyBranding({
+          logoUrl: resp.data.logoUrl || null,
+          businessName: resp.data.businessName || null,
+        })
+      } catch {
+        // The user may not have typed a known pharmacy email yet.
+      }
+    }, 300)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [email])
 
   useEffect(() => {
     if (!isLocalHost && tenantChecked && tenantError) {
@@ -75,11 +181,15 @@ function LoginForm() {
         logoUrl: validTenant.logoUrl || branding?.logoUrl || null,
         businessName: validTenant.buyingGroupName,
       }
-      setBranding(updatedBranding)
-      try { localStorage.setItem('pharmacyAdminBranding', JSON.stringify(updatedBranding)) } catch { /* ignore */ }
-      document.title = `${validTenant.buyingGroupName} - Data Analytics Platform`
+      applyBranding(updatedBranding)
     }
   }, [validTenant])
+
+  useEffect(() => {
+    if (branding?.businessName) {
+      applyLoginTitle(branding.businessName)
+    }
+  }, [branding?.businessName])
 
   useEffect(() => {
     if (branding?.logoUrl) {
@@ -176,7 +286,9 @@ function LoginForm() {
           {branding?.logoUrl && (
             <img src={branding.logoUrl} alt="Logo" className="w-16 h-16 sm:w-20 sm:h-20 rounded-[4px] object-contain" />
           )}
-          <div className="text-2xl font-bold text-primary">{branding?.businessName || 'PharmAnalytics'}</div>
+          {branding?.businessName && (
+            <div className="text-2xl font-bold text-primary">{branding.businessName}</div>
+          )}
         </div>
         <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
         <CardDescription className="text-center">

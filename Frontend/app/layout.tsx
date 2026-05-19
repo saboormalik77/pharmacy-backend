@@ -19,7 +19,6 @@ const manrope = Manrope({
 })
 
 export const metadata: Metadata = {
-  title: 'PharmAnalytics',
   description: 'Maximize your pharmacy returns with data-driven insights',
 }
 
