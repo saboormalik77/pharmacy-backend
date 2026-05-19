@@ -1,14 +1,18 @@
--- Function : list_batches
--- Arguments: p_status text, p_page integer, p_limit integer, p_all_debit_memos_shipped boolean, p_exclude_if_no_remaining_pharmacy_payout boolean, p_all_debit_memos_paid_or_partial boolean
--- Type     : FUNCTION
--- =============================================================
+-- Migration: Allow batch to appear in payout dropdown when at least one memo is paid
+-- (previously required ALL memos to be paid/partial)
+-- Run in Supabase Dashboard → SQL Editor
 
-DROP FUNCTION IF EXISTS public.list_batches(p_status text, p_page integer, p_limit integer, p_all_debit_memos_shipped boolean, p_exclude_if_no_remaining_pharmacy_payout boolean, p_all_debit_memos_paid_or_partial boolean) CASCADE;
-
-CREATE OR REPLACE FUNCTION public.list_batches(p_status text DEFAULT NULL::text, p_page integer DEFAULT 1, p_limit integer DEFAULT 20, p_all_debit_memos_shipped boolean DEFAULT false, p_exclude_if_no_remaining_pharmacy_payout boolean DEFAULT false, p_all_debit_memos_paid_or_partial boolean DEFAULT false)
- RETURNS jsonb
- LANGUAGE plpgsql
- STABLE SECURITY DEFINER
+CREATE OR REPLACE FUNCTION public.list_batches(
+  p_status text DEFAULT NULL::text,
+  p_page integer DEFAULT 1,
+  p_limit integer DEFAULT 20,
+  p_all_debit_memos_shipped boolean DEFAULT false,
+  p_exclude_if_no_remaining_pharmacy_payout boolean DEFAULT false,
+  p_all_debit_memos_paid_or_partial boolean DEFAULT false
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+STABLE SECURITY DEFINER
 AS $function$
 DECLARE
   v_offset  INTEGER;
@@ -89,12 +93,12 @@ BEGIN
                    FROM debit_memos
                   WHERE batch_id = b.id
                ) ph
-              WHERE NOT EXISTS (
+              WHERE EXISTS (
                 SELECT 1
                   FROM debit_memos dm
                  WHERE dm.batch_id = b.id
                    AND dm.pharmacy_id = ph.pharmacy_id
-                   AND (dm.payment_status IS NULL OR dm.payment_status NOT IN ('paid', 'partial'))
+                   AND dm.payment_status IN ('paid', 'partial')
               )
                 AND NOT EXISTS (
                   SELECT 1
