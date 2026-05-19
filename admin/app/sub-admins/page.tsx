@@ -432,7 +432,7 @@ export default function SubAdminsPage() {
                                 {/* Email */}
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Email *</label>
-                                    <input type="email" value={addForm.email} onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))}
+                                    <input type="email" value={addForm.email} autoComplete="off" onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))}
                                         className="w-full text-xs border border-gray-200 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#516057]"
                                         placeholder="jane@example.com" />
                                 </div>
@@ -440,7 +440,8 @@ export default function SubAdminsPage() {
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Password *</label>
                                     <div className="relative">
-                                        <input type={showPassword ? 'text' : 'password'} value={addForm.password}
+                                        <input type={showPassword ? 'text' : 'password'}  value={addForm.password}
+                                            autoComplete="new-password"
                                             onChange={e => setAddForm(f => ({ ...f, password: e.target.value }))}
                                             className="w-full text-xs border border-gray-200 rounded px-3 py-2 pr-8 focus:outline-none focus:ring-1 focus:ring-[#516057]"
                                             placeholder="Min 8 characters" />
