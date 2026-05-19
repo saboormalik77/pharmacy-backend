@@ -24,14 +24,18 @@ const ASSIGNABLE_PERMISSIONS = [
     { key: 'analytics',       label: 'Analytics',        description: 'View analytics and reports' },
     { key: 'settings',        label: 'Settings',         description: 'View and update settings' },
     { key: 'processors',      label: 'Processors',       description: 'Manage field processors' },
-    { key: 'service_requests',label: 'Service Requests', description: 'View and manage service requests' },
-    { key: 'sub_admins',      label: 'Sub-Admins',       description: 'Manage sub-admins' },
+    { key: 'service_requests',label: 'Service Requests' },
+    { key: 'sub_admins',      label: 'Sub-Admins' },
 ] as const;
 
+const MODAL_ASSIGNABLE_PERMISSIONS = ASSIGNABLE_PERMISSIONS.filter(
+    permission => !['service_requests', 'sub_admins'].includes(permission.key)
+);
+
 const ROLES = [
-    { value: 'manager',  label: 'Manager',  color: 'warning' as const,  description: 'Manage pharmacies, approve documents, process payments, view analytics' },
-    { value: 'reviewer', label: 'Reviewer', color: 'info' as const,     description: 'Review documents, approve/reject returns, view shipments' },
-    { value: 'support',  label: 'Support',  color: 'default' as const,  description: 'View-only access, customer support, generate reports' },
+    { value: 'manager',  label: 'Manager',  color: 'warning' as const },
+    { value: 'reviewer', label: 'Reviewer', color: 'info' as const },
+    { value: 'support',  label: 'Support',  color: 'default' as const },
 ];
 
 // ── Types ──────────────────────────────────────────────────────
@@ -243,120 +247,136 @@ export default function SubAdminsPage() {
 
     return (
         <PermissionGate permission="sub_admins">
-            <div className="space-y-6 p-6">
+            <div className="space-y-6 p-8">
 
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-lg font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>
                             Team Members
                         </h1>
-                        <p className="text-xs text-gray-500 mt-0.5">
+                        <p className="text-xs text-gray-500 mt-1">
                             Manage sub-admins for your buying group. Each member has their own login and permissions.
                         </p>
                     </div>
                     {isBuyingGroupAdmin && (
-                        <Button onClick={() => { setAddModal(true); setAddForm(emptyForm()); setFormError(''); }}
-                            className="flex items-center gap-2 text-xs">
+                        <button
+                            onClick={() => { setAddModal(true); setAddForm(emptyForm()); setFormError(''); }}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[4px] text-xs font-medium bg-[#516057] text-white hover:opacity-90 transition-all"
+                        >
                             <UserPlus className="w-4 h-4" /> Add Member
-                        </Button>
+                        </button>
                     )}
                 </div>
 
                 {/* Stats */}
                 {stats && (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                         {[
-                            { label: 'Total', value: stats.total, color: 'text-gray-700' },
-                            { label: 'Active', value: stats.active, color: 'text-green-600' },
-                            { label: 'Managers', value: stats.managers, color: 'text-yellow-600' },
-                            { label: 'Reviewers', value: stats.reviewers, color: 'text-blue-600' },
+                            { label: 'Total', value: stats.total, color: 'text-gray-900', icon: <Users className="w-5 h-5 text-gray-400" /> },
+                            { label: 'Active', value: stats.active, color: 'text-green-700', icon: <CheckCircle className="w-5 h-5 text-green-500" /> },
+                            { label: 'Managers', value: stats.managers, color: 'text-yellow-700', icon: <ShieldCheck className="w-5 h-5 text-yellow-500" /> },
+                            { label: 'Reviewers', value: stats.reviewers, color: 'text-blue-700', icon: <Eye className="w-5 h-5 text-blue-500" /> },
                         ].map(s => (
-                            <div key={s.label} className="bg-white border border-gray-200 rounded p-3">
-                                <p className="text-xs text-gray-500">{s.label}</p>
-                                <p className={`text-xl font-semibold mt-0.5 ${s.color}`}>{s.value}</p>
+                            <div key={s.label} className="bg-white rounded-[4px] shadow border border-[#e2e2e2] px-5 py-4">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs font-medium text-gray-500">{s.label}</span>
+                                    {s.icon}
+                                </div>
+                                <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
                             </div>
                         ))}
                     </div>
                 )}
 
-                {/* Filters */}
-                <div className="flex flex-col sm:flex-row gap-2">
-                    <div className="relative flex-1 max-w-xs">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search by name or email..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                            className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#516057]"
-                        />
+                {/* Table Card */}
+                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] overflow-hidden">
+                    {/* Filters */}
+                    <div className="px-5 py-4 border-b border-gray-100">
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search by name or email"
+                                    value={searchTerm}
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                    className="w-full pl-11 pr-4 py-3 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
+                                />
+                            </div>
+                            <select
+                                value={roleFilter}
+                                onChange={e => setRoleFilter(e.target.value)}
+                                className="px-5 py-3 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
+                            >
+                                <option value="all">All Roles</option>
+                                {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                            </select>
+                            <select
+                                value={statusFilter}
+                                onChange={e => setStatusFilter(e.target.value)}
+                                className="px-5 py-3 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
+                            >
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
                     </div>
-                    <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}
-                        className="text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#516057]">
-                        <option value="all">All Roles</option>
-                        {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-                    </select>
-                    <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-                        className="text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#516057]">
-                        <option value="all">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
-                </div>
 
-                {/* Table */}
-                <div className="bg-white border border-gray-200 rounded overflow-hidden">
                     {isLoading ? (
-                        <div className="flex items-center justify-center py-16">
-                            <Loader2 className="w-5 h-5 animate-spin text-[#516057]" />
+                        <div className="text-center py-12">
+                            <Loader2 className="w-6 h-6 animate-spin text-[#516057] mx-auto mb-2" />
+                            <p className="text-gray-500 text-sm">Loading team members...</p>
                         </div>
                     ) : subAdmins.length === 0 ? (
-                        <div className="text-center py-16">
-                            <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                            <p className="text-sm text-gray-500">No team members found</p>
+                        <div className="text-center py-12">
+                            <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                            <p className="text-gray-600 text-sm font-medium">No team members found</p>
+                            <p className="text-gray-400 text-xs mt-1">Invite your first team member using the button above</p>
                             {isBuyingGroupAdmin && (
                                 <button onClick={() => setAddModal(true)}
-                                    className="mt-2 text-xs text-[#516057] hover:underline">
+                                    className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[#516057] hover:underline">
                                     Add your first team member
                                 </button>
                             )}
                         </div>
                     ) : (
-                        <table className="w-full text-xs">
-                            <thead>
-                                <tr className="border-b border-gray-100 bg-gray-50">
-                                    <th className="text-left px-4 py-2.5 font-medium text-gray-600">Member</th>
-                                    <th className="text-left px-4 py-2.5 font-medium text-gray-600">Role</th>
-                                    <th className="text-left px-4 py-2.5 font-medium text-gray-600">Permissions</th>
-                                    <th className="text-left px-4 py-2.5 font-medium text-gray-600">Status</th>
-                                    <th className="text-left px-4 py-2.5 font-medium text-gray-600">Last Login</th>
-                                    <th className="text-left px-4 py-2.5 font-medium text-gray-600">Actions</th>
+                        <div className="overflow-x-auto">
+                        <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                            <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                <tr className="bg-[#f4f5f5]">
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Member</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Role</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Permissions</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Status</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Last Login</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
                                 {subAdmins.map(sa => (
-                                    <tr key={sa.id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center gap-2.5">
-                                                <div className="w-7 h-7 rounded-full bg-[#516057] flex items-center justify-center text-white font-semibold text-[10px] flex-shrink-0">
+                                    <tr key={sa.id} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                        <td className="px-3 py-3 whitespace-nowrap">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-[4px] bg-[#516057] flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
                                                     {getInitials(sa.name)}
                                                 </div>
-                                                <div>
-                                                    <p className="font-medium text-gray-800">{sa.name}</p>
-                                                    <p className="text-gray-400">{sa.email}</p>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900 truncate max-w-[160px]" title={sa.name}>{sa.name}</p>
+                                                    <p className="text-xs text-gray-500 truncate max-w-[220px]" title={sa.email}>{sa.email}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-4 py-3">
+                                        <td className="px-3 py-3 whitespace-nowrap">
                                             <Badge variant={roleColor(sa.role)}>{sa.roleDisplay}</Badge>
                                         </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex flex-wrap gap-1 max-w-[200px]">
+                                        <td className="px-3 py-3">
+                                            <div className="flex flex-wrap gap-1 max-w-[260px]">
                                                 {sa.permissions.length === 0 ? (
                                                     <span className="text-gray-400">None</span>
                                                 ) : sa.permissions.slice(0, 3).map(p => (
-                                                    <span key={p} className="bg-gray-100 text-gray-600 rounded px-1.5 py-0.5 text-[10px]">
+                                                    <span key={p} className="bg-gray-100 text-gray-600 rounded-[4px] px-1.5 py-0.5 text-[10px]">
                                                         {ASSIGNABLE_PERMISSIONS.find(ap => ap.key === p)?.label || p}
                                                     </span>
                                                 ))}
@@ -365,23 +385,23 @@ export default function SubAdminsPage() {
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="px-4 py-3">
+                                        <td className="px-3 py-3 whitespace-nowrap">
                                             <Badge variant={sa.isActive ? 'success' : 'default'}>
                                                 {sa.isActive ? 'Active' : 'Inactive'}
                                             </Badge>
                                         </td>
-                                        <td className="px-4 py-3 text-gray-500">
+                                        <td className="px-3 py-3 whitespace-nowrap text-xs text-gray-600">
                                             {sa.lastLoginAt ? formatDate(sa.lastLoginAt) : 'Never'}
                                         </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center gap-1.5">
+                                        <td className="px-3 py-3 whitespace-nowrap">
+                                            <div className="flex items-center gap-1 justify-center">
                                                 <button onClick={() => openEdit(sa)}
-                                                    className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-gray-100 rounded transition-colors"
+                                                    className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded-[4px] transition-colors"
                                                     title="Edit">
                                                     <Edit className="w-3.5 h-3.5" />
                                                 </button>
                                                 <button onClick={() => setDeleteModal(sa)}
-                                                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-[4px] transition-colors"
                                                     title="Remove">
                                                     <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
@@ -391,25 +411,26 @@ export default function SubAdminsPage() {
                                 ))}
                             </tbody>
                         </table>
+                        </div>
+                    )}
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between px-5 py-4 border-t border-gray-100 bg-gray-50">
+                            <p className="text-sm text-gray-600 font-medium">Page {currentPage} of {totalPages}</p>
+                            <div className="flex items-center gap-2">
+                                <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}
+                                    className="p-2 border border-gray-300 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors">
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
+                                <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}
+                                    className="p-2 border border-gray-300 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors">
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
                     )}
                 </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="flex items-center justify-between">
-                        <p className="text-xs text-gray-500">Page {currentPage} of {totalPages}</p>
-                        <div className="flex gap-1">
-                            <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}
-                                className="p-1 border border-gray-200 rounded disabled:opacity-40 hover:bg-gray-50">
-                                <ChevronLeft className="w-3.5 h-3.5" />
-                            </button>
-                            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}
-                                className="p-1 border border-gray-200 rounded disabled:opacity-40 hover:bg-gray-50">
-                                <ChevronRight className="w-3.5 h-3.5" />
-                            </button>
-                        </div>
-                    </div>
-                )}
 
                 {/* ── Add Modal ─────────────────────────────────────── */}
                 {addModal && (
@@ -463,7 +484,6 @@ export default function SubAdminsPage() {
                                                     className="mt-0.5 accent-[#516057]" />
                                                 <div>
                                                     <p className="text-xs font-medium text-gray-700">{r.label}</p>
-                                                    <p className="text-[10px] text-gray-400">{r.description}</p>
                                                 </div>
                                             </label>
                                         ))}
@@ -475,7 +495,7 @@ export default function SubAdminsPage() {
                                         <ShieldCheck className="inline w-3.5 h-3.5 mr-1" />Permissions
                                     </label>
                                     <div className="grid grid-cols-2 gap-1.5">
-                                        {ASSIGNABLE_PERMISSIONS.map(p => (
+                                        {MODAL_ASSIGNABLE_PERMISSIONS.map(p => (
                                             <label key={p.key}
                                                 className={`flex items-center gap-2 p-2 border rounded cursor-pointer text-xs transition-colors ${addForm.permissions.includes(p.key) ? 'border-[#516057] bg-[#f5f2f1] text-[#516057]' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}>
                                                 <input type="checkbox" checked={addForm.permissions.includes(p.key)}
@@ -538,7 +558,6 @@ export default function SubAdminsPage() {
                                                     className="mt-0.5 accent-[#516057]" />
                                                 <div>
                                                     <p className="text-xs font-medium text-gray-700">{r.label}</p>
-                                                    <p className="text-[10px] text-gray-400">{r.description}</p>
                                                 </div>
                                             </label>
                                         ))}
@@ -550,7 +569,7 @@ export default function SubAdminsPage() {
                                         <ShieldCheck className="inline w-3.5 h-3.5 mr-1" />Permissions
                                     </label>
                                     <div className="grid grid-cols-2 gap-1.5">
-                                        {ASSIGNABLE_PERMISSIONS.map(p => (
+                                        {MODAL_ASSIGNABLE_PERMISSIONS.map(p => (
                                             <label key={p.key}
                                                 className={`flex items-center gap-2 p-2 border rounded cursor-pointer text-xs transition-colors ${(editForm.permissions || []).includes(p.key) ? 'border-[#516057] bg-[#f5f2f1] text-[#516057]' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}>
                                                 <input type="checkbox"
