@@ -6,10 +6,14 @@ import { generateBarcode } from '../services/barcodeService';
 import * as shipmentGroupService from '../services/shipmentGroupService';
 import { getWarehouseAddressFromTable } from '../utils/warehouseAddress';
 import {
+  isFedexTestLabel,
   parseShipmentGroupFedexLabels,
   buildFedexLabelsPrintHtml,
 } from '../utils/shipmentGroupFedexLabels';
 import { isFedExSandbox } from '../services/fedexService';
+
+const hasPrintableFedexLabels = (labels: Record<string, string> | null): labels is Record<string, string> =>
+  !!labels && !isFedExSandbox() && !Object.values(labels).some(isFedexTestLabel);
 
 // ============================================================
 // GET /api/admin/shipment-groups/shipped
@@ -80,8 +84,34 @@ export const createShipmentGroupHandler = catchAsync(
 export const shipmentGroupShippingLabelHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { id } = req.params;
+    const trackingParam = (req.query.tracking as string | undefined)?.trim();
+    const trackingNumbersParam = (req.query.trackingNumbers as string | undefined)?.trim();
+    const packageNumberParam = req.query.packageNumber as string | undefined;
+    const totalPackagesParam = req.query.totalPackages as string | undefined;
 
     if (!supabaseAdmin) throw new AppError('Supabase admin client not configured', 500);
+
+    // FedEx API group shipments store PDF labels on the group — return those instead of the
+    // internal HTML "packing slip" used for manual tracking-only shipments.
+    const { data: groupRow, error: groupRowErr } = await supabaseAdmin
+      .from('shipment_groups')
+      .select('id, fedex_labels, outbound_tracking, fedex_shipment_id')
+      .eq('id', id)
+      .single();
+
+    if (!groupRowErr && groupRow) {
+      const fedexLabels = parseShipmentGroupFedexLabels(groupRow.fedex_labels);
+      if (hasPrintableFedexLabels(fedexLabels)) {
+        const html = buildFedexLabelsPrintHtml(groupRow, fedexLabels, {
+          fedExSandbox: isFedExSandbox(),
+        });
+        res.set({
+          'Content-Type': 'text/html; charset=utf-8',
+          'Content-Disposition': `inline; filename="fedex-labels-${groupRow.id}.html"`,
+        });
+        return res.send(html);
+      }
+    }
 
     const details = await shipmentGroupService.getShipmentGroupDetails(id);
     const group = details.group;
@@ -159,15 +189,37 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
       .join('<br/>');
 
     const boxCount = Math.max(1, group.boxCount || 1);
-
     const packageTracking: Record<string, string> =
       group.packageTracking && typeof group.packageTracking === 'object'
         ? (group.packageTracking as Record<string, string>)
         : {};
 
-    const buildBarcode = async (trackingNum: string): Promise<string> => {
+    let trackingList: { tracking: string; packageNumber: number; total: number }[] = [];
+    if (trackingNumbersParam) {
+      const list = trackingNumbersParam.split(',').map((t) => t.trim()).filter(Boolean);
+      trackingList = list.map((tracking, idx) => ({
+        tracking,
+        packageNumber: idx + 1,
+        total: list.length,
+      }));
+    } else if (trackingParam) {
+      trackingList = [{
+        tracking: trackingParam,
+        packageNumber: packageNumberParam ? parseInt(packageNumberParam, 10) : 1,
+        total: totalPackagesParam ? parseInt(totalPackagesParam, 10) : 1,
+      }];
+    } else {
+      trackingList = Array.from({ length: boxCount }, (_, i) => ({
+        tracking: packageTracking[`package${i + 1}`] || group.outboundTracking || '',
+        packageNumber: i + 1,
+        total: boxCount,
+      }));
+    }
+
+    const buildBarcode = (tracking: string): string => {
+      if (!tracking) return '';
       try {
-        const bc = generateBarcode(trackingNum, {
+        const bc = generateBarcode(tracking, {
           format: 'CODE128',
           width: 2,
           height: 60,
@@ -181,14 +233,14 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
       }
     };
 
-    const labelBlocks = await Promise.all(
-      Array.from({ length: boxCount }, async (_, i) => {
-        const pkgNum = i + 1;
-        const pkgTracking = packageTracking[`package${pkgNum}`] || group.outboundTracking || '';
-        const barcodeDataUrl = await buildBarcode(pkgTracking);
-        return `
-<div class="label" style="${pkgNum < boxCount ? 'page-break-after:always;' : ''}">
-  <div class="pkg-info">GROUP SHIPMENT — Package ${pkgNum} of ${boxCount} — ${memos.length} debit memo${memos.length !== 1 ? 's' : ''}</div>
+    const renderLabel = (tracking: string, packageNumber: number, total: number) => {
+      const barcodeDataUrl = buildBarcode(tracking);
+      const pkgInfo = total > 1
+        ? `GROUP SHIPMENT — Package ${packageNumber} of ${total} — ${memos.length} debit memo${memos.length !== 1 ? 's' : ''}`
+        : `GROUP SHIPMENT — ${memos.length} debit memo${memos.length !== 1 ? 's' : ''}`;
+
+      return `<div class="label">
+  <div class="pkg-info">${pkgInfo}</div>
   <div class="label-box">
     <div class="label-heading">From - Shipper</div>
     <div class="label-name">${esc(fromName)}</div>
@@ -208,15 +260,16 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
   <div class="barcode-section">
     ${barcodeDataUrl ? `<img src="${barcodeDataUrl}" alt="barcode">` : ''}
   </div>
-  <div class="tracking-text">${esc(pkgTracking)}</div>
+  <div class="tracking-text">${esc(tracking)}</div>
   <div class="memo-info">
     <strong>Memos in this shipment:</strong><br/>${memoLines}
   </div>
 </div>`;
-      })
-    );
+    };
 
-    const labelPages = labelBlocks.join('\n');
+    const labelsHtml = trackingList
+      .map((t) => renderLabel(t.tracking, t.packageNumber, t.total))
+      .join('\n');
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -227,7 +280,8 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
   @page { margin:0.3in; size:4in 6in; }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#000;background:#fff;}
-  .label{width:100%;max-width:3.6in;margin:0 auto;padding:10px 0;}
+  .label{width:100%;max-width:3.6in;margin:0 auto;padding:10px 0;page-break-after:always;}
+  .label:last-child{page-break-after:auto;}
   .label-box{border:2px solid #000;padding:12px;margin-bottom:14px;}
   .label-heading{font-size:8pt;font-weight:bold;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;border-bottom:1px solid #aaa;padding-bottom:2px;}
   .label-name{font-size:13pt;font-weight:bold;margin-bottom:2px;}
@@ -242,7 +296,7 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
 <script>window.onload=function(){setTimeout(function(){window.print();},400);}</script>
 </head>
 <body>
-${labelPages}
+${labelsHtml}
 </body>
 </html>`;
 
@@ -324,6 +378,13 @@ export const downloadShipmentGroupFedexLabelHandler = catchAsync(
       throw new AppError('No FedEx labels found for this shipment group', 404);
     }
 
+    if (!hasPrintableFedexLabels(labels)) {
+      if (format === 'print') {
+        return shipmentGroupShippingLabelHandler(req, res, _next);
+      }
+      throw new AppError('FedEx test labels cannot be downloaded. Create a production FedEx shipment for downloadable FedEx PDFs.', 400);
+    }
+
     const key = `package${packageNumber}`;
     const labelBase64 = labels[key];
     if (!labelBase64) {
@@ -395,6 +456,10 @@ export const printAllShipmentGroupFedexLabelsHandler = catchAsync(
     const labels = parseShipmentGroupFedexLabels(group.fedex_labels);
     if (!labels) {
       throw new AppError('No FedEx labels found for this shipment group', 404);
+    }
+
+    if (!hasPrintableFedexLabels(labels)) {
+      return shipmentGroupShippingLabelHandler(req, res, _next);
     }
 
     const html = buildFedexLabelsPrintHtml(group, labels, {

@@ -26,6 +26,15 @@ export function parseShipmentGroupFedexLabels(
   return Object.keys(parsed).length > 0 ? parsed : null;
 }
 
+export function isFedexTestLabel(base64: string): boolean {
+  try {
+    const text = Buffer.from(base64, 'base64').toString('latin1').toUpperCase();
+    return text.includes('TEST LABEL') || text.includes('SAMPLE') || text.includes('DO NOT SHIP');
+  } catch {
+    return false;
+  }
+}
+
 export function buildFedexLabelsPrintHtml(
   group: { id: string; outbound_tracking?: string | null },
   labels: Record<string, string>,

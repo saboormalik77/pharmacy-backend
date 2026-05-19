@@ -6,6 +6,11 @@ import * as raService from '../services/raService';
 import * as fedexService from '../services/fedexService';
 import { generateBarcode } from '../services/barcodeService';
 import { getWarehouseAddressFromTable } from '../utils/warehouseAddress';
+import {
+  buildFedexLabelsPrintHtml,
+  isFedexTestLabel,
+  parseShipmentGroupFedexLabels,
+} from '../utils/shipmentGroupFedexLabels';
 
 // ============================================================
 // POST /api/admin/debit-memos/:id/request-ra
@@ -446,13 +451,46 @@ export const debitMemoShippingLabelHandler = catchAsync(
 
     const { data: memo, error: memoErr } = await supabaseAdmin
       .from('debit_memos')
-      .select('id, memo_number, destination, outbound_tracking, labeler_name, total_items')
+      .select('id, memo_number, destination, outbound_tracking, labeler_name, total_items, fedex_labels')
       .eq('id', id)
       .single();
 
     if (memoErr || !memo) throw new AppError('Debit memo not found', 404);
     if (!memo.outbound_tracking && !trackingParam && !trackingNumbersParam) {
       throw new AppError('No tracking number found for this memo', 400);
+    }
+
+    const fedexLabels = parseShipmentGroupFedexLabels(memo.fedex_labels);
+    const fedexLabelsArePrintable =
+      !!fedexLabels && !fedexService.isFedExSandbox() && !Object.values(fedexLabels).some(isFedexTestLabel);
+
+    if (fedexLabelsArePrintable) {
+      let labelsToPrint = fedexLabels;
+      const packageNumber = packageNumberParam ? parseInt(packageNumberParam, 10) : null;
+
+      if (packageNumber && Number.isFinite(packageNumber)) {
+        const key = `package${packageNumber}`;
+        const labelBase64 = fedexLabels[key];
+        if (!labelBase64) {
+          throw new AppError(`No FedEx label found for package ${packageNumber}`, 404);
+        }
+        labelsToPrint = { [key]: labelBase64 };
+      }
+
+      const html = buildFedexLabelsPrintHtml(
+        {
+          id: memo.id,
+          outbound_tracking: trackingParam || memo.outbound_tracking,
+        },
+        labelsToPrint,
+        { fedExSandbox: fedexService.isFedExSandbox() }
+      );
+
+      res.set({
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': `inline; filename="fedex-labels-${memo.id}.html"`,
+      });
+      return res.send(html);
     }
 
     const s = await getWarehouseAddressFromTable();
