@@ -129,7 +129,7 @@ function CalculatePayoutModal({
                 <label className="block text-[11px] font-medium text-gray-600 mb-1">
                   Batch{' '}
                   <span className="text-gray-400 font-normal">
-                    (closed, all memos shipped; at least one pharmacy fully RD-paid + payout remaining)
+                    (closed, all memos shipped; at least one pharmacy with at least one RD-paid memo + payout remaining)
                   </span>
                 </label>
                 {isLoadingOpenBatches ? (
@@ -151,8 +151,8 @@ function CalculatePayoutModal({
                 )}
                 {!isLoadingOpenBatches && openBatches.length === 0 && (
                   <p className="text-[10px] text-gray-400 mt-1">
-                    No batches match: closed, all memos shipped, at least one pharmacy with all of its debit
-                    memos paid or partial on Unpaid, and that pharmacy still needs a payout record.
+                    No batches match: closed, all memos shipped, at least one pharmacy with at least one
+                    paid memo on Unpaid, and that pharmacy still needs a payout record.
                   </p>
                 )}
               </div>
@@ -177,7 +177,7 @@ function CalculatePayoutModal({
                         {!batchId
                           ? 'Select a batch first...'
                           : batchPharmacies.length === 0
-                            ? 'No pharmacies with all debit memos paid/partial yet (Warehouse / Unpaid)'
+                            ? 'No pharmacies with any paid debit memos yet (Warehouse / Unpaid)'
                             : eligiblePharmacyCount === 0
                               ? 'All listed pharmacies already have a payout record'
                               : 'Select a pharmacy...'}

@@ -800,7 +800,7 @@ export interface AddItemPayload {
 export interface ManufacturerPolicy {
     id: string;
     labelerId: string;
-    labelerType: 'generic' | 'brand';
+    labelerType: 'generic' | 'brand' | 'manufacturer' | 'distributor' | 'repackager';
     manufacturerName: string;
     address1: string | null;
     address2: string | null;
@@ -865,7 +865,7 @@ export interface PolicyNote {
 export interface ManufacturerPolicyCreatePayload {
     labelerId: string;
     manufacturerName: string;
-    labelerType?: 'generic' | 'brand';
+    labelerType?: 'generic' | 'brand' | 'manufacturer' | 'distributor' | 'repackager';
     address1?: string;
     address2?: string;
     city?: string;

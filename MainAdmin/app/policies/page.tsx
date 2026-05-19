@@ -63,7 +63,7 @@ const US_STATES = [
 ];
 
 const INITIAL_RETURN_POLICY = {
-    destination: '', autoRaEmail: '', policyNumber: undefined as number | undefined,
+    destination: '', autoRaEmail: '', policyNumber: 1 as number | undefined,
     policyDescription: '',
     monthsBeforeExpiration: undefined as number | undefined,
     monthsAfterExpiration: undefined as number | undefined,
@@ -200,6 +200,13 @@ export default function PoliciesPage() {
     }, [dispatch, page, debouncedSearch, labelerType, destination]);
 
     useEffect(() => { setPage(1); }, [debouncedSearch, labelerType, destination]);
+
+    // Auto-fill partialPolicyNumber = policyNumber + 1 when partials are enabled
+    useEffect(() => {
+        if (newReturnPolicy.partialsAccepted && partialPolicy.policyNumber == null) {
+            setPartialPolicy(prev => ({ ...prev, policyNumber: (newReturnPolicy.policyNumber ?? 1) + 1 }));
+        }
+    }, [newReturnPolicy.partialsAccepted]);
 
     const handleAdd = async () => {
         const errors = validateLabelerForm(
@@ -779,8 +786,9 @@ export default function PoliciesPage() {
                                         type="text"
                                         value={newPolicy.mainPhone || ''}
                                         onChange={e => {
-                                            setNewPolicy({ ...newPolicy, mainPhone: e.target.value });
-                                            validateOnChange('mainPhone', e.target.value);
+                                            const v = e.target.value.replace(/[a-zA-Z]/g, '');
+                                            setNewPolicy({ ...newPolicy, mainPhone: v });
+                                            validateOnChange('mainPhone', v);
                                         }}
                                         placeholder="e.g. (800) 255-5162"
                                         className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.mainPhone)}`}
@@ -793,8 +801,9 @@ export default function PoliciesPage() {
                                         type="text"
                                         value={newPolicy.fax || ''}
                                         onChange={e => {
-                                            setNewPolicy({ ...newPolicy, fax: e.target.value });
-                                            validateOnChange('fax', e.target.value);
+                                            const v = e.target.value.replace(/[a-zA-Z]/g, '');
+                                            setNewPolicy({ ...newPolicy, fax: v });
+                                            validateOnChange('fax', v);
                                         }}
                                         placeholder="e.g. (800) 255-5163"
                                         className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.fax)}`}
@@ -841,8 +850,9 @@ export default function PoliciesPage() {
                                         type="text"
                                         value={newPolicy.contact2Phone || ''}
                                         onChange={e => {
-                                            setNewPolicy({ ...newPolicy, contact2Phone: e.target.value });
-                                            validateOnChange('contact2Phone', e.target.value);
+                                            const v = e.target.value.replace(/[a-zA-Z]/g, '');
+                                            setNewPolicy({ ...newPolicy, contact2Phone: v });
+                                            validateOnChange('contact2Phone', v);
                                         }}
                                         placeholder="e.g. (800) 255-5162"
                                         className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 ${errClass(!!formErrors.contact2Phone)}`}
@@ -946,18 +956,11 @@ export default function PoliciesPage() {
                                         <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy #</label>
                                         <input
                                             type="number"
-                                            min="1"
-                                            value={newReturnPolicy.policyNumber ?? ''}
-                                            onChange={e => {
-                                                const v = e.target.value ? parseInt(e.target.value) : undefined;
-                                                setNewReturnPolicy({ ...newReturnPolicy, policyNumber: v });
-                                                validateOnChange('policyNumber', e.target.value);
-                                            }}
-                                            placeholder="e.g. 1"
-                                            className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.policyNumber)}`}
-                                            style={!formErrors.policyNumber ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
+                                            readOnly
+                                            value={1}
+                                            className="w-full px-2.5 py-1.5 text-xs rounded-[4px] border cursor-not-allowed"
+                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-high)', color: 'var(--on-surface-variant)' }}
                                         />
-                                        {formErrors.policyNumber && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.policyNumber}</p>}
                                     </div>
                                     <div className="col-span-2">
                                         <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy Description</label>
@@ -1134,17 +1137,11 @@ export default function PoliciesPage() {
                                                 <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy #</label>
                                                 <input
                                                     type="number"
-                                                    min="1"
+                                                    readOnly
                                                     value={partialPolicy.policyNumber ?? ''}
-                                                    onChange={e => {
-                                                        setPartialPolicy({ ...partialPolicy, policyNumber: e.target.value ? parseInt(e.target.value) : undefined });
-                                                        validateOnChange('partialPolicyNumber', e.target.value);
-                                                    }}
-                                                    placeholder="e.g. 2"
-                                                    className={`w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 border ${errClass(!!formErrors.partialPolicyNumber)}`}
-                                                    style={!formErrors.partialPolicyNumber ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
+                                                    className="w-full px-2.5 py-1.5 text-xs rounded-[4px] border cursor-not-allowed"
+                                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-high)', color: 'var(--on-surface-variant)' }}
                                                 />
-                                                {formErrors.partialPolicyNumber && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.partialPolicyNumber}</p>}
                                             </div>
                                             <div className="col-span-2">
                                                 <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy Description</label>

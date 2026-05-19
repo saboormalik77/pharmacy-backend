@@ -188,6 +188,12 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
       )
       .join('<br/>');
 
+    const boxCount = Math.max(1, group.boxCount || 1);
+    const packageTracking: Record<string, string> =
+      group.packageTracking && typeof group.packageTracking === 'object'
+        ? (group.packageTracking as Record<string, string>)
+        : {};
+
     let trackingList: { tracking: string; packageNumber: number; total: number }[] = [];
     if (trackingNumbersParam) {
       const list = trackingNumbersParam.split(',').map((t) => t.trim()).filter(Boolean);
@@ -203,15 +209,15 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
         total: totalPackagesParam ? parseInt(totalPackagesParam, 10) : 1,
       }];
     } else {
-      trackingList = [{
-        tracking: group.outboundTracking,
-        packageNumber: 1,
-        total: 1,
-      }];
+      trackingList = Array.from({ length: boxCount }, (_, i) => ({
+        tracking: packageTracking[`package${i + 1}`] || group.outboundTracking || '',
+        packageNumber: i + 1,
+        total: boxCount,
+      }));
     }
 
-    const renderLabel = (tracking: string, packageNumber: number, total: number) => {
-      let barcodeDataUrl = '';
+    const buildBarcode = (tracking: string): string => {
+      if (!tracking) return '';
       try {
         const bc = generateBarcode(tracking, {
           format: 'CODE128',
@@ -221,11 +227,14 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
           fontSize: 12,
           margin: 5,
         });
-        barcodeDataUrl = `data:image/png;base64,${bc.buffer.toString('base64')}`;
+        return `data:image/png;base64,${bc.buffer.toString('base64')}`;
       } catch {
-        /* optional */
+        return '';
       }
+    };
 
+    const renderLabel = (tracking: string, packageNumber: number, total: number) => {
+      const barcodeDataUrl = buildBarcode(tracking);
       const pkgInfo = total > 1
         ? `GROUP SHIPMENT — Package ${packageNumber} of ${total} — ${memos.length} debit memo${memos.length !== 1 ? 's' : ''}`
         : `GROUP SHIPMENT — ${memos.length} debit memo${memos.length !== 1 ? 's' : ''}`;

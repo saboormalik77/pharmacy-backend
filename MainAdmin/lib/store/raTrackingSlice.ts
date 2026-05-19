@@ -201,6 +201,7 @@ export const createDebitMemoFedexShipment = createAsyncThunk<
             packages: { trackingNumber: string; hasLabel: boolean }[];
         };
         labels: Record<string, string>;
+        fedExTestMode?: boolean;
     },
     { memoId: string; boxCount?: number; packageWeight?: number; serviceType?: string },
     { rejectValue: string }

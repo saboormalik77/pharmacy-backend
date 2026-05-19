@@ -61,6 +61,9 @@ const STATUS_OPTIONS = [
     { value: 'paused', label: 'Paused' },
     { value: 'completed', label: 'Completed' },
     { value: 'verified', label: 'Verified' },
+    { value: 'not_paid', label: 'Not Paid' },
+    { value: 'partially_paid', label: 'Partially Paid' },
+    { value: 'paid', label: 'Paid' },
     { value: 'finalized', label: 'Finalized' },
     { value: 'received', label: 'Received' },
     { value: 'closed_out', label: 'Closed Out' },
@@ -81,8 +84,9 @@ function getStatusBadge(status: string): { variant: 'success' | 'warning' | 'err
         case 'paused': return { variant: 'warning', label: 'Paused' };
         case 'completed': return { variant: 'success', label: 'Completed' };
         case 'verified': return { variant: 'success', label: 'Verified' };
-        case 'paid': return { variant: 'success', label: 'Paid' };
+        case 'not_paid': return { variant: 'error', label: 'Not Paid' };
         case 'partially_paid': return { variant: 'warning', label: 'Partially Paid' };
+        case 'paid': return { variant: 'success', label: 'Paid' };
         case 'finalized': return { variant: 'default', label: 'Finalized' };
         case 'received': return { variant: 'success', label: 'Received' };
         case 'closed_out': return { variant: 'default', label: 'Closed Out' };

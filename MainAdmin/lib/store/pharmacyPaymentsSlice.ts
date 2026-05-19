@@ -293,7 +293,7 @@ export const fetchBatchPharmacies = createAsyncThunk(
         const pharmacyMemosPaidForPayout = (pharmacyId: string): boolean => {
             const mine = memos.filter((m) => m.pharmacyId === pharmacyId);
             if (mine.length === 0) return false;
-            return mine.every((m) => {
+            return mine.some((m) => {
                 const s = (m.paymentStatus || '').toLowerCase();
                 return s === 'paid' || s === 'partial';
             });

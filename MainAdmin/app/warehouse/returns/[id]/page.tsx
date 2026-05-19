@@ -1305,7 +1305,7 @@ export default function ReturnDetailPage() {
                                                             {partialDetail && (
                                                                 <span className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{partialDetail}</span>
                                                             )}
-                                                        </motion.div>
+                                                        </div>
                                                     );
                                                 })()}
                                             </td>

@@ -1,9 +1,6 @@
--- Function : _rt_to_json
--- Arguments: rt return_transactions
--- Type     : FUNCTION
--- =============================================================
-
-DROP FUNCTION IF EXISTS public._rt_to_json(rt return_transactions) CASCADE;
+-- Migration: A memo is only "paid" if pharmacy_payments has a check_number.
+-- Without a recorded check, all memos are treated as unpaid regardless of payment_status.
+-- Run in Supabase Dashboard → SQL Editor
 
 CREATE OR REPLACE FUNCTION public._rt_to_json(rt return_transactions)
  RETURNS jsonb
@@ -115,7 +112,7 @@ BEGIN
                                         )
                                         ELSE 0
                                      END,
-        -- unpaidMemoCount: when check exists count truly unpaid; when no check all memos are unpaid
+        -- unpaidMemoCount: when check exists, count truly unpaid; when no check, all memos are unpaid
         'unpaidMemoCount',           CASE
                                         WHEN rt.batch_id IS NOT NULL AND v_has_check THEN (
                                             SELECT COUNT(*)::int FROM debit_memos dm
@@ -151,7 +148,7 @@ BEGIN
         'totalItems',                rt.total_items,
         'totalReturnableValue',      rt.total_returnable_value,
         'totalNonReturnableValue',   rt.total_non_returnable_value,
-        'hasCiiItems',               v_has_cii_items,  -- New field for DEA Form 222 availability
+        'hasCiiItems',               v_has_cii_items,
         'batchId',                   rt.batch_id,
         'timeIn',                    rt.time_in,
         'timeOut',                   rt.time_out,

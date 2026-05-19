@@ -18,7 +18,7 @@ import { lookupNDC } from './ndcLookupService';
 
 export interface ManufacturerPolicyInput {
   labelerId: string;
-  labelerType?: 'generic' | 'brand';
+  labelerType?: 'generic' | 'brand' | 'manufacturer' | 'distributor' | 'repackager';
   manufacturerName: string;
   address1?: string;
   address2?: string;
@@ -47,7 +47,7 @@ export interface ReturnPolicyInput {
   discountRate?: number;
   partialsAccepted?: boolean;
   partialDosageForms?: string[];
-  reimbursementType?: 'batch' | 'per_item';
+  reimbursementType?: 'batch' | 'per_item' | 'credit' | 'check' | 'ach';
   /** If false, expiration inside the months before/after window is still non-returnable */
   returnableWithinPolicyPeriod?: boolean;
 }
