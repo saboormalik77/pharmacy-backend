@@ -6,10 +6,14 @@ import { generateBarcode } from '../services/barcodeService';
 import * as shipmentGroupService from '../services/shipmentGroupService';
 import { getWarehouseAddressFromTable } from '../utils/warehouseAddress';
 import {
+  isFedexTestLabel,
   parseShipmentGroupFedexLabels,
   buildFedexLabelsPrintHtml,
 } from '../utils/shipmentGroupFedexLabels';
 import { isFedExSandbox } from '../services/fedexService';
+
+const hasPrintableFedexLabels = (labels: Record<string, string> | null): labels is Record<string, string> =>
+  !!labels && !isFedExSandbox() && !Object.values(labels).some(isFedexTestLabel);
 
 // ============================================================
 // GET /api/admin/shipment-groups/shipped
@@ -80,6 +84,10 @@ export const createShipmentGroupHandler = catchAsync(
 export const shipmentGroupShippingLabelHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { id } = req.params;
+    const trackingParam = (req.query.tracking as string | undefined)?.trim();
+    const trackingNumbersParam = (req.query.trackingNumbers as string | undefined)?.trim();
+    const packageNumberParam = req.query.packageNumber as string | undefined;
+    const totalPackagesParam = req.query.totalPackages as string | undefined;
 
     if (!supabaseAdmin) throw new AppError('Supabase admin client not configured', 500);
 
@@ -93,7 +101,7 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
 
     if (!groupRowErr && groupRow) {
       const fedexLabels = parseShipmentGroupFedexLabels(groupRow.fedex_labels);
-      if (fedexLabels) {
+      if (hasPrintableFedexLabels(fedexLabels)) {
         const html = buildFedexLabelsPrintHtml(groupRow, fedexLabels, {
           fedExSandbox: isFedExSandbox(),
         });
@@ -169,21 +177,6 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
       }
     }
 
-    let barcodeDataUrl = '';
-    try {
-      const bc = generateBarcode(group.outboundTracking, {
-        format: 'CODE128',
-        width: 2,
-        height: 60,
-        displayValue: true,
-        fontSize: 12,
-        margin: 5,
-      });
-      barcodeDataUrl = `data:image/png;base64,${bc.buffer.toString('base64')}`;
-    } catch {
-      /* optional */
-    }
-
     const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const cityLine = (city: string, state: string, zip: string) =>
       [city, state, zip].filter(Boolean).join(', ');
@@ -195,32 +188,50 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
       )
       .join('<br/>');
 
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Group Shipment - ${esc(group.outboundTracking)}</title>
-<style>
-  @page { margin:0.3in; size:4in 6in; }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#000;background:#fff;}
-  .label{width:100%;max-width:3.6in;margin:0 auto;padding:10px 0;}
-  .label-box{border:2px solid #000;padding:12px;margin-bottom:14px;}
-  .label-heading{font-size:8pt;font-weight:bold;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;border-bottom:1px solid #aaa;padding-bottom:2px;}
-  .label-name{font-size:13pt;font-weight:bold;margin-bottom:2px;}
-  .label-line{font-size:10pt;margin-bottom:1px;}
-  .barcode-section{text-align:center;margin:12px 0 4px;}
-  .barcode-section img{max-width:100%;}
-  .tracking-text{font-family:'Courier New',monospace;font-size:14pt;font-weight:bold;margin-top:4px;text-align:center;}
-  .pkg-info{text-align:center;font-size:9pt;color:#555;margin-bottom:8px;}
-  .memo-info{text-align:left;font-size:8pt;color:#333;margin-top:10px;border-top:1px dashed #ccc;padding-top:6px;line-height:1.4;}
-  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.label{max-width:none;}}
-</style>
-<script>window.onload=function(){setTimeout(function(){window.print();},400);}</script>
-</head>
-<body>
-<div class="label">
-  <div class="pkg-info">GROUP SHIPMENT — ${memos.length} debit memo${memos.length !== 1 ? 's' : ''}</div>
+    let trackingList: { tracking: string; packageNumber: number; total: number }[] = [];
+    if (trackingNumbersParam) {
+      const list = trackingNumbersParam.split(',').map((t) => t.trim()).filter(Boolean);
+      trackingList = list.map((tracking, idx) => ({
+        tracking,
+        packageNumber: idx + 1,
+        total: list.length,
+      }));
+    } else if (trackingParam) {
+      trackingList = [{
+        tracking: trackingParam,
+        packageNumber: packageNumberParam ? parseInt(packageNumberParam, 10) : 1,
+        total: totalPackagesParam ? parseInt(totalPackagesParam, 10) : 1,
+      }];
+    } else {
+      trackingList = [{
+        tracking: group.outboundTracking,
+        packageNumber: 1,
+        total: 1,
+      }];
+    }
+
+    const renderLabel = (tracking: string, packageNumber: number, total: number) => {
+      let barcodeDataUrl = '';
+      try {
+        const bc = generateBarcode(tracking, {
+          format: 'CODE128',
+          width: 2,
+          height: 60,
+          displayValue: true,
+          fontSize: 12,
+          margin: 5,
+        });
+        barcodeDataUrl = `data:image/png;base64,${bc.buffer.toString('base64')}`;
+      } catch {
+        /* optional */
+      }
+
+      const pkgInfo = total > 1
+        ? `GROUP SHIPMENT — Package ${packageNumber} of ${total} — ${memos.length} debit memo${memos.length !== 1 ? 's' : ''}`
+        : `GROUP SHIPMENT — ${memos.length} debit memo${memos.length !== 1 ? 's' : ''}`;
+
+      return `<div class="label">
+  <div class="pkg-info">${pkgInfo}</div>
   <div class="label-box">
     <div class="label-heading">From - Shipper</div>
     <div class="label-name">${esc(fromName)}</div>
@@ -240,11 +251,43 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
   <div class="barcode-section">
     ${barcodeDataUrl ? `<img src="${barcodeDataUrl}" alt="barcode">` : ''}
   </div>
-  <div class="tracking-text">${esc(group.outboundTracking)}</div>
+  <div class="tracking-text">${esc(tracking)}</div>
   <div class="memo-info">
     <strong>Memos in this shipment:</strong><br/>${memoLines}
   </div>
-</div>
+</div>`;
+    };
+
+    const labelsHtml = trackingList
+      .map((t) => renderLabel(t.tracking, t.packageNumber, t.total))
+      .join('\n');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Group Shipment - ${esc(group.outboundTracking)}</title>
+<style>
+  @page { margin:0.3in; size:4in 6in; }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#000;background:#fff;}
+  .label{width:100%;max-width:3.6in;margin:0 auto;padding:10px 0;page-break-after:always;}
+  .label:last-child{page-break-after:auto;}
+  .label-box{border:2px solid #000;padding:12px;margin-bottom:14px;}
+  .label-heading{font-size:8pt;font-weight:bold;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;border-bottom:1px solid #aaa;padding-bottom:2px;}
+  .label-name{font-size:13pt;font-weight:bold;margin-bottom:2px;}
+  .label-line{font-size:10pt;margin-bottom:1px;}
+  .barcode-section{text-align:center;margin:12px 0 4px;}
+  .barcode-section img{max-width:100%;}
+  .tracking-text{font-family:'Courier New',monospace;font-size:14pt;font-weight:bold;margin-top:4px;text-align:center;}
+  .pkg-info{text-align:center;font-size:9pt;color:#555;margin-bottom:8px;}
+  .memo-info{text-align:left;font-size:8pt;color:#333;margin-top:10px;border-top:1px dashed #ccc;padding-top:6px;line-height:1.4;}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.label{max-width:none;}}
+</style>
+<script>window.onload=function(){setTimeout(function(){window.print();},400);}</script>
+</head>
+<body>
+${labelsHtml}
 </body>
 </html>`;
 
@@ -326,6 +369,13 @@ export const downloadShipmentGroupFedexLabelHandler = catchAsync(
       throw new AppError('No FedEx labels found for this shipment group', 404);
     }
 
+    if (!hasPrintableFedexLabels(labels)) {
+      if (format === 'print') {
+        return shipmentGroupShippingLabelHandler(req, res, _next);
+      }
+      throw new AppError('FedEx test labels cannot be downloaded. Create a production FedEx shipment for downloadable FedEx PDFs.', 400);
+    }
+
     const key = `package${packageNumber}`;
     const labelBase64 = labels[key];
     if (!labelBase64) {
@@ -397,6 +447,10 @@ export const printAllShipmentGroupFedexLabelsHandler = catchAsync(
     const labels = parseShipmentGroupFedexLabels(group.fedex_labels);
     if (!labels) {
       throw new AppError('No FedEx labels found for this shipment group', 404);
+    }
+
+    if (!hasPrintableFedexLabels(labels)) {
+      return shipmentGroupShippingLabelHandler(req, res, _next);
     }
 
     const html = buildFedexLabelsPrintHtml(group, labels, {
