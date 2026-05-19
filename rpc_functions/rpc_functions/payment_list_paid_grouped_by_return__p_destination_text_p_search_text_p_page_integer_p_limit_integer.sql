@@ -53,7 +53,29 @@ BEGIN
           'totalMemos',     COUNT(DISTINCT dm.id),
           'totalItems',     SUM(dm.total_items),
           'totalAskValue',  SUM(dm.amount_requested),
-          'totalReceived',  SUM(dm.amount_received),
+          'totalReceived',  (
+            SELECT COALESCE(SUM(t.amount_received), 0)
+              FROM (
+                SELECT DISTINCT dm2.id, dm2.amount_received
+                  FROM debit_memos dm2
+                  JOIN debit_memo_items dmi2 ON dmi2.debit_memo_id = dm2.id
+                  JOIN return_transaction_items rti2 ON rti2.id = dmi2.transaction_item_id
+                 WHERE rti2.transaction_id = rt.id
+                   AND dm2.payment_status IN ('paid', 'partial')
+                   AND (p_destination IS NULL OR dm2.destination = p_destination)
+                   AND (
+                     p_search IS NULL
+                     OR dm2.memo_number  ILIKE '%' || p_search || '%'
+                     OR dm2.labeler_name ILIKE '%' || p_search || '%'
+                     OR rt.license_plate ILIKE '%' || p_search || '%'
+                     OR EXISTS (
+                       SELECT 1 FROM pharmacy p
+                        WHERE p.id = rt.pharmacy_id
+                          AND p.pharmacy_name ILIKE '%' || p_search || '%'
+                     )
+                   )
+              ) t
+          ),
           'memos',          COALESCE(
             jsonb_agg(
               DISTINCT jsonb_build_object(

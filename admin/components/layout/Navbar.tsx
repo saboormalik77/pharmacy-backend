@@ -35,12 +35,34 @@ export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
     const [showNotifications, setShowNotifications] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [cachedBranding, setCachedBranding] = useState<{ businessName: string | null; logoUrl: string | null } | null>(null);
     const notificationsRef = useRef<HTMLDivElement>(null);
     const profileRef = useRef<HTMLDivElement>(null);
 
     // Processors get their own personal notifications feed. Admins/super_admins
     // use the buying-group-wide admin_recent_activity feed.
     const isProcessor = user?.role === 'processor';
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const readCachedBranding = () => {
+            try {
+                const stored = window.localStorage.getItem('adminBranding');
+                if (!stored) return;
+                const parsed = JSON.parse(stored);
+                setCachedBranding({
+                    businessName: typeof parsed?.businessName === 'string' ? parsed.businessName : null,
+                    logoUrl: typeof parsed?.logoUrl === 'string' ? parsed.logoUrl : null,
+                });
+            } catch {
+                // ignore malformed cache
+            }
+        };
+
+        readCachedBranding();
+        window.addEventListener('storage', readCachedBranding);
+        return () => window.removeEventListener('storage', readCachedBranding);
+    }, []);
 
     // Fetch settings and the appropriate notification feed when authenticated
     useEffect(() => {
@@ -167,6 +189,8 @@ export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
     const isLoadingActiveFeed = isProcessor
         ? isLoadingProcessorNotifications
         : isLoadingNotifications;
+    const headerBusinessName = settings?.businessName ?? cachedBranding?.businessName ?? null;
+    const headerLogoUrl = settings?.logoUrl ?? cachedBranding?.logoUrl ?? null;
 
     const handleMarkAsRead = async (activityId: string) => {
         // Only mark as read if it's not already read
@@ -234,11 +258,21 @@ export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
     return (
         <nav className={`bg-white border-b border-[#e2e2e2] fixed top-0 z-40 h-14 transition-all duration-300 ${sidebarCollapsed ? 'left-16' : 'left-64'} right-0`}>
             <div className="flex items-center justify-between h-full px-3 sm:px-4">
-                {/* Left side - mobile menu only */}
-                <div className="flex items-center sm:hidden">
+                {/* Left side - mobile menu and dynamic brand */}
+                <div className="flex items-center gap-3 min-w-0">
                     <button onClick={onToggleSidebar} className="p-1.5 rounded-[4px] hover:bg-gray-100 transition-colors">
                         <Menu className="w-5 h-5 text-gray-700" />
                     </button>
+                    {(headerLogoUrl || headerBusinessName) && (
+                        <div className="hidden sm:flex items-center gap-2 min-w-0">
+                            {headerLogoUrl && (
+                                <img src={headerLogoUrl} alt="Logo" className="w-7 h-7 rounded-[4px] object-contain flex-shrink-0" />
+                            )}
+                            {headerBusinessName && (
+                                <span className="text-sm font-semibold text-gray-900 truncate">{headerBusinessName}</span>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Right side - Notifications & Profile */}

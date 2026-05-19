@@ -40,30 +40,33 @@ BEGIN
        )
      );
 
-  -- Build summary (across all unpaid memos, not just current page)
+  -- Build summary (across all unpaid memos, not just current page; one row per memo)
   SELECT jsonb_build_object(
-    'totalUnpaid',      COUNT(DISTINCT dm.id),
-    'totalOutstanding', COALESCE(SUM(dm.amount_requested - dm.amount_received), 0)
+    'totalUnpaid',      COUNT(*),
+    'totalOutstanding', COALESCE(SUM(t.outstanding), 0)
   ) INTO v_summary
-    FROM return_transactions rt
-    JOIN debit_memo_items dmi ON dmi.transaction_item_id IN (
-      SELECT rti.id FROM return_transaction_items rti WHERE rti.transaction_id = rt.id
-    )
-    JOIN debit_memos dm ON dm.id = dmi.debit_memo_id
-   WHERE dm.payment_status NOT IN ('paid', 'partial')
-     AND (p_destination IS NULL OR dm.destination = p_destination)
-     AND (p_manufacturer IS NULL OR dm.labeler_name ILIKE '%' || p_manufacturer || '%')
-     AND (
-       p_search IS NULL
-       OR dm.memo_number  ILIKE '%' || p_search || '%'
-       OR dm.labeler_name ILIKE '%' || p_search || '%'
-       OR rt.license_plate ILIKE '%' || p_search || '%'
-       OR EXISTS (
-         SELECT 1 FROM pharmacy p
-          WHERE p.id = rt.pharmacy_id
-            AND p.pharmacy_name ILIKE '%' || p_search || '%'
-       )
-     );
+    FROM (
+      SELECT DISTINCT dm.id, (dm.amount_requested - dm.amount_received) AS outstanding
+        FROM return_transactions rt
+        JOIN debit_memo_items dmi ON dmi.transaction_item_id IN (
+          SELECT rti.id FROM return_transaction_items rti WHERE rti.transaction_id = rt.id
+        )
+        JOIN debit_memos dm ON dm.id = dmi.debit_memo_id
+       WHERE dm.payment_status NOT IN ('paid', 'partial')
+         AND (p_destination IS NULL OR dm.destination = p_destination)
+         AND (p_manufacturer IS NULL OR dm.labeler_name ILIKE '%' || p_manufacturer || '%')
+         AND (
+           p_search IS NULL
+           OR dm.memo_number  ILIKE '%' || p_search || '%'
+           OR dm.labeler_name ILIKE '%' || p_search || '%'
+           OR rt.license_plate ILIKE '%' || p_search || '%'
+           OR EXISTS (
+             SELECT 1 FROM pharmacy p
+              WHERE p.id = rt.pharmacy_id
+                AND p.pharmacy_name ILIKE '%' || p_search || '%'
+           )
+         )
+    ) t;
 
   -- Build the grouped result
   SELECT COALESCE(jsonb_agg(return_group ORDER BY return_created DESC), '[]'::jsonb)
@@ -80,7 +83,30 @@ BEGIN
           'totalMemos',     COUNT(DISTINCT dm.id),
           'totalItems',     SUM(dm.total_items),
           'totalAskValue',  SUM(dm.amount_requested),
-          'totalOutstanding', SUM(dm.amount_requested - dm.amount_received),
+          'totalOutstanding', (
+            SELECT COALESCE(SUM(t.outstanding), 0)
+              FROM (
+                SELECT DISTINCT dm2.id, (dm2.amount_requested - dm2.amount_received) AS outstanding
+                  FROM debit_memos dm2
+                  JOIN debit_memo_items dmi2 ON dmi2.debit_memo_id = dm2.id
+                  JOIN return_transaction_items rti2 ON rti2.id = dmi2.transaction_item_id
+                 WHERE rti2.transaction_id = rt.id
+                   AND dm2.payment_status NOT IN ('paid', 'partial')
+                   AND (p_destination IS NULL OR dm2.destination = p_destination)
+                   AND (p_manufacturer IS NULL OR dm2.labeler_name ILIKE '%' || p_manufacturer || '%')
+                   AND (
+                     p_search IS NULL
+                     OR dm2.memo_number  ILIKE '%' || p_search || '%'
+                     OR dm2.labeler_name ILIKE '%' || p_search || '%'
+                     OR rt.license_plate ILIKE '%' || p_search || '%'
+                     OR EXISTS (
+                       SELECT 1 FROM pharmacy p
+                        WHERE p.id = rt.pharmacy_id
+                          AND p.pharmacy_name ILIKE '%' || p_search || '%'
+                     )
+                   )
+              ) t
+          ),
           'memos',          COALESCE(
             jsonb_agg(
               DISTINCT jsonb_build_object(

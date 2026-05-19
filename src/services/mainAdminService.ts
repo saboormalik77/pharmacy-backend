@@ -371,6 +371,11 @@ export const updateBuyingGroup = async (groupId: string, params: {
   const result = data as any;
   if (result?.error) throw new AppError(result.message, result.code || 400);
 
+  if (params.name) {
+    const { clearTenantCacheForBuyingGroup } = await import('./tenantService');
+    clearTenantCacheForBuyingGroup(groupId);
+  }
+
   return result;
 };
 

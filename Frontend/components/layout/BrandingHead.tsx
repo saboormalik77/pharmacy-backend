@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { usePharmacyPortalTenant } from '@/lib/hooks/usePharmacyPortalTenant'
 import { getPharmacyId } from '@/lib/utils/cookies'
 
@@ -51,7 +52,9 @@ const ensureFaviconLink = (): HTMLLinkElement | null => {
 }
 
 export default function BrandingHead() {
+  const pathname = usePathname()
   const { validTenant } = usePharmacyPortalTenant()
+  const [cachedBranding, setCachedBranding] = useState<CachedBranding | null>(cachedOnLoad)
 
   const lastTitleRef = useRef<string | null>(null)
   const lastFaviconRef = useRef<string | null>(null)
@@ -62,13 +65,23 @@ export default function BrandingHead() {
   //                    previous session; gives an instant value at first paint
   const businessName =
     validTenant?.buyingGroupName ||
-    cachedOnLoad?.businessName ||
+    cachedBranding?.businessName ||
     null
 
   const logoUrl =
     validTenant?.logoUrl ||
-    cachedOnLoad?.logoUrl ||
+    cachedBranding?.logoUrl ||
     null
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const raw = window.localStorage.getItem(LS_KEY)
+      setCachedBranding(raw ? (JSON.parse(raw) as CachedBranding) : null)
+    } catch {
+      setCachedBranding(null)
+    }
+  }, [])
 
   // Persist to localStorage whenever the tenant API returns fresh data.
   useEffect(() => {
@@ -139,11 +152,13 @@ export default function BrandingHead() {
 
   useEffect(() => {
     if (typeof document === 'undefined') return
+    if (!businessName && pathname === '/login') return
+    if (!businessName && document.title && document.title !== DEFAULT_TITLE) return
     const nextTitle = businessName || DEFAULT_TITLE
     if (lastTitleRef.current === nextTitle) return
     lastTitleRef.current = nextTitle
     document.title = nextTitle
-  }, [businessName])
+  }, [businessName, pathname])
 
   useEffect(() => {
     const nextFavicon = logoUrl || DEFAULT_FAVICON
