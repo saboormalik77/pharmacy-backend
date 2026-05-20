@@ -446,7 +446,7 @@ export default function SubAdminsPage() {
         >
           <div className="rounded-[4px] shadow-xl max-w-2xl w-full my-auto border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
             {/* Header */}
-            <div className="rounded-t-xl px-5 py-3" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
+            <div className="rounded-t-[4px] px-5 py-3" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 bg-white/20 rounded-[4px]">

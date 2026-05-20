@@ -167,10 +167,10 @@ function SetupAccountPageContent() {
         <div className="rounded-[4px] shadow-md p-8" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
           {adminInfo && (
             <div className="mb-6 p-3 rounded-[4px]" style={{ backgroundColor: 'var(--primary-container)' }}>
-              <p className="text-sm" style={{ color: 'var(--on-primary-container)' }}>
+              <p className="text-sm" style={{ color: 'var(--on-primary)' }}>
                 Welcome, <strong>{adminInfo.name}</strong>
               </p>
-              <p className="text-xs mt-1" style={{ color: 'var(--on-surface-variant)' }}>{adminInfo.email}</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--on-primary)' }}>{adminInfo.email}</p>
             </div>
           )}
 

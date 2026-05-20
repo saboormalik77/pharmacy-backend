@@ -7,11 +7,12 @@ import { Button } from '@/components/ui/Button';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { loginUser, clearError } from '@/lib/store/authSlice';
 import { validateEmail } from '@/lib/validation';
+import { getFirstAllowedPath } from '@/lib/permissions';
 
 export default function LoginPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { isAuthenticated, isLoading, error: authError } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, isLoading, error: authError, user } = useAppSelector((state) => state.auth);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -20,9 +21,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push('/');
+      router.push(getFirstAllowedPath(user) || '/');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, router, user]);
 
   useEffect(() => {
     if (authError) {
@@ -50,7 +51,7 @@ export default function LoginPage() {
       const result = await dispatch(loginUser({ email, password }));
 
       if (loginUser.fulfilled.match(result)) {
-        router.push('/');
+        router.push(getFirstAllowedPath(result.payload.user) || '/');
       } else {
         const errorMessage = result.payload as string || 'Invalid credentials. Please try again.';
         setError(errorMessage);

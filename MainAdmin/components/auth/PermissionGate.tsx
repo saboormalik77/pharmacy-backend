@@ -3,6 +3,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePermissions } from '@/hooks/usePermissions';
+import { getFirstAllowedPath } from '@/lib/permissions';
+import { useAppSelector } from '@/lib/store/hooks';
 import { ShieldOff } from 'lucide-react';
 
 interface PermissionGateProps {
@@ -14,14 +16,16 @@ interface PermissionGateProps {
 export function PermissionGate({ permission, children, fallback }: PermissionGateProps) {
   const router = useRouter();
   const { hasPermission } = usePermissions();
+  const { user } = useAppSelector((state) => state.auth);
 
   const allowed = hasPermission(permission);
+  const firstAllowedPath = getFirstAllowedPath(user);
 
   useEffect(() => {
-    if (!allowed && !fallback) {
-      router.replace('/');
+    if (!allowed && !fallback && firstAllowedPath) {
+      router.replace(firstAllowedPath);
     }
-  }, [allowed, fallback, router]);
+  }, [allowed, fallback, firstAllowedPath, router]);
 
   if (!allowed) {
     return fallback ? (

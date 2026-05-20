@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { logoutUser } from '@/lib/store/authSlice';
+import { canAccessRoute, getFirstAllowedPath } from '@/lib/permissions';
+import { ShieldOff } from 'lucide-react';
 
 const PUBLIC_PAGES = ['/login', '/setup-account'];
 
@@ -29,8 +31,10 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useAppDispatch();
-  const { isAuthenticated, isLoading, token } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, isLoading, token, user } = useAppSelector((state) => state.auth);
   const isPublicPage = PUBLIC_PAGES.includes(pathname);
+  const canAccessCurrentRoute = isPublicPage || canAccessRoute(user, pathname);
+  const firstAllowedPath = getFirstAllowedPath(user);
 
   useEffect(() => {
     if (!token) return;
@@ -60,9 +64,11 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     if (!isAuthenticated && !isPublicPage) {
       window.location.href = '/login';
     } else if (isAuthenticated && isPublicPage) {
-      router.push('/');
+      router.push(firstAllowedPath || '/');
+    } else if (isAuthenticated && !canAccessCurrentRoute && firstAllowedPath && pathname !== firstAllowedPath) {
+      router.replace(firstAllowedPath);
     }
-  }, [isAuthenticated, isLoading, isPublicPage, router]);
+  }, [canAccessCurrentRoute, firstAllowedPath, isAuthenticated, isLoading, isPublicPage, pathname, router]);
 
   if (isLoading && !isAuthenticated && !isPublicPage) {
     return (
@@ -71,6 +77,27 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated && !isPublicPage && !canAccessCurrentRoute) {
+    if (firstAllowedPath && pathname !== firstAllowedPath) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+            <p className="mt-4 text-gray-600">Redirecting...</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-gray-500">
+        <ShieldOff className="w-16 h-16 mb-4 text-gray-300" />
+        <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+        <p className="text-sm">You do not have permission to view this page.</p>
       </div>
     );
   }
