@@ -248,10 +248,10 @@ export default function RATrackingPage() {
                 );
             }
             if (isPackingSlipOnly) {
-                addToast(
-                    'No FedEx PDF labels are saved for this group (common for older shipments). Showing address slip only. Create a new FedEx group shipment to store printable labels.',
-                    'warning'
-                );
+                // addToast(
+                //     'No FedEx PDF labels are saved for this group (common for older shipments). Showing address slip only. Create a new FedEx group shipment to store printable labels.',
+                //     'warning'
+                // );
             }
 
             const printWindow = window.open('', '_blank');

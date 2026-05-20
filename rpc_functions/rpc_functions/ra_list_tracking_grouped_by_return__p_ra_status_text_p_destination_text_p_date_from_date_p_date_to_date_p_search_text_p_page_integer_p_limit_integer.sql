@@ -141,6 +141,7 @@ BEGIN
             jsonb_agg(
               DISTINCT jsonb_build_object(
                 'id',                dm.id,
+                'shipmentGroupId',   dm.shipment_group_id,
                 'batchId',           dm.batch_id,
                 'pharmacyId',        dm.pharmacy_id,
                 'pharmacyName',      COALESCE((SELECT pharmacy_name FROM pharmacy WHERE id = dm.pharmacy_id), ''),

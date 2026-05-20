@@ -451,7 +451,7 @@ export const debitMemoShippingLabelHandler = catchAsync(
 
     const { data: memo, error: memoErr } = await supabaseAdmin
       .from('debit_memos')
-      .select('id, memo_number, destination, outbound_tracking, labeler_name, total_items, fedex_labels')
+      .select('id, memo_number, destination, outbound_tracking, labeler_name, total_items, shipment_group_id')
       .eq('id', id)
       .single();
 
@@ -460,7 +460,18 @@ export const debitMemoShippingLabelHandler = catchAsync(
       throw new AppError('No tracking number found for this memo', 400);
     }
 
-    const fedexLabels = parseShipmentGroupFedexLabels(memo.fedex_labels);
+    // Fetch FedEx labels from the shipment group when available
+    let rawFedexLabels: any = null;
+    if (memo.shipment_group_id) {
+      const { data: grp } = await supabaseAdmin
+        .from('shipment_groups')
+        .select('fedex_labels')
+        .eq('id', memo.shipment_group_id)
+        .maybeSingle();
+      rawFedexLabels = grp?.fedex_labels ?? null;
+    }
+
+    const fedexLabels = parseShipmentGroupFedexLabels(rawFedexLabels);
     const fedexLabelsArePrintable =
       !!fedexLabels && !fedexService.isFedExSandbox() && !Object.values(fedexLabels).some(isFedexTestLabel);
 
