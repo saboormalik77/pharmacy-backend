@@ -372,18 +372,18 @@ export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
                         )}
                     </div>
 
-                    <div className="relative" ref={profileRef}>
+                    <div className="relative min-w-0" ref={profileRef}>
                         <button onClick={() => { setShowProfile(!showProfile); setShowNotifications(false); }} className="flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-[4px] hover:bg-gray-100 transition-colors">
                             <div className="w-8 h-8 sm:w-9 sm:h-9 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
                                 <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             </div>
-                            <span className="text-xs sm:text-sm font-medium text-gray-700 hidden sm:inline">{user?.name || 'Admin User'}</span>
+                            <span className="text-xs sm:text-sm font-medium text-gray-700 hidden sm:inline truncate max-w-48">{user?.name || 'Admin User'}</span>
                         </button>
                         {showProfile && (
-                            <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-[4px] shadow-lg border border-[#e2e2e2] overflow-hidden z-50">
-                                <div className="px-4 py-3 border-b border-[#e2e2e2]">
-                                    <p className="font-medium text-gray-900">{user?.name || 'Admin User'}</p>
-                                    <p className="text-sm text-gray-500">{user?.email || 'admin@pharmadmin.com'}</p>
+                            <div className="absolute right-0 mt-2 w-48 sm:w-56 max-w-[calc(100vw-2rem)] bg-white rounded-[4px] shadow-lg border border-[#e2e2e2] overflow-hidden z-50">
+                                <div className="px-4 py-3 border-b border-[#e2e2e2] min-w-0">
+                                    <p className="font-medium text-gray-900 truncate">{user?.name || 'Admin User'}</p>
+                                    <p className="text-sm text-gray-500 truncate mt-1">{user?.email || 'admin@pharmadmin.com'}</p>
                                 </div>
                                 <div className="py-1">
                                     {hasPermission('settings') && (
