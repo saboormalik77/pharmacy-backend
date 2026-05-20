@@ -93,18 +93,18 @@ export function UserDropdown() {
         </div>
       )}
       
-      <div className="relative" ref={dropdownRef}>
+      <div className="relative min-w-0" ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="group flex items-center gap-2 sm:gap-3 rounded-[4px] px-2 sm:px-3 py-1.5 sm:py-2 transition-colors hover:bg-primary/10"
           aria-label="User menu"
           disabled={isLoggingOut}
         >
-          <div className="text-right hidden sm:block">
-            <p className="text-sm font-medium text-foreground transition-colors group-hover:text-primary">
+          <div className="text-right hidden sm:block min-w-0">
+            <p className="text-sm font-medium text-foreground transition-colors group-hover:text-primary truncate max-w-48">
               {userData?.name || 'User'}
             </p>
-            <p className="text-xs text-muted-foreground transition-colors group-hover:text-primary/80">
+            <p className="text-xs text-muted-foreground transition-colors group-hover:text-primary/80 truncate max-w-48">
               {userData?.pharmacy_name || 'Pharmacy'}
             </p>
           </div>
@@ -117,10 +117,10 @@ export function UserDropdown() {
         </button>
 
         {isOpen && !isLoggingOut && (
-          <div className="absolute right-0 mt-2 w-56 rounded-[4px] shadow-lg bg-card border border-border z-50">
+          <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] rounded-[4px] shadow-lg bg-card border border-border z-50 overflow-hidden">
             <div className="py-1">
-              <div className="px-4 py-3 border-b border-border">
-                <p className="text-sm font-medium">{userData?.name || 'User'}</p>
+              <div className="px-4 py-3 border-b border-border min-w-0">
+                <p className="text-sm font-medium truncate">{userData?.name || 'User'}</p>
                 <p className="text-xs text-muted-foreground truncate">
                   {userData?.pharmacy_name || 'Pharmacy'}
                 </p>
