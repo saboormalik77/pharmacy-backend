@@ -3,7 +3,7 @@
 import { useRef, useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { makeStore, AppStore } from '@/lib/store/store';
-import { checkAuthStatus } from '@/lib/store/authSlice';
+import { checkAuthStatus, refreshPermissions } from '@/lib/store/authSlice';
 
 export default function StoreProvider({
   children,
@@ -16,7 +16,10 @@ export default function StoreProvider({
   }
 
   useEffect(() => {
-    storeRef.current!.dispatch(checkAuthStatus() as any);
+    const store = storeRef.current!;
+    store.dispatch(checkAuthStatus() as any).then(() => {
+      store.dispatch(refreshPermissions() as any);
+    });
   }, []);
 
   return <Provider store={storeRef.current!}>{children}</Provider>;

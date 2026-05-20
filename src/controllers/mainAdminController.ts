@@ -33,6 +33,20 @@ export const mainAdminLoginHandler = catchAsync(
   }
 );
 
+export const getMeHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    res.status(200).json({
+      user: {
+        id: req.mainAdminId,
+        email: req.mainAdminEmail,
+        name: req.mainAdminName,
+        role: req.mainAdminRole,
+        permissions: req.mainAdminPermissions || [],
+      },
+    });
+  }
+);
+
 export const getBuyingGroupsHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { page, limit, search, status, sortBy, sortOrder } = req.query;

@@ -55,6 +55,25 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
+export const refreshPermissions = createAsyncThunk(
+  'auth/refreshPermissions',
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = cookieUtils.getAuthToken();
+      if (!token) return rejectWithValue('No token');
+
+      const { apiClient } = await import('@/lib/api/apiClient');
+      const data = await apiClient.get('/main-admin/auth/me');
+
+      const userData: User = data.user;
+      cookieUtils.setUser(userData);
+      return { token, user: userData };
+    } catch (error: any) {
+      return rejectWithValue(error?.message || 'Failed to refresh permissions');
+    }
+  }
+);
+
 export const checkAuthStatus = createAsyncThunk(
   'auth/checkStatus',
   async (_, { rejectWithValue }) => {
@@ -137,6 +156,13 @@ const authSlice = createSlice({
         state.token = null;
         state.user = null;
         state.isAuthenticated = false;
+      });
+
+    builder
+      .addCase(refreshPermissions.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
       });
   },
 });
