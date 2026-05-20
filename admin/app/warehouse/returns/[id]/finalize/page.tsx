@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import {
-    ArrowLeft, Loader2, CheckCircle, Lock, Truck, Edit, FileText, Download, AlertTriangle, Printer,
+    ArrowLeft, Loader2, CheckCircle, Lock, Truck, Edit, FileText, AlertTriangle, Printer,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
@@ -745,73 +744,54 @@ export default function FinalizeReturnPage() {
                                                             className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
                                                             title="Print all shipping labels"
                                                         >
-                                                            <Printer className="w-3 h-3" /> Print Labels
+                                                            {pdfLoading === 'shipping-labels' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                            {pdfLoading === 'shipping-labels' ? 'Printing…' : 'Print Labels'}
                                                         </button>
 
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-1 gap-2">
                                                     {fedexApiResult.packages.map((pkg, i) => (
-                                                        <div key={i} className="flex items-center justify-between text-xs">
+                                                        <div
+                                                            key={i}
+                                                            className="flex items-center justify-between rounded-[4px] px-3 py-2 border"
+                                                            style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--border)' }}
+                                                        >
                                                             <div className="flex items-center gap-2">
-                                                                <span style={{ color: 'var(--on-surface-variant)' }}>Package {i + 1}:</span>
-                                                                <span className="font-mono" style={{ color: 'var(--primary-brand)' }}>{pkg.trackingNumber}</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-1">
-                                                                <button
-                                                                    onClick={() => printSingleLabel(i + 1)}
-                                                                    disabled={pdfLoading === `shipping-label-${i + 1}`}
-                                                                    className="flex items-center gap-1 px-1.5 py-0.5 rounded border transition-colors disabled:opacity-50"
-                                                                    style={{ 
-                                                                        backgroundColor: 'var(--secondary-container)', 
-                                                                        borderColor: 'var(--primary-action)',
-                                                                        color: 'var(--primary-action)'
-                                                                    }}
-                                                                    onMouseEnter={e => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = 'var(--primary-50)')}
-                                                                    onMouseLeave={e => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = 'var(--secondary-container)')}
-                                                                    title={`Print shipping label for ${pkg.trackingNumber}`}
+                                                                <div
+                                                                    className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold"
+                                                                    style={{ backgroundColor: 'var(--primary-fixed)', color: 'var(--primary-brand)' }}
                                                                 >
-                                                                    {pdfLoading === `shipping-label-${i + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
-                                                                </button>
-
-                                                                {pkg.hasLabel && (
-                                                                    <a
-                                                                        href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${i + 1}/download`}
-                                                                        target="_blank"
-                                                                        rel="noreferrer"
-                                                                        className="text-blue-600 hover:text-blue-800"
-                                                                        title="Download Label"
-                                                                    >
-                                                                        <Download className="w-3.5 h-3.5" />
-                                                                    </a>
-                                                                )}
+                                                                    {i + 1}
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Package {i + 1}</p>
+                                                                    <p className="text-xs font-mono font-semibold tracking-wide" style={{ color: 'var(--primary-brand)' }}>{pkg.trackingNumber}</p>
+                                                                </div>
                                                             </div>
+                                                            <button
+                                                                onClick={() => printSingleLabel(i + 1)}
+                                                                disabled={pdfLoading === `shipping-label-${i + 1}`}
+                                                                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[4px] border text-xs font-medium transition-all disabled:opacity-50 hover:shadow-sm"
+                                                                style={{
+                                                                    backgroundColor: 'var(--secondary-container)',
+                                                                    borderColor: 'var(--primary-action)',
+                                                                    color: 'var(--primary-action)'
+                                                                }}
+                                                                onMouseEnter={e => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = 'var(--primary-50)')}
+                                                                onMouseLeave={e => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = 'var(--secondary-container)')}
+                                                                title={`Print label for Package ${i + 1}`}
+                                                            >
+                                                                {pdfLoading === `shipping-label-${i + 1}`
+                                                                    ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Printing…</>
+                                                                    : <><Printer className="w-3.5 h-3.5" /> Print Label</>
+                                                                }
+                                                            </button>
                                                         </div>
                                                     ))}
                                                 </div>
                                             </div>
 
-                                            {/* Download All Labels */}
-                                            {fedexApiResult.packages.some(p => p.hasLabel) && (
-                                                <div className="flex justify-center">
-                                                    <a
-                                                        href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels?packageNumber=1`}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-[4px] border transition-colors"
-                                                        style={{ 
-                                                            backgroundColor: 'var(--surface-container-low)', 
-                                                            color: 'var(--primary-brand)',
-                                                            borderColor: 'var(--border)'
-                                                        }}
-                                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--surface-container)'}
-                                                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--surface-container-low)'}
-                                                    >
-                                                        <Printer className="w-3.5 h-3.5" />
-                                                        Download Labels
-                                                    </a>
-                                                </div>
-                                            )}
 
                                             {/* Schedule Pickup */}
                                             <div className="border-t pt-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
