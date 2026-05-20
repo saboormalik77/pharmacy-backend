@@ -1,21 +1,14 @@
 -- Function : email_is_in_use
--- Cross-entity login email check (buying group / admin, processor, pharmacy, pending invites).
 -- Arguments: p_email text, p_exclude_admin_id uuid, p_exclude_processor_id uuid, p_exclude_pharmacy_id uuid
 -- Type     : FUNCTION
 -- =============================================================
 
-DROP FUNCTION IF EXISTS public.email_is_in_use(text, uuid, uuid, uuid) CASCADE;
+DROP FUNCTION IF EXISTS public.email_is_in_use(p_email text, p_exclude_admin_id uuid, p_exclude_processor_id uuid, p_exclude_pharmacy_id uuid) CASCADE;
 
-CREATE OR REPLACE FUNCTION public.email_is_in_use(
-  p_email text,
-  p_exclude_admin_id uuid DEFAULT NULL::uuid,
-  p_exclude_processor_id uuid DEFAULT NULL::uuid,
-  p_exclude_pharmacy_id uuid DEFAULT NULL::uuid
-)
+CREATE OR REPLACE FUNCTION public.email_is_in_use(p_email text, p_exclude_admin_id uuid DEFAULT NULL::uuid, p_exclude_processor_id uuid DEFAULT NULL::uuid, p_exclude_pharmacy_id uuid DEFAULT NULL::uuid)
  RETURNS boolean
  LANGUAGE plpgsql
- STABLE
- SECURITY DEFINER
+ STABLE SECURITY DEFINER
 AS $function$
 DECLARE
   v_email TEXT;

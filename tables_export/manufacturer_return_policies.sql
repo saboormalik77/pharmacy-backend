@@ -25,7 +25,7 @@ CREATE TABLE public."manufacturer_return_policies" (
 
 -- Constraints
 ALTER TABLE public."manufacturer_return_policies"
-    ADD CONSTRAINT "manufacturer_return_policies_reimbursement_type_check" CHECK (reimbursement_type = ANY (ARRAY['batch'::text, 'per_item'::text]));
+    ADD CONSTRAINT "manufacturer_return_policies_reimbursement_type_check" CHECK (reimbursement_type = ANY (ARRAY['batch'::text, 'per_item'::text, 'credit'::text, 'check'::text, 'ach'::text]));
 
 ALTER TABLE public."manufacturer_return_policies"
     ADD CONSTRAINT "manufacturer_return_policies_manufacturer_policy_id_fkey" FOREIGN KEY (manufacturer_policy_id) REFERENCES manufacturer_policies(id) ON DELETE CASCADE;

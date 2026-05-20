@@ -33,6 +33,7 @@ CREATE TABLE public."debit_memos" (
     "payment_notes" text,
     "credit_memo_url" text,
     "shipment_group_id" uuid,
+    "pharmacy_payout_id" uuid,
     CONSTRAINT "debit_memos_pkey" PRIMARY KEY (id)
 );
 
@@ -48,6 +49,9 @@ ALTER TABLE public."debit_memos"
 
 ALTER TABLE public."debit_memos"
     ADD CONSTRAINT "debit_memos_pharmacy_id_fkey" FOREIGN KEY (pharmacy_id) REFERENCES pharmacy(id) ON DELETE RESTRICT;
+
+ALTER TABLE public."debit_memos"
+    ADD CONSTRAINT "debit_memos_pharmacy_payout_id_fkey" FOREIGN KEY (pharmacy_payout_id) REFERENCES pharmacy_payments(id);
 
 ALTER TABLE public."debit_memos"
     ADD CONSTRAINT "debit_memos_shipment_group_id_fkey" FOREIGN KEY (shipment_group_id) REFERENCES shipment_groups(id) ON DELETE SET NULL;

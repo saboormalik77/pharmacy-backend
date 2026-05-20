@@ -11,37 +11,27 @@ CREATE OR REPLACE FUNCTION public.pharmacy_payment_create(p_pharmacy_id uuid, p_
  SECURITY DEFINER
 AS $function$
 DECLARE
-  v_payment pharmacy_payments;
+  v_payment  pharmacy_payments;
   v_gpo_name TEXT;
 BEGIN
-  -- Log the function call for debugging
-  RAISE NOTICE 'pharmacy_payment_create called: pharmacy_id=%, batch_id=%, total_credit=%, method=%, ref=%', 
-    p_pharmacy_id, p_batch_id, p_total_credit_received, p_payment_method, p_payment_reference;
-
-  -- Validate pharmacy exists
   IF NOT EXISTS (SELECT 1 FROM pharmacy WHERE id = p_pharmacy_id) THEN
     RETURN jsonb_build_object('error', true, 'code', 404, 'message', 'Pharmacy not found');
   END IF;
 
-  -- Validate batch exists (if provided)
   IF p_batch_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM return_batches WHERE id = p_batch_id) THEN
     RETURN jsonb_build_object('error', true, 'code', 404, 'message', 'Batch not found');
   END IF;
 
-  -- Validate payment_method if provided
   IF p_payment_method IS NOT NULL AND p_payment_method NOT IN ('wire', 'check', 'zelle', 'cash') THEN
     RETURN jsonb_build_object('error', true, 'code', 400, 'message', 'Invalid payment_method. Must be: wire, check, zelle, cash');
   END IF;
 
-  -- Get GPO name from pharmacy (fallback to null if column doesn't exist)
   BEGIN
     SELECT gpo_affiliation INTO v_gpo_name FROM pharmacy WHERE id = p_pharmacy_id;
   EXCEPTION
-    WHEN undefined_column THEN
-      v_gpo_name := NULL;
+    WHEN undefined_column THEN v_gpo_name := NULL;
   END;
 
-  -- Insert the payment record
   INSERT INTO pharmacy_payments (
     pharmacy_id, batch_id, total_credit_received, company_fee,
     company_fee_percent, gpo_share, gpo_name, pharmacy_payout,
@@ -70,11 +60,6 @@ BEGIN
 
 EXCEPTION
   WHEN OTHERS THEN
-    RAISE NOTICE 'pharmacy_payment_create error: %', SQLERRM;
-    RETURN jsonb_build_object(
-      'error', true,
-      'code', 500,
-      'message', 'Internal error: ' || SQLERRM
-    );
+    RETURN jsonb_build_object('error', true, 'code', 500, 'message', 'Internal error: ' || SQLERRM);
 END;
 $function$;

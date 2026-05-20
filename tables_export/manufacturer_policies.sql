@@ -31,7 +31,7 @@ CREATE TABLE public."manufacturer_policies" (
 
 -- Constraints
 ALTER TABLE public."manufacturer_policies"
-    ADD CONSTRAINT "manufacturer_policies_labeler_type_check" CHECK (labeler_type = ANY (ARRAY['generic'::text, 'brand'::text]));
+    ADD CONSTRAINT "manufacturer_policies_labeler_type_check" CHECK (labeler_type = ANY (ARRAY['generic'::text, 'brand'::text, 'manufacturer'::text, 'distributor'::text, 'repackager'::text]));
 
 ALTER TABLE public."manufacturer_policies"
     ADD CONSTRAINT "manufacturer_policies_labeler_id_key" UNIQUE (labeler_id);

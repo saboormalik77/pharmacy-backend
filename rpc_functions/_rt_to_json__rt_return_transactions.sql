@@ -115,7 +115,7 @@ BEGIN
                                         )
                                         ELSE 0
                                      END,
-        -- unpaidMemoCount: when check exists count truly unpaid; when no check all memos are unpaid
+        -- unpaidMemoCount: when check exists, count truly unpaid; when no check, all memos are unpaid
         'unpaidMemoCount',           CASE
                                         WHEN rt.batch_id IS NOT NULL AND v_has_check THEN (
                                             SELECT COUNT(*)::int FROM debit_memos dm
@@ -151,7 +151,7 @@ BEGIN
         'totalItems',                rt.total_items,
         'totalReturnableValue',      rt.total_returnable_value,
         'totalNonReturnableValue',   rt.total_non_returnable_value,
-        'hasCiiItems',               v_has_cii_items,  -- New field for DEA Form 222 availability
+        'hasCiiItems',               v_has_cii_items,
         'batchId',                   rt.batch_id,
         'timeIn',                    rt.time_in,
         'timeOut',                   rt.time_out,

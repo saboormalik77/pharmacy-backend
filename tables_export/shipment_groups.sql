@@ -16,6 +16,7 @@ CREATE TABLE public."shipment_groups" (
     "notes" text,
     "created_at" timestamptz DEFAULT now() NOT NULL,
     "updated_at" timestamptz DEFAULT now() NOT NULL,
+    "package_tracking" jsonb,
     CONSTRAINT "shipment_groups_pkey" PRIMARY KEY (id)
 );
 

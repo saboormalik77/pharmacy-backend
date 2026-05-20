@@ -11,46 +11,42 @@ CREATE OR REPLACE FUNCTION public.pharmacy_payment_calculate(p_pharmacy_id uuid,
  STABLE SECURITY DEFINER
 AS $function$
 DECLARE
-  v_total_credit   DECIMAL(12,2);
-  v_company_fee    DECIMAL(12,2);
-  v_gpo_share      DECIMAL(12,2);
+  v_total_credit    DECIMAL(12,2);
+  v_company_fee     DECIMAL(12,2);
+  v_gpo_share       DECIMAL(12,2);
   v_pharmacy_payout DECIMAL(12,2);
-  v_gpo_name       TEXT;
-  v_pharmacy_name  TEXT;
-  v_batch_name     TEXT;
-  v_memo_count     INTEGER;
+  v_gpo_name        TEXT;
+  v_pharmacy_name   TEXT;
+  v_batch_name      TEXT;
+  v_memo_count      INTEGER;
 BEGIN
-  -- Validate pharmacy exists
   SELECT pharmacy_name INTO v_pharmacy_name FROM pharmacy WHERE id = p_pharmacy_id;
   IF v_pharmacy_name IS NULL THEN
     RETURN jsonb_build_object('error', true, 'code', 404, 'message', 'Pharmacy not found');
   END IF;
 
-  -- Validate batch exists
   SELECT batch_name INTO v_batch_name FROM return_batches WHERE id = p_batch_id;
   IF v_batch_name IS NULL THEN
     RETURN jsonb_build_object('error', true, 'code', 404, 'message', 'Batch not found');
   END IF;
 
-  -- Get GPO affiliation from pharmacy
   SELECT gpo_affiliation INTO v_gpo_name FROM pharmacy WHERE id = p_pharmacy_id;
 
-  -- Sum only memos not yet covered by a prior payout
+  -- Only sum memos not yet covered by a prior payout
   SELECT COALESCE(SUM(amount_received), 0), COUNT(*)
     INTO v_total_credit, v_memo_count
-  FROM debit_memos
-  WHERE pharmacy_id = p_pharmacy_id
-    AND batch_id = p_batch_id
-    AND payment_status IN ('paid', 'partial')
-    AND pharmacy_payout_id IS NULL;
+    FROM debit_memos
+   WHERE pharmacy_id  = p_pharmacy_id
+     AND batch_id     = p_batch_id
+     AND payment_status IN ('paid', 'partial')
+     AND pharmacy_payout_id IS NULL;
 
   IF v_memo_count = 0 THEN
     RETURN jsonb_build_object('error', true, 'code', 400, 'message', 'No uncovered paid memos found for this pharmacy in this batch');
   END IF;
 
-  -- Calculate splits
-  v_company_fee    := ROUND(v_total_credit * (p_company_fee_pct / 100.0), 2);
-  v_gpo_share      := ROUND(v_total_credit * (p_gpo_share_pct / 100.0), 2);
+  v_company_fee     := ROUND(v_total_credit * (p_company_fee_pct / 100.0), 2);
+  v_gpo_share       := ROUND(v_total_credit * (p_gpo_share_pct  / 100.0), 2);
   v_pharmacy_payout := v_total_credit - v_company_fee - v_gpo_share;
 
   RETURN jsonb_build_object(

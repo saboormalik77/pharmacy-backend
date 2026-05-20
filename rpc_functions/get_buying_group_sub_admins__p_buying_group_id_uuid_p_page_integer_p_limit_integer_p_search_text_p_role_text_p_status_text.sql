@@ -1,19 +1,11 @@
 -- Function : get_buying_group_sub_admins
 -- Arguments: p_buying_group_id uuid, p_page integer, p_limit integer, p_search text, p_role text, p_status text
 -- Type     : FUNCTION
--- Returns sub-admins (manager/reviewer/support) for a buying group, excluding the super_admin owner.
 -- =============================================================
 
 DROP FUNCTION IF EXISTS public.get_buying_group_sub_admins(p_buying_group_id uuid, p_page integer, p_limit integer, p_search text, p_role text, p_status text) CASCADE;
 
-CREATE OR REPLACE FUNCTION public.get_buying_group_sub_admins(
-  p_buying_group_id uuid,
-  p_page integer DEFAULT 1,
-  p_limit integer DEFAULT 20,
-  p_search text DEFAULT NULL,
-  p_role text DEFAULT NULL,
-  p_status text DEFAULT NULL
-)
+CREATE OR REPLACE FUNCTION public.get_buying_group_sub_admins(p_buying_group_id uuid, p_page integer DEFAULT 1, p_limit integer DEFAULT 20, p_search text DEFAULT NULL::text, p_role text DEFAULT NULL::text, p_status text DEFAULT NULL::text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER

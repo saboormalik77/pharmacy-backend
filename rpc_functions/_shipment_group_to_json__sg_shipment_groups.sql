@@ -19,6 +19,7 @@ AS $function$
     'totalMemos',       sg.total_memos,
     'fedexShipmentId',  sg.fedex_shipment_id,
     'fedexLabels',      sg.fedex_labels,
+    'packageTracking',  sg.package_tracking,
     'notes',            sg.notes,
     'createdAt',        sg.created_at,
     'updatedAt',        sg.updated_at
