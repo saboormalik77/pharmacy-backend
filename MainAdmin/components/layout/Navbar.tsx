@@ -89,9 +89,9 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
             </nav>
 
             {isLoggingOut && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="flex flex-col items-center gap-3 p-6 rounded-[4px]" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
-                        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--secondary)' }} />
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white">
+                    <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--primary)' }} />
                         <p className="text-sm font-medium" style={{ color: 'var(--on-surface-variant)' }}>Logging out...</p>
                     </div>
                 </div>

@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   mainAdminLoginHandler,
+  getMeHandler,
   getBuyingGroupsHandler,
   getBuyingGroupByIdHandler,
   createBuyingGroupHandler,
@@ -27,6 +28,9 @@ const router = express.Router();
 
 // Auth (public)
 router.post('/auth/login', mainAdminLoginHandler);
+
+// Auth (protected) — fetch fresh user/permissions on page refresh
+router.get('/auth/me', authenticateMainAdmin, getMeHandler);
 
 // Sub-admin invite flow (public — no auth needed)
 router.get('/sub-admins/invite/validate', validateInviteTokenHandler);
