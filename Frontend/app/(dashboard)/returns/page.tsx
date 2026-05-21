@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import { formatDate, formatCurrency } from '@/lib/utils/format';
+import { getPharmacyId, getToken } from '@/lib/utils/cookies';
 
 // ── Types (matching the return_transactions backend response) ──
 
@@ -94,6 +95,10 @@ function getStatusBadge(status: string): { variant: 'success' | 'warning' | 'err
     }
 }
 
+function normalizeStatus(status: string | null | undefined) {
+    return (status || '').trim().toLowerCase();
+}
+
 function useDebounce(value: string, delay: number) {
     const [debounced, setDebounced] = useState(value);
     useEffect(() => {
@@ -136,10 +141,27 @@ export default function ReturnsPage() {
 
     const downloadDeaForm222 = async (tx: ReturnTransaction) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/return-transactions/${tx.id}/dea-form-222`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                },
+            const token = getToken();
+            if (!token) {
+                throw new Error('Authentication required. Please log in again.');
+            }
+
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            const url = new URL(`${baseUrl}/return-transactions/${tx.id}/dea-form-222`);
+            const pharmacyId = getPharmacyId();
+            if (pharmacyId) {
+                url.searchParams.set('pharmacy_id', pharmacyId);
+            }
+
+            const headers: HeadersInit = {
+                Authorization: `Bearer ${token}`,
+            };
+            if (typeof window !== 'undefined' && window.location.hostname) {
+                headers['X-Tenant-Domain'] = window.location.hostname;
+            }
+
+            const response = await fetch(url.toString(), {
+                headers,
             });
             
             if (!response.ok) {
@@ -148,14 +170,14 @@ export default function ReturnsPage() {
             }
             
             const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
+            const blobUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = url;
+            link.href = blobUrl;
             link.download = `dea-form-222-${tx.licensePlate}.pdf`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+            window.URL.revokeObjectURL(blobUrl);
             
             showToast('DEA Form 222 downloaded successfully');
         } catch (error: any) {
@@ -206,6 +228,11 @@ export default function ReturnsPage() {
 
     const handleDelete = async () => {
         if (!deleteModal) return;
+        if (!canDoAction(deleteModal, 'delete')) {
+            showToast('Finalized returns cannot be deleted.', 'error');
+            setDeleteModal(null);
+            return;
+        }
         try {
             setIsActionLoading(true);
             await apiClient.delete(`/return-transactions/${deleteModal.id}`);
@@ -225,10 +252,16 @@ export default function ReturnsPage() {
         if (tx.processorId) {
             return false;
         }
+
+        const status = normalizeStatus(tx.status);
+        const isFinalized = status === 'finalized' || Boolean(tx.finalizedAt);
+        if (isFinalized && (action === 'edit' || action === 'delete')) {
+            return false;
+        }
         
         switch (action) {
-            case 'edit': return !['finalized', 'received', 'verified', 'closed_out'].includes(tx.status);
-            case 'delete': return !['finalized', 'received', 'verified', 'closed_out'].includes(tx.status);
+            case 'edit': return !['received', 'verified', 'closed_out'].includes(status);
+            case 'delete': return !['received', 'verified', 'closed_out'].includes(status);
             default: return false;
         }
     };

@@ -107,20 +107,30 @@ interface ReverseDistributor {
 
 // ── Helpers ────────────────────────────────────────────────────
 
+function normalizeStatus(status: string | null | undefined) {
+    return (status || '').trim().toLowerCase();
+}
+
 function canDoAction(tx: ReturnTransaction, action: string): boolean {
     // If return was created by processor, pharmacy can only view - no actions allowed
     if (tx.processorId) {
         return false;
     }
+
+    const status = normalizeStatus(tx.status);
+    const isFinalized = status === 'finalized' || Boolean(tx.finalizedAt);
+    if (isFinalized && (action === 'edit' || action === 'delete')) {
+        return false;
+    }
     
     switch (action) {
-        case 'pause': return tx.status === 'in_progress';
-        case 'resume': return tx.status === 'paused';
-        case 'complete': return tx.status === 'in_progress' || tx.status === 'paused';
-        case 'finalize': return tx.status === 'completed';
-        case 'edit': return !['finalized', 'received', 'verified', 'closed_out'].includes(tx.status);
-        case 'delete': return !['finalized', 'received', 'verified', 'closed_out'].includes(tx.status);
-        case 'add_items': return tx.status === 'in_progress' || tx.status === 'paused';
+        case 'pause': return status === 'in_progress';
+        case 'resume': return status === 'paused';
+        case 'complete': return status === 'in_progress' || status === 'paused';
+        case 'finalize': return status === 'completed';
+        case 'edit': return !['received', 'verified', 'closed_out'].includes(status);
+        case 'delete': return !['received', 'verified', 'closed_out'].includes(status);
+        case 'add_items': return status === 'in_progress' || status === 'paused';
         default: return false;
     }
 }
@@ -477,6 +487,11 @@ export default function ReturnDetailPage() {
 
     const handleDelete = async () => {
         if (!tx) return;
+        if (!canDoAction(tx, 'delete')) {
+            showToast('Finalized returns cannot be deleted.', 'error');
+            setDeleteModal(false);
+            return;
+        }
         setIsActionLoading(true);
         try {
             const res = await apiClient.delete(`/return-transactions/${tx.id}`, true);
