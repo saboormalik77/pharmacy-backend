@@ -11,6 +11,11 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 const COLORS = ['#516057', '#2196F3', '#ad916a', '#FF5722', '#9C27B0', '#00BCD4', '#E91E63'];
 
+function toFiniteNumber(value: unknown) {
+    const number = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(number) ? number : 0;
+}
+
 export default function AnalyticsPage() {
     const dispatch = useAppDispatch();
     const { data, isLoading, error } = useAppSelector((state) => state.analytics);
@@ -42,7 +47,7 @@ export default function AnalyticsPage() {
     // Transform returns value trend data for chart
     const returnsValueTrendData = data?.charts.returnsValueTrend.map(item => ({
         month: item.month,
-        value: item.totalValue,
+        value: toFiniteNumber(item.totalValue),
     })) || [];
 
     // Transform top products data for bar chart
@@ -190,7 +195,10 @@ export default function AnalyticsPage() {
                                                 width={50}
                                             />
                                             <Tooltip
-                                                formatter={(value: number | undefined) => value ? formatCurrency(value) : '$0'}
+                                                formatter={(value: unknown, name: string) => [
+                                                    formatCurrency(toFiniteNumber(value)),
+                                                    name === 'value' ? 'Returns Value' : name,
+                                                ]}
                                                 contentStyle={{
                                                     backgroundColor: '#fff',
                                                     border: '1px solid #e5e7eb',
@@ -343,9 +351,9 @@ export default function AnalyticsPage() {
                                                 <tr key={state.state} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
                                                     <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{state.state}</td>
                                                     <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{state.pharmacies}</td>
-                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{formatNumber(state.totalReturns)}</td>
-                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{formatCurrency(state.avgReturnValue)}</td>
-                                                    <td className="px-3 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">{formatCurrency(state.totalValue)}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{formatNumber(toFiniteNumber(state.totalReturns))}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{formatCurrency(toFiniteNumber(state.avgReturnValue))}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">{formatCurrency(toFiniteNumber(state.totalValue))}</td>
                                                 </tr>
                                             ))}
                                         </tbody>

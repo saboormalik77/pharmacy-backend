@@ -72,6 +72,11 @@ export interface AnalyticsResponse {
 // Service Functions
 // ============================================================
 
+function toFiniteNumber(value: unknown): number {
+  const number = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
 /**
  * Get all analytics data for admin dashboard
  * Uses PostgreSQL RPC function - no custom JS logic.
@@ -106,11 +111,41 @@ export const getAnalytics = async (
     throw new AppError('No analytics data returned', 500);
   }
 
+  const distributorBreakdown = (data.distributorBreakdown || []).map((item: any) => {
+    const totalReturns = toFiniteNumber(item.totalReturns);
+    const totalValue = toFiniteNumber(item.totalValue);
+    return {
+      ...item,
+      pharmaciesCount: toFiniteNumber(item.pharmaciesCount),
+      totalReturns,
+      totalValue,
+      avgReturnValue: Number.isFinite(Number(item.avgReturnValue))
+        ? Number(item.avgReturnValue)
+        : totalReturns > 0 ? Math.round((totalValue / totalReturns) * 100) / 100 : 0,
+    };
+  });
+
+  const stateBreakdown = (data.stateBreakdown || []).map((item: any) => {
+    const totalReturns = toFiniteNumber(item.totalReturns);
+    const totalValue = toFiniteNumber(item.totalValue);
+    const pharmacies = toFiniteNumber(item.pharmacies ?? item.pharmaciesCount);
+    return {
+      ...item,
+      pharmacies,
+      pharmaciesCount: pharmacies,
+      totalReturns,
+      totalValue,
+      avgReturnValue: Number.isFinite(Number(item.avgReturnValue))
+        ? Number(item.avgReturnValue)
+        : totalReturns > 0 ? Math.round((totalValue / totalReturns) * 100) / 100 : 0,
+    };
+  });
+
   return {
     keyMetrics: data.keyMetrics,
     charts: data.charts,
-    distributorBreakdown: data.distributorBreakdown || [],
-    stateBreakdown: data.stateBreakdown || [],
+    distributorBreakdown,
+    stateBreakdown,
     scope: data.scope ?? {
       buyingGroupId: buyingGroupId ?? null,
       isGlobal: !buyingGroupId,
