@@ -327,7 +327,7 @@ export const downloadPharmacyItemizedReturnHandler = catchAsync(
     
     // Generate XLSX
     const buffer = await generatePharmacyReturnXlsx(transactionId);
-    const filename = getPharmacyReturnFilename(data.pharmacyName, data.batchMonth);
+    const filename = getPharmacyReturnFilename(data.licensePlate, data.batchMonth);
     
     // Send file
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

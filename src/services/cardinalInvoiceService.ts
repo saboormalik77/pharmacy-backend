@@ -387,15 +387,16 @@ export function getCardinalInvoiceFilename(batchMonth: string): string {
  */
 export async function getPharmacyDebitMemoData(transactionId: string): Promise<{
   pharmacyName: string;
+  licensePlate: string;
   batchMonth: string;
   debitMemos: DebitMemoData[];
 }> {
   const sb = ensureAdmin();
-  
+
   // First, get the transaction to find pharmacy_id and batch_id
   const { data: transaction, error: txnError } = await sb
     .from('return_transactions')
-    .select('pharmacy_id, batch_id, pharmacy:pharmacy(name)')
+    .select('pharmacy_id, batch_id, license_plate, pharmacy:pharmacy(name)')
     .eq('id', transactionId)
     .single();
   
@@ -437,6 +438,7 @@ export async function getPharmacyDebitMemoData(transactionId: string): Promise<{
   
   return {
     pharmacyName: (transaction.pharmacy as any)?.name || 'Unknown Pharmacy',
+    licensePlate: (transaction as any).license_plate || '',
     batchMonth: batch.batch_month,
     debitMemos,
   };
@@ -531,10 +533,9 @@ export async function generatePharmacyReturnXlsx(transactionId: string): Promise
  * Get the filename for Pharmacy Itemized Return XLSX
  * Format: Cardinal_Invoice_{PharmacyName}_{InvoiceNumber}.xlsx
  */
-export function getPharmacyReturnFilename(pharmacyName: string, batchMonth: string): string {
-  const safeName = pharmacyName.replace(/[^a-zA-Z0-9\s]/g, '').trim().replace(/\s+/g, '_');
+export function getPharmacyReturnFilename(_identifier: string, batchMonth: string): string {
   const invoiceNumber = generateInvoiceNumber(batchMonth);
-  return `Cardinal_Invoice_${safeName}_${invoiceNumber}.xlsx`;
+  return `Cardinal_Invoice_${invoiceNumber}.xlsx`;
 }
 
 // ============================================================
@@ -581,7 +582,8 @@ export async function generateAllPharmacyReturnXlsx(batchId: string): Promise<Ar
     try {
       const buffer = await generatePharmacyReturnXlsx(txn.id);
       const pharmacyName = (txn.pharmacy as any)?.name || 'Unknown';
-      const filename = getPharmacyReturnFilename(pharmacyName, batch.batch_month);
+      const licensePlate = (txn as any).license_plate || pharmacyName.replace(/[^a-zA-Z0-9]/g, '_');
+      const filename = getPharmacyReturnFilename(licensePlate, batch.batch_month);
       
       results.push({
         pharmacyName,
