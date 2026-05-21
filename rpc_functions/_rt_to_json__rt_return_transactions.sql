@@ -72,10 +72,9 @@ BEGIN
         'processorName',             COALESCE(proc_info ->> 'name', NULL),
         'serviceType',               rt.service_type,
         'status',                    CASE
-                                        -- All memos paid/partial + check recorded = paid
+                                        -- All memos: paid/partial status + payout linked + that payout has a check = paid
                                         WHEN rt.status = 'verified'
                                           AND rt.batch_id IS NOT NULL
-                                          AND v_has_check
                                           AND EXISTS (
                                                 SELECT 1 FROM debit_memos dm
                                                 WHERE dm.batch_id = rt.batch_id
@@ -83,50 +82,60 @@ BEGIN
                                               )
                                           AND NOT EXISTS (
                                                 SELECT 1 FROM debit_memos dm
+                                                LEFT JOIN pharmacy_payments pp ON pp.id = dm.pharmacy_payout_id
                                                 WHERE dm.batch_id = rt.batch_id
                                                   AND dm.pharmacy_id = rt.pharmacy_id
-                                                  AND dm.payment_status NOT IN ('paid', 'partial')
+                                                  AND (
+                                                    dm.payment_status NOT IN ('paid', 'partial')
+                                                    OR dm.pharmacy_payout_id IS NULL
+                                                    OR pp.check_number IS NULL
+                                                  )
                                               )
                                         THEN 'paid'
-                                        -- Some memos paid/partial + check recorded = partially_paid
+                                        -- At least one memo has payout + check issued = partially_paid
                                         WHEN rt.status = 'verified'
                                           AND rt.batch_id IS NOT NULL
-                                          AND v_has_check
                                           AND EXISTS (
                                                 SELECT 1 FROM debit_memos dm
+                                                JOIN pharmacy_payments pp ON pp.id = dm.pharmacy_payout_id
                                                 WHERE dm.batch_id = rt.batch_id
                                                   AND dm.pharmacy_id = rt.pharmacy_id
                                                   AND dm.payment_status IN ('paid', 'partial')
+                                                  AND pp.check_number IS NOT NULL
                                               )
                                         THEN 'partially_paid'
-                                        -- Verified + batch but no check (or all memos still unpaid) = not_paid
+                                        -- Verified + batch but no check issued on any memo = not_paid
                                         WHEN rt.status = 'verified'
                                           AND rt.batch_id IS NOT NULL
                                         THEN 'not_paid'
                                         ELSE rt.status
                                      END,
-        -- paidMemoCount: only when a check is recorded; otherwise 0
+        -- paidMemoCount: memos where payout was issued AND that payout has a check number
         'paidMemoCount',             CASE
-                                        WHEN rt.batch_id IS NOT NULL AND v_has_check THEN (
-                                            SELECT COUNT(*)::int FROM debit_memos dm
+                                        WHEN rt.batch_id IS NOT NULL THEN (
+                                            SELECT COUNT(*)::int
+                                            FROM debit_memos dm
+                                            JOIN pharmacy_payments pp ON pp.id = dm.pharmacy_payout_id
                                             WHERE dm.batch_id = rt.batch_id
                                               AND dm.pharmacy_id = rt.pharmacy_id
                                               AND dm.payment_status IN ('paid', 'partial')
+                                              AND pp.check_number IS NOT NULL
                                         )
                                         ELSE 0
                                      END,
-        -- unpaidMemoCount: when check exists, count truly unpaid; when no check, all memos are unpaid
+        -- unpaidMemoCount: memos with no payout, no check, or non-paid status
         'unpaidMemoCount',           CASE
-                                        WHEN rt.batch_id IS NOT NULL AND v_has_check THEN (
-                                            SELECT COUNT(*)::int FROM debit_memos dm
-                                            WHERE dm.batch_id = rt.batch_id
-                                              AND dm.pharmacy_id = rt.pharmacy_id
-                                              AND dm.payment_status NOT IN ('paid', 'partial')
-                                        )
                                         WHEN rt.batch_id IS NOT NULL THEN (
-                                            SELECT COUNT(*)::int FROM debit_memos dm
+                                            SELECT COUNT(*)::int
+                                            FROM debit_memos dm
+                                            LEFT JOIN pharmacy_payments pp ON pp.id = dm.pharmacy_payout_id
                                             WHERE dm.batch_id = rt.batch_id
                                               AND dm.pharmacy_id = rt.pharmacy_id
+                                              AND (
+                                                dm.payment_status NOT IN ('paid', 'partial')
+                                                OR dm.pharmacy_payout_id IS NULL
+                                                OR pp.check_number IS NULL
+                                              )
                                         )
                                         ELSE 0
                                      END,
