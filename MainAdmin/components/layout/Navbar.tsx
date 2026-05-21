@@ -69,10 +69,10 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                         <span className="text-sm font-medium truncate max-w-[40vw] sm:max-w-48" style={{ color: 'var(--on-surface)' }}>{user?.name || 'Admin'}</span>
                     </button>
                     {showProfile && (
-                        <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] rounded-[4px] shadow-lg border overflow-hidden z-50" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <div className="absolute right-0 mt-2 min-w-40 w-max max-w-[calc(100vw-2rem)] rounded-[4px] shadow-lg border overflow-hidden z-50" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                             <div className="px-4 py-3 border-b min-w-0" style={{ borderColor: 'var(--outline-variant)' }}>
-                                <p className="font-medium truncate" style={{ color: 'var(--on-surface)' }}>{user?.name || 'Admin'}</p>
-                                <p className="text-sm truncate mt-1" style={{ color: 'var(--on-surface-variant)' }}>{user?.email || ''}</p>
+                                <p className="font-medium whitespace-normal break-words" style={{ color: 'var(--on-surface)' }}>{user?.name || 'Admin'}</p>
+                                <p className="text-sm mt-1 whitespace-normal break-words" style={{ color: 'var(--on-surface-variant)' }}>{user?.email || ''}</p>
                             </div>
                             <div className="py-1">
                                 <button

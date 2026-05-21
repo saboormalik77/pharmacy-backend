@@ -60,7 +60,7 @@ function buildInviteHtml(data: SubAdminInvitePayload): string {
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);padding:32px 40px;text-align:center;">
-              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">Welcome to Main Admin Portal</h1>
+              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">Welcome to Admin Portal</h1>
               <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:14px;">You've been invited as a Sub-Admin</p>
             </td>
           </tr>
@@ -72,7 +72,7 @@ function buildInviteHtml(data: SubAdminInvitePayload): string {
                 Hello <strong>${data.name || 'there'}</strong>,
               </p>
               <p style="margin:0 0 20px;color:#374151;font-size:16px;line-height:1.6;">
-                You have been invited to the <strong>Main Admin Portal</strong> as a sub-administrator. To get started, please click the button below to create your login credentials.
+                You have been invited to the <strong>Admin Portal</strong> as a sub-administrator. To get started, please click the button below to create your login credentials.
               </p>
 
               <!-- CTA Button -->
@@ -101,7 +101,7 @@ function buildInviteHtml(data: SubAdminInvitePayload): string {
               </p>
               <ul style="margin:0 0 20px;padding-left:20px;color:#6b7280;font-size:13px;line-height:1.8;">
                 <li>Create a secure password for your account</li>
-                <li>Access the Main Admin portal immediately</li>
+                <li>Access the Admin portal immediately</li>
                 <li>Your access is managed by the Main Administrator</li>
               </ul>
 
@@ -115,7 +115,7 @@ function buildInviteHtml(data: SubAdminInvitePayload): string {
           <tr>
             <td style="background-color:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #e5e7eb;">
               <p style="margin:0;color:#9ca3af;font-size:12px;">
-                &copy; ${new Date().getFullYear()} Main Admin Portal — Buying Group Management
+                &copy; ${new Date().getFullYear()} Admin Portal — Buying Group Management
               </p>
             </td>
           </tr>
@@ -164,11 +164,11 @@ serve(async (req: Request) => {
     const html = buildInviteHtml(payload);
 
     const info = await transporter.sendMail({
-      from: `"${getEnv('SMTP_FROM_NAME', 'Main Admin Portal')}" <${smtpFrom || smtpUser}>`,
+      from: `"${getEnv('SMTP_FROM_NAME', 'Admin Portal')}" <${smtpFrom || smtpUser}>`,
       to: payload.to,
-      subject: `You've Been Invited to Main Admin Portal — Set Up Your Account`,
+      subject: `You've Been Invited to Admin Portal — Set Up Your Account`,
       html,
-      text: `Hello ${payload.name || 'there'},\n\nYou have been invited to the Main Admin Portal as a sub-administrator.\n\nPlease set up your account at: ${payload.portalBaseUrl}/setup-account?token=${payload.inviteToken}\n\nYour permissions: ${formatPermissions(payload.permissions)}\n\nThis link expires in 7 days.`,
+      text: `Hello ${payload.name || 'there'},\n\nYou have been invited to the Admin Portal as a sub-administrator.\n\nPlease set up your account at: ${payload.portalBaseUrl}/setup-account?token=${payload.inviteToken}\n\nYour permissions: ${formatPermissions(payload.permissions)}\n\nThis link expires in 7 days.`,
     });
 
     console.log(`[send-sub-admin-invite] Email sent successfully, messageId: ${info.messageId}`);

@@ -117,11 +117,11 @@ export function UserDropdown() {
         </button>
 
         {isOpen && !isLoggingOut && (
-          <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] rounded-[4px] shadow-lg bg-card border border-border z-50 overflow-hidden">
+          <div className="absolute right-0 mt-2 min-w-40 sm:min-w-56 w-max max-w-[calc(100vw-2rem)] rounded-[4px] shadow-lg bg-card border border-border z-50 overflow-hidden">
             <div className="py-1">
               <div className="px-4 py-3 border-b border-border min-w-0">
-                <p className="text-sm font-medium truncate">{userData?.name || 'User'}</p>
-                <p className="text-xs text-muted-foreground truncate">
+                <p className="text-sm font-medium whitespace-normal break-words">{userData?.name || 'User'}</p>
+                <p className="text-xs text-muted-foreground whitespace-normal break-words">
                   {userData?.pharmacy_name || 'Pharmacy'}
                 </p>
               </div>
