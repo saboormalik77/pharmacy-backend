@@ -82,6 +82,35 @@ export const getAdminDashboardStats = async (
     throw new AppError('No data returned from admin dashboard stats', 500);
   }
 
+  let returnsValueTrend: ReturnsTrendDataPoint[] = (data.returnsValueTrend || []).map((item: any) => ({
+    period: String(item.period ?? item.monthKey ?? ''),
+    label: String(item.label ?? item.month ?? ''),
+    value: Number.isFinite(Number(item.value ?? item.totalValue)) ? Number(item.value ?? item.totalValue) : 0,
+    documentsCount: Number.isFinite(Number(item.documentsCount ?? item.returnsCount)) ? Number(item.documentsCount ?? item.returnsCount) : 0,
+  }));
+
+  // Keep the dashboard's all-pharmacy monthly trend aligned with the Analytics API,
+  // which is the source used by the Overview graphs/tables.
+  if (!pharmacyId && periodType === 'monthly') {
+    const { data: analyticsData, error: analyticsError } = await db.rpc('get_admin_analytics', {
+      p_buying_group_id: buyingGroupId || null,
+    });
+
+    if (analyticsError) {
+      throw new AppError(`Failed to fetch dashboard analytics trend: ${analyticsError.message}`, 400);
+    }
+
+    const analyticsTrend = analyticsData?.charts?.returnsValueTrend;
+    if (Array.isArray(analyticsTrend)) {
+      returnsValueTrend = analyticsTrend.slice(-periods).map((item: any) => ({
+        period: String(item.monthKey ?? ''),
+        label: String(item.month ?? '').split(' ')[0] || String(item.monthKey ?? ''),
+        value: Number.isFinite(Number(item.totalValue)) ? Number(item.totalValue) : 0,
+        documentsCount: Number.isFinite(Number(item.returnsCount)) ? Number(item.returnsCount) : 0,
+      }));
+    }
+  }
+
   console.log('✅ Admin dashboard stats fetched successfully');
 
   // Return database result directly - response structure matches interface
@@ -93,7 +122,7 @@ export const getAdminDashboardStats = async (
       totalReturns: data.stats.totalReturns,
     },
     pharmacies: data.pharmacies || [],
-    returnsValueTrend: data.returnsValueTrend || [],
+    returnsValueTrend,
     period: {
       type: data.period.type,
       periods: data.period.periods,

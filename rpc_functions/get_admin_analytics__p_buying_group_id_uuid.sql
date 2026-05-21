@@ -206,6 +206,7 @@ BEGIN
       'distributorName', ds.distributor_name,
       'pharmaciesCount', ds.pharmacies_count,
       'totalReturns', ds.total_returns,
+      'avgReturnValue', CASE WHEN ds.total_returns > 0 THEN ROUND(ds.total_value / ds.total_returns, 2) ELSE 0 END,
       'totalValue', ROUND(ds.total_value, 2)
     ) ORDER BY ds.total_value DESC
   ), '[]'::jsonb)
@@ -237,8 +238,10 @@ BEGIN
   SELECT COALESCE(jsonb_agg(
     jsonb_build_object(
       'state', ss.state_code,
+      'pharmacies', ss.pharmacies_count,
       'pharmaciesCount', ss.pharmacies_count,
       'totalReturns', ss.total_returns,
+      'avgReturnValue', CASE WHEN ss.total_returns > 0 THEN ROUND(ss.total_value / ss.total_returns, 2) ELSE 0 END,
       'totalValue', ROUND(ss.total_value, 2)
     ) ORDER BY ss.total_value DESC
   ), '[]'::jsonb)

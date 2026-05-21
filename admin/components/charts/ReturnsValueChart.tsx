@@ -7,6 +7,28 @@ import { fetchDashboard, setSelectedPharmacy, setSelectedPeriodType } from '@/li
 import { useEffect } from 'react';
 import { PeriodType } from '@/lib/types';
 
+function toFiniteNumber(value: unknown) {
+    const number = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(number) ? number : 0;
+}
+
+function ReturnsValueTooltip({ active, label, payload }: any) {
+    if (!active || !payload?.length) return null;
+
+    const point = payload[0]?.payload;
+    const value = toFiniteNumber(point?.value ?? payload[0]?.value);
+
+    return (
+        <div
+            className="rounded-[4px] border bg-white px-3 py-2 shadow-md"
+            style={{ borderColor: '#e5e7eb', fontSize: '12px' }}
+        >
+            <p className="mb-1 font-medium text-gray-900">{point?.period || label}</p>
+            <p className="text-gray-600">Returns Value : {formatCurrency(value)}</p>
+        </div>
+    );
+}
+
 export function ReturnsValueChart() {
     const dispatch = useAppDispatch();
     const { data, isLoading, selectedPharmacyId, selectedPeriodType } = useAppSelector((state) => state.dashboard);
@@ -33,7 +55,7 @@ export function ReturnsValueChart() {
     // Transform API data for chart
     const chartData = data?.returnsValueTrend.map((item) => ({
         period: item.label,
-        value: item.value,
+        value: toFiniteNumber(item.value),
     })) || [];
 
     return (
@@ -103,26 +125,18 @@ export function ReturnsValueChart() {
                                 tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
                                 width={45}
                             />
-                            <Tooltip
-                                formatter={(value: number | undefined) => value ? formatCurrency(value) : '$0'}
-                                contentStyle={{
-                                    backgroundColor: '#fff',
-                                    border: '1px solid #e5e7eb',
-                                    borderRadius: '8px',
-                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                                    fontSize: '12px'
-                                }}
-                            />
+                            <Tooltip content={<ReturnsValueTooltip />} />
                             <Legend
                                 wrapperStyle={{ fontSize: '12px' }}
                             />
                             <Line
-                                type="monotone"
+                                type="linear"
                                 dataKey="value"
-stroke="#516057"
-
+                                name="Returns Value"
+                                stroke="#516057"
                                 dot={{ fill: '#516057', r: 3 }}
                                 activeDot={{ r: 5 }}
+                                isAnimationActive={false}
                             />
                         </LineChart>
                     </ResponsiveContainer>
