@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -177,11 +178,12 @@ export default function ForgotPasswordPage() {
                 autoFocus
                 className={emailError ? 'border-red-500' : ''}
               />
-              {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
+              {emailError && <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle className="w-3 h-3 flex-shrink-0" />{emailError}</p>}
             </div>
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
-                {error}
+              <div className="flex items-start gap-2.5 px-4 py-3 rounded-[4px] border border-red-300 bg-red-50 text-red-700 text-sm font-medium">
+                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-500" />
+                <span>{error}</span>
               </div>
             )}
           </CardContent>

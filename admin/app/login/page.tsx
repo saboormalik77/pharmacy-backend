@@ -3,7 +3,7 @@
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, Mail, Shield, Eye, EyeOff } from 'lucide-react';
+import { Lock, Mail, Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { loginUser, clearError } from '@/lib/store/authSlice';
@@ -231,8 +231,9 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-sm">
-                {error}
+              <div className="flex items-start gap-2.5 px-4 py-3 rounded-[4px] border border-red-300 bg-red-50 text-red-700 text-sm font-medium">
+                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-500" />
+                <span>{error}</span>
               </div>
             )}
 
@@ -254,7 +255,7 @@ export default function LoginPage() {
                   autoComplete="email"
                 />
               </div>
-              {fieldErrors.email && <p className="text-xs text-red-500 mt-1">{fieldErrors.email}</p>}
+              {fieldErrors.email && <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle className="w-3 h-3 flex-shrink-0" />{fieldErrors.email}</p>}
             </div>
 
             {/* Password Field */}
@@ -287,7 +288,7 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
-              {fieldErrors.password && <p className="text-xs text-red-500 mt-1">{fieldErrors.password}</p>}
+              {fieldErrors.password && <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle className="w-3 h-3 flex-shrink-0" />{fieldErrors.password}</p>}
             </div>
 
             {/* Remember Me & Forgot Password */}

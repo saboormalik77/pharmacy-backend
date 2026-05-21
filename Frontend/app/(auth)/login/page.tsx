@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 import { useClerk, useSignIn } from '@clerk/nextjs'
 import { toast } from 'react-toastify'
 import { Button } from '@/components/ui/Button'
@@ -330,7 +330,7 @@ function LoginForm() {
               required
               className={emailError ? 'border-red-500' : ''}
             />
-            {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
+            {emailError && <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle className="w-3 h-3 flex-shrink-0" />{emailError}</p>}
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -367,11 +367,12 @@ function LoginForm() {
                 )}
               </button>
             </div>
-            {passwordError && <p className="text-xs text-red-500 mt-1">{passwordError}</p>}
+            {passwordError && <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle className="w-3 h-3 flex-shrink-0" />{passwordError}</p>}
           </div>
           {error && (
-            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-[4px]">
-              {error}
+            <div className="flex items-start gap-2.5 px-4 py-3 rounded-[4px] border border-red-300 bg-red-50 text-red-700 text-sm font-medium">
+              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-500" />
+              <span>{error}</span>
             </div>
           )}
         </CardContent>

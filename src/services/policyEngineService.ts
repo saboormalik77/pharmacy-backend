@@ -54,6 +54,8 @@ export interface ReturnabilityResult {
   manufacturerName: string | null;
   manufacturerPolicyId: string | null;
   autoRaEmail: string | null;
+  monthsBeforeExpiration: number | null;
+  monthsAfterExpiration: number | null;
 }
 
 export interface CheckReturnabilityInput {
@@ -137,6 +139,8 @@ export async function checkReturnability(
     manufacturerName: null,
     manufacturerPolicyId: null,
     autoRaEmail: null,
+    monthsBeforeExpiration: null,
+    monthsAfterExpiration: null,
   };
 
   // Step 1: Lookup manufacturer_policies by labeler_id
@@ -259,6 +263,8 @@ export async function checkReturnability(
     manufacturerName,
     manufacturerPolicyId,
     autoRaEmail: rp.auto_ra_email,
+    monthsBeforeExpiration: rp.months_before_expiration ?? null,
+    monthsAfterExpiration: rp.months_after_expiration ?? null,
   };
 
   const invertedReturnWindow = rp.returnable_within_policy_period === false;

@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Shield, Lock, Eye, EyeOff, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
+import { Shield, Lock, Eye, EyeOff, CheckCircle, AlertTriangle, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { validatePassword, validatePasswordMatch } from '@/lib/validation';
 
@@ -176,8 +176,10 @@ function SetupAccountPageContent() {
 
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             {error && (
-              <div style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
-                {error}
+              <div className="flex items-start gap-2.5 px-4 py-3 rounded-[4px] border text-sm font-medium"
+                style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--error)', color: 'var(--on-error-container)' }}>
+                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: 'var(--error)' }} />
+                <span>{error}</span>
               </div>
             )}
 

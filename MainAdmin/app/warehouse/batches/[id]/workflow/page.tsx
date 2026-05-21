@@ -38,6 +38,14 @@ function getStatusBadge(status: string): { label: string; variant: 'success' | '
 
 const WORKFLOW_STEPS = [
     {
+        key: 'debit_memos_created',
+        stateKey: 'debitMemosCreated' as const,
+        label: 'Create Debit Memos',
+        description: 'Review and confirm debit memos generated for this batch.',
+        icon: FileText,
+        color: 'orange',
+    },
+    {
         key: 'cardinal_generated',
         stateKey: 'cardinalGenerated' as const,
         label: 'Generate Cardinal Invoice',
@@ -52,14 +60,6 @@ const WORKFLOW_STEPS = [
         description: 'Upload and send the Cardinal file.',
         icon: Upload,
         color: 'purple',
-    },
-    {
-        key: 'debit_memos_created',
-        stateKey: 'debitMemosCreated' as const,
-        label: 'Create Debit Memos',
-        description: 'Review and confirm debit memos generated for this batch.',
-        icon: FileText,
-        color: 'orange',
     },
     {
         key: 'ra_requested',

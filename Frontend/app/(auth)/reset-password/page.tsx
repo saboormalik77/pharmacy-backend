@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -368,7 +368,7 @@ function ResetPasswordForm() {
               </button>
             </div>
             {newPasswordError
-              ? <p className="text-xs text-red-500 mt-1">{newPasswordError}</p>
+              ? <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle className="w-3 h-3 flex-shrink-0" />{newPasswordError}</p>
               : <p className="text-xs text-muted-foreground">Must be at least 8 characters with uppercase, lowercase, number, and special character</p>
             }
           </div>
@@ -399,11 +399,12 @@ function ResetPasswordForm() {
                 )}
               </button>
             </div>
-            {confirmPasswordError && <p className="text-xs text-red-500 mt-1">{confirmPasswordError}</p>}
+            {confirmPasswordError && <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle className="w-3 h-3 flex-shrink-0" />{confirmPasswordError}</p>}
           </div>
           {error && (
-            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
-              {error}
+            <div className="flex items-start gap-2.5 px-4 py-3 rounded-[4px] border border-red-300 bg-red-50 text-red-700 text-sm font-medium">
+              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-500" />
+              <span>{error}</span>
             </div>
           )}
         </CardContent>

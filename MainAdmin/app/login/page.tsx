@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Mail, Shield, Eye, EyeOff } from 'lucide-react';
+import { Lock, Mail, Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { loginUser, clearError } from '@/lib/store/authSlice';
@@ -78,8 +78,10 @@ export default function LoginPage() {
         <div className="rounded-[4px] shadow-md p-6" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             {error && (
-              <div style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
-                {error}
+              <div className="flex items-start gap-2.5 px-4 py-3 rounded-[4px] border text-sm font-medium"
+                style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--error)', color: 'var(--on-error-container)' }}>
+                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: 'var(--error)' }} />
+                <span>{error}</span>
               </div>
             )}
 
@@ -101,7 +103,7 @@ export default function LoginPage() {
                   autoComplete="email"
                 />
               </div>
-              {fieldErrors.email && <p className="text-xs text-red-500 mt-1">{fieldErrors.email}</p>}
+              {fieldErrors.email && <p className="flex items-center gap-1 text-xs mt-1" style={{ color: 'var(--error)' }}><AlertCircle className="w-3 h-3 flex-shrink-0" />{fieldErrors.email}</p>}
             </div>
 
             <div>
@@ -131,7 +133,7 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-              {fieldErrors.password && <p className="text-xs text-red-500 mt-1">{fieldErrors.password}</p>}
+              {fieldErrors.password && <p className="flex items-center gap-1 text-xs mt-1" style={{ color: 'var(--error)' }}><AlertCircle className="w-3 h-3 flex-shrink-0" />{fieldErrors.password}</p>}
             </div>
 
             <Button

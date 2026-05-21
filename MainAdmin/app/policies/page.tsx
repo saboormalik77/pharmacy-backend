@@ -950,7 +950,7 @@ export default function PoliciesPage() {
                                     </div>
                                 </div>
 
-                                {/* Policy # / Policy Description */}
+                                {/* Policy # */}
                                 <div className="grid grid-cols-3 gap-3">
                                     <div>
                                         <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy #</label>
@@ -962,7 +962,8 @@ export default function PoliciesPage() {
                                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-high)', color: 'var(--on-surface-variant)' }}
                                         />
                                     </div>
-                                    <div className="col-span-2">
+                                    {/* Policy Description field commented out — generated from months_before/after fields */}
+                                    {/* <div className="col-span-2">
                                         <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy Description</label>
                                         <input
                                             type="text"
@@ -977,7 +978,7 @@ export default function PoliciesPage() {
                                             style={!formErrors.policyDescription ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
                                         />
                                         {formErrors.policyDescription && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.policyDescription}</p>}
-                                    </div>
+                                    </div> */}
                                 </div>
 
                                 {/* Months Before / After Expiration */}
@@ -1143,7 +1144,8 @@ export default function PoliciesPage() {
                                                     style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-high)', color: 'var(--on-surface-variant)' }}
                                                 />
                                             </div>
-                                            <div className="col-span-2">
+                                            {/* Policy Description field commented out — generated from months_before/after fields */}
+                                            {/* <div className="col-span-2">
                                                 <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy Description</label>
                                                 <input
                                                     type="text"
@@ -1158,7 +1160,7 @@ export default function PoliciesPage() {
                                                     style={!formErrors.partialPolicyDescription ? { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' } : undefined}
                                                 />
                                                 {formErrors.partialPolicyDescription && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.partialPolicyDescription}</p>}
-                                            </div>
+                                            </div> */}
                                         </div>
                                         {/* Partial Months Before / After Expiration */}
                                         <div className="grid grid-cols-2 gap-3">

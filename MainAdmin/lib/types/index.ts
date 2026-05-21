@@ -902,6 +902,8 @@ export interface ReturnabilityCheckResult {
     manufacturerName: string | null;
     manufacturerPolicyId: string | null;
     autoRaEmail: string | null;
+    monthsBeforeExpiration?: number | null;
+    monthsAfterExpiration?: number | null;
 }
 
 export interface PoliciesListResponse {

@@ -35,6 +35,14 @@ import {
 
 // ── Helpers ────────────────────────────────────────────────────
 
+function formatPolicyWindow(before?: number | null, after?: number | null): string {
+    const parts = [
+        before != null ? `${before} Months Prior to` : null,
+        after != null ? `${after} Months Post Drug Expiration` : null,
+    ].filter(Boolean);
+    return parts.length > 0 ? parts.join(' ') : '—';
+}
+
 function destBadge(d: string): 'success' | 'info' | 'warning' | 'default' {
     if (d === 'inmar') return 'success';
     if (d === 'qualanex') return 'info';
@@ -335,7 +343,7 @@ export default function PolicyDetailPage() {
                                         </td>
                                         <td className="px-3 py-3 text-center">{rp.partialsAccepted ? <Badge variant="success"><span className="text-[10px]">Yes</span></Badge> : <span className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>No</span>}</td>
                                         <td className="px-3 py-3 text-right text-sm" style={{ color: 'var(--on-surface)' }}>{rp.discountRate != null ? `${(rp.discountRate * 100).toFixed(0)}%` : '—'}</td>
-                                        <td className="px-3 py-3 text-sm max-w-[160px] truncate" style={{ color: 'var(--on-surface-variant)' }} title={rp.policyDescription || ''}>{rp.policyDescription || '—'}</td>
+                                        <td className="px-3 py-3 text-sm max-w-[200px] truncate" style={{ color: 'var(--on-surface-variant)' }} title={formatPolicyWindow(rp.monthsBeforeExpiration, rp.monthsAfterExpiration)}>{formatPolicyWindow(rp.monthsBeforeExpiration, rp.monthsAfterExpiration)}</td>
                                         <td className="px-3 py-3 text-right">
                                             <div className="flex justify-end gap-1">
                                                 <button type="button" onClick={() => setEditRPModal(rp)} className="p-1 rounded transition-colors hover:bg-primary-50/40" style={{ color: 'var(--on-surface-variant)' }} title="Edit"><Edit className="w-3 h-3" /></button>
@@ -465,7 +473,8 @@ export default function PolicyDetailPage() {
                             </select>
                         </div>
                     </div>
-                    <ModalField label="Description" value={rpForm.policyDescription || ''} onChange={v => setRpForm({ ...rpForm, policyDescription: v })} placeholder="e.g. 6 Months Prior to 12 Months Post" />
+                    {/* Description field commented out — generated from months_before/after fields */}
+                    {/* <ModalField label="Description" value={rpForm.policyDescription || ''} onChange={v => setRpForm({ ...rpForm, policyDescription: v })} placeholder="e.g. 6 Months Prior to 12 Months Post" /> */}
                     <div className="grid grid-cols-3 gap-3">
                         <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Months Before Exp.</label>
                             <input type="number" min="0" value={rpForm.monthsBeforeExpiration ?? ''} onChange={e => setRpForm({ ...rpForm, monthsBeforeExpiration: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }} />

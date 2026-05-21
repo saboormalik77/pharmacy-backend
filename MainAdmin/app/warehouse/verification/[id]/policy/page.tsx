@@ -143,12 +143,15 @@ export default function PolicyPage() {
                             {policyResult.autoRaEmail && <PolicyDetail label="RA Email" value={policyResult.autoRaEmail} />}
                         </div>
 
-                        {policyResult.policyDescription && (
+                        {(policyResult.monthsBeforeExpiration != null || policyResult.monthsAfterExpiration != null) && (
                             <div>
                                 <h3 className="text-sm font-medium text-[var(--on-surface)] mb-2">Policy Notes</h3>
                                 <div className="bg-[var(--surface-container-low)] rounded-[4px] p-4 border" style={{ borderColor: 'var(--outline-variant)' }}>
                                     <p className="text-sm text-[var(--on-surface)] leading-relaxed">
-                                        {policyResult.policyDescription}
+                                        {[
+                                            policyResult.monthsBeforeExpiration != null ? `${policyResult.monthsBeforeExpiration} Months Prior to` : null,
+                                            policyResult.monthsAfterExpiration != null ? `${policyResult.monthsAfterExpiration} Months Post Drug Expiration` : null,
+                                        ].filter(Boolean).join(' ')}
                                     </p>
                                 </div>
                             </div>
