@@ -66,6 +66,14 @@ function formatCurrency(value: number): string {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 }
 
+function normalizeStatus(status: string | null | undefined) {
+    return (status || '').trim().toLowerCase();
+}
+
+function canEditOrDelete(tx: ReturnTransaction) {
+    return ['in_progress', 'completed'].includes(normalizeStatus(tx.status));
+}
+
 /** Label left / value right — matches General Information and other detail cards */
 function ReturnTransactionStoreAndProcessorDl({
     tx,
@@ -214,13 +222,15 @@ function ReturnTransactionStoreAndProcessorDl({
 }
 
 function canDoAction(tx: ReturnTransaction, action: string): boolean {
+    const status = normalizeStatus(tx.status);
+
     switch (action) {
-        case 'pause': return tx.status === 'in_progress';
-        case 'resume': return tx.status === 'paused';
-        case 'complete': return tx.status === 'in_progress' || tx.status === 'paused';
-        case 'finalize': return tx.status === 'completed';
-        case 'edit': return true; // Notes always editable; field-level control in the modal
-        case 'delete': return !['finalized', 'scanning', 'received', 'verified', 'closed', 'closed_out'].includes(tx.status);
+        case 'pause': return status === 'in_progress';
+        case 'resume': return status === 'paused';
+        case 'complete': return status === 'in_progress' || status === 'paused';
+        case 'finalize': return status === 'completed';
+        case 'edit': return canEditOrDelete(tx);
+        case 'delete': return canEditOrDelete(tx);
         default: return false;
     }
 }
@@ -262,7 +272,7 @@ export default function ReturnDetailPage() {
     } = useReturnEditProtection(id);
     
     // Fallback lock check based on status (in case API fails)
-    const statusBasedLocked = tx ? ['finalized', 'scanning', 'received', 'verified', 'closed', 'closed_out'].includes(tx.status) : false;
+    const statusBasedLocked = tx ? !canEditOrDelete(tx) : false;
     
     const isLocked = hookIsLocked || statusBasedLocked;
     const canEditCoreData = hookCanEditCoreData && !statusBasedLocked;
@@ -401,6 +411,11 @@ export default function ReturnDetailPage() {
 
     const handleUpdate = async () => {
         if (!tx) return;
+        if (!canEditOrDelete(tx)) {
+            showToast('Only in-progress or completed returns can be edited.', 'error');
+            setEditModal(false);
+            return;
+        }
         // When locked, only send notes to avoid backend rejection
         const payload = isLocked 
             ? { notes: editForm.notes } 
@@ -428,6 +443,11 @@ export default function ReturnDetailPage() {
 
     const handleDelete = async () => {
         if (!tx) return;
+        if (!canEditOrDelete(tx)) {
+            showToast('Only in-progress or completed returns can be deleted.', 'error');
+            setDeleteModal(false);
+            return;
+        }
         const result = await dispatch(deleteReturnTransaction(tx.id));
         if (deleteReturnTransaction.fulfilled.match(result)) {
             showToast(`Return ${tx.licensePlate} deleted!`);

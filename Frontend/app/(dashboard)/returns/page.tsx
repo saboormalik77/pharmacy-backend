@@ -99,6 +99,10 @@ function normalizeStatus(status: string | null | undefined) {
     return (status || '').trim().toLowerCase();
 }
 
+function canEditOrDelete(tx: ReturnTransaction) {
+    return ['in_progress', 'completed'].includes(normalizeStatus(tx.status));
+}
+
 function useDebounce(value: string, delay: number) {
     const [debounced, setDebounced] = useState(value);
     useEffect(() => {
@@ -228,8 +232,8 @@ export default function ReturnsPage() {
 
     const handleDelete = async () => {
         if (!deleteModal) return;
-        if (!canDoAction(deleteModal, 'delete')) {
-            showToast('Finalized returns cannot be deleted.', 'error');
+        if (!canEditOrDelete(deleteModal)) {
+            showToast('Only in-progress or completed returns can be deleted.', 'error');
             setDeleteModal(null);
             return;
         }
@@ -248,20 +252,9 @@ export default function ReturnsPage() {
     };
 
     const canDoAction = (tx: ReturnTransaction, action: string): boolean => {
-        // If return was created by processor, pharmacy can only view - no actions allowed
-        if (tx.processorId) {
-            return false;
-        }
-
-        const status = normalizeStatus(tx.status);
-        const isFinalized = status === 'finalized' || Boolean(tx.finalizedAt);
-        if (isFinalized && (action === 'edit' || action === 'delete')) {
-            return false;
-        }
-        
         switch (action) {
-            case 'edit': return !['received', 'verified', 'closed_out'].includes(status);
-            case 'delete': return !['received', 'verified', 'closed_out'].includes(status);
+            case 'edit': return canEditOrDelete(tx);
+            case 'delete': return canEditOrDelete(tx);
             default: return false;
         }
     };
