@@ -83,6 +83,11 @@ if (loading) {
     if (!data) return null;
 
     const { overall, byStatus, trend } = data;
+    const statusChartData: Array<Record<string, string | number>> = (byStatus || []).map((row) => ({
+        status: row.status,
+        count: row.count,
+        totalReturnableValue: row.totalReturnableValue,
+    }));
     const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444', '#6b7280'];
 
     return (
@@ -190,11 +195,11 @@ if (loading) {
                 <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                     <h2 className="text-base font-semibold text-gray-900 mb-4">Status Distribution</h2>
                     <div className="h-72">
-                        {byStatus && byStatus.length > 0 ? (
+                        {statusChartData.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
-                                        data={byStatus}
+                                        data={statusChartData}
                                         cx="50%"
                                         cy="45%"
                                         labelLine={false}
@@ -203,8 +208,8 @@ if (loading) {
                                         fill="#8884d8"
                                         dataKey="count"
                                     >
-                                        {byStatus.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.status] || COLORS[index % COLORS.length]} />
+                                        {statusChartData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={STATUS_COLORS[String(entry.status)] || COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
                                     <Tooltip

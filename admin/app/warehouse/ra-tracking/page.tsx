@@ -112,6 +112,9 @@ export default function RATrackingPage() {
     const [shippedGroupsPage, setShippedGroupsPage] = useState(1);
     const [expandedShippedGroupId, setExpandedShippedGroupId] = useState<string | null>(null);
     const [toasts, setToasts] = useState<Toast[]>([]);
+    const addToast = useCallback((message: string, type: Toast['type'] = 'success') => {
+        setToasts(prev => [...prev, { id: Date.now().toString(), message, type }]);
+    }, []);
 
     const [activeModal, setActiveModal] = useState<ModalType>(null);
     const [selectedMemo, setSelectedMemo] = useState<DebitMemo | null>(null);
