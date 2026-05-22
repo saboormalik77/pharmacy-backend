@@ -124,7 +124,7 @@ function generateCheckHtml(data: CheckPdfData): string {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>RSI Check #${payment.checkNumber}</title>
+    <title>FCR Check #${payment.checkNumber}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -326,7 +326,7 @@ function generateCheckHtml(data: CheckPdfData): string {
             <span>$${Number(directTotal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
         <div class="summary-line">
-            <span>RSI Fee (@ ${Number(rsiFeePercent).toFixed(2)}%) for manufacturers included in this check:</span>
+            <span>FCR Fee (@ ${Number(rsiFeePercent).toFixed(2)}%) for manufacturers included in this check:</span>
             <span><strong>- $${Number(rsiFeeIncluded).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
         </div>
         <div class="summary-line">
@@ -334,7 +334,7 @@ function generateCheckHtml(data: CheckPdfData): string {
             <span>$${Number(grossCredit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
         <div class="summary-line">
-            <span>RSI Fee (@ ${Number(rsiFeeDirectPercent).toFixed(2)}%) for direct crediting manufacturers:</span>
+            <span>FCR Fee (@ ${Number(rsiFeeDirectPercent).toFixed(2)}%) for direct crediting manufacturers:</span>
             <span>- $${Number(rsiFeeDeducts).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
         <div class="summary-line" style="border-top: 1px solid #000; padding-top: 5px; margin-top: 10px;">

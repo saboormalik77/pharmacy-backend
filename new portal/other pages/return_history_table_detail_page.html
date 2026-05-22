@@ -92,8 +92,8 @@ margin-top: -60px;
        <div id="creditTypeContainer" class="custom-select-container">
            <select class="custom-select form-select">
                <option value="0">All</option>
-               <option value="1">RSI One Check</option>
-               <option value="2">RSI Paid On Receipt (POR)</option>
+               <option value="1">FCR One Check</option>
+               <option value="2">FCR Paid On Receipt (POR)</option>
                <option value="3">Manufacturer Direct</option>
            </select>
        </div>
@@ -208,7 +208,7 @@ margin-top: -60px;
                          <td class="dtr-hidden" style="display: none;">RX</td>
                          <td class="dtr-hidden" style="display: none;">$0.47</td>
                          <td class="dtr-hidden" style="display: none;">ACCORD HEALTHCARE</td>
-                         <td class="dtr-hidden" style="display: none;"><span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">RSI OneCheck</span></td>
+                         <td class="dtr-hidden" style="display: none;"><span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">FCR OneCheck</span></td>
                          <td class="dtr-hidden" style="display: none;">
                              <div class="details-icon-wrapper">
                                <img src="/assets/images/details.png" style="opacity:0.5; cursor:not-allowed; width:25px;" title="Check not available">
@@ -224,7 +224,7 @@ margin-top: -60px;
                          <td class="dtr-hidden" style="display: none;">RX</td>
                          <td class="dtr-hidden" style="display: none;">$1.03</td>
                          <td class="dtr-hidden" style="display: none;">APOTEX</td>
-                         <td class="dtr-hidden" style="display: none;"><span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">RSI OneCheck</span></td>
+                         <td class="dtr-hidden" style="display: none;"><span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">FCR OneCheck</span></td>
                          <td class="dtr-hidden" style="display: none;">
                              <div class="details-icon-wrapper">
                                <img src="/assets/images/details.png" style="opacity:0.5; cursor:not-allowed; width:25px;" title="Check not available">
@@ -288,7 +288,7 @@ margin-top: -60px;
                          <td class="dtr-hidden" style="display: none;">RX</td>
                          <td class="dtr-hidden" style="display: none;">$5.35</td>
                          <td class="dtr-hidden" style="display: none;">COSETTE PHARMA </td>
-                         <td class="dtr-hidden" style="display: none;"><span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">RSI OneCheck</span></td>
+                         <td class="dtr-hidden" style="display: none;"><span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">FCR OneCheck</span></td>
                          <td class="dtr-hidden" style="display: none;">
                              <div class="details-icon-wrapper">
                                <img src="/assets/images/details.png" style="opacity:0.5; cursor:not-allowed; width:25px;" title="Check not available">
@@ -304,7 +304,7 @@ margin-top: -60px;
                          <td class="dtr-hidden" style="display: none;">RX</td>
                          <td class="dtr-hidden" style="display: none;">$13.97</td>
                          <td class="dtr-hidden" style="display: none;">COSETTE PHARMA </td>
-                         <td class="dtr-hidden" style="display: none;"><span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">RSI OneCheck</span></td>
+                         <td class="dtr-hidden" style="display: none;"><span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">FCR OneCheck</span></td>
                          <td class="dtr-hidden" style="display: none;">
                              <div class="details-icon-wrapper">
                                <img src="/assets/images/details.png" style="opacity:0.5; cursor:not-allowed; width:25px;" title="Check not available">
@@ -385,7 +385,7 @@ margin-top: -60px;
                  <thead>
                    <tr>
                      <th>Processor</th>
-                     <th>RSI Estimate</th>
+                     <th>FCR Estimate</th>
                      <th>RA Number</th>
                      <th>Debit Memo</th>
                      <th>Phone Number</th>
@@ -564,9 +564,9 @@ $(document).ready(function () {
                }
    
                data.forEach(row => {
-                   const isRSI = row.creditType === "RSI OneCheck" || row.creditType === "RSI Pay-On-Receipt"; 
-                   const isOneCheck = row.creditType === "RSI OneCheck";
-                   const isPOR = row.creditType === "RSI Pay-On-Receipt";
+                   const isRSI = row.creditType === "FCR OneCheck" || row.creditType === "FCR Pay-On-Receipt"; 
+                   const isOneCheck = row.creditType === "FCR OneCheck";
+                   const isPOR = row.creditType === "FCR Pay-On-Receipt";
                    const isManufacturer = row.creditType === "Manufacturer Direct";
                    const hasCheck = row.ClosingCheckNum && String(row.ClosingCheckNum).trim() !== "";
                 

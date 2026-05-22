@@ -224,7 +224,7 @@ export function ChecksTable({
                       className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454] border-r border-[var(--outline)] cursor-pointer hover:bg-[var(--surface-container)]"
                       onClick={() => handleSort('companyFee')}
                     >
-                      RSI Credit Fee
+                      FCR Credit Fee
                     </th>
                     <th 
                       className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454] border-r border-[var(--outline)]"

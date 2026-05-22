@@ -70,7 +70,7 @@ export const checkPdfHandler = catchAsync(
     
     // Set headers for PDF response
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="RSI_Check_${checkNumber}.pdf"`);
+    res.setHeader('Content-Disposition', `inline; filename="FCR_Check_${checkNumber}.pdf"`);
     res.setHeader('Content-Length', pdfBuffer.length);
     
     // Send PDF

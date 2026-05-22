@@ -64,7 +64,7 @@ export function DateRangeFilter({ onFilter, loading = false, className = '' }: D
         <div className="space-y-4">
           {/* Header section */}
           <div>
-            <h4 className="font-semibold text-[#000000] mb-2 font-serif">RSI Check History</h4>
+            <h4 className="font-semibold text-[#000000] mb-2 font-serif">FCR Check History</h4>
             <div className="space-y-1 text-sm">
               <div className="flex items-center gap-2">
                 <span className="font-medium text-[#516057]">OCS :</span>
@@ -73,7 +73,7 @@ export function DateRangeFilter({ onFilter, loading = false, className = '' }: D
                   <Info className="h-4 w-4 text-[#9ca3af] cursor-help" />
                   <div className="absolute left-0 top-6 w-80 p-3 bg-white border border-[#e2e2e2] rounded-[4px] shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
                     <div className="text-xs text-[#505454] leading-relaxed">
-                      You select the time-frame in which you want your credit due from RSI to be issued in a single check. We offer time-frames of 10, 30, 60, and 90 days. Typically 80-90% of your credit will be included in this check with the remainder being issued directly from certain manufacturers. RSI fees are deducted from the check.
+                      You select the time-frame in which you want your credit due from FCR to be issued in a single check. We offer time-frames of 10, 30, 60, and 90 days. Typically 80-90% of your credit will be included in this check with the remainder being issued directly from certain manufacturers. FCR fees are deducted from the check.
                     </div>
                   </div>
                 </div>
