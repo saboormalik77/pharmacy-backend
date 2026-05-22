@@ -11,7 +11,12 @@ export interface PharmacyDashboardOverview {
   totalReturnableValue: number;
   totalNonReturnableValue: number;
   inProgressReturns: number;
+  verifiedReturns: number;
   completedReturns: number;
+  receivedReturns: number;
+  paidReturns: number;
+  partiallyPaidReturns: number;
+  notPaidReturns: number;
   avgItemsPerReturn: number;
 }
 

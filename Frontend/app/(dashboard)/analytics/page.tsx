@@ -50,6 +50,7 @@ const COLORS = ['#516057', '#ad916a', '#1d2222', '#505454', '#e2e2e2', '#6b7280'
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pending',
   in_progress: 'In Progress',
+  verified: 'Verified',
   completed: 'Completed',
   finalized: 'Finalized',
   received: 'Received',
@@ -433,32 +434,81 @@ export default function AnalyticsPage() {
                       <CardDescription>Completed vs in-progress returns</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <ResponsiveContainer width="100%" height={250}>
-                        <PieChart>
-                          <Pie
-                            data={[
-                              { name: 'Completed', value: data.overview.completedReturns, color: '#10b981' },
-                              { name: 'In Progress', value: data.overview.inProgressReturns, color: '#3b82f6' },
-                              { name: 'Other', value: Math.max(0, data.overview.totalReturns - data.overview.completedReturns - data.overview.inProgressReturns), color: '#6b7280' },
-                            ].filter(d => d.value > 0)}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
-                            outerRadius={90}
-                            dataKey="value"
-                          >
-                            {[
-                              { color: '#10b981' },
-                              { color: '#3b82f6' },
-                              { color: '#6b7280' },
-                            ].map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
+                      {(() => {
+                        const ov = data.overview;
+                        const total = ov.totalReturns || 0;
+                        const pct = (v: number) => total > 0 ? `${((v / total) * 100).toFixed(1)}%` : '0%';
+
+                        const inProgressTotal = (ov.inProgressReturns || 0) + (ov.completedReturns || 0) + (ov.receivedReturns || 0) + (ov.verifiedReturns || 0);
+                        const paidTotal       = (ov.paidReturns || 0) + (ov.partiallyPaidReturns || 0);
+                        const notPaidTotal    = ov.notPaidReturns || 0;
+
+                        const slices = [
+                          {
+                            name: 'In Progress', value: inProgressTotal, color: '#3b82f6',
+                            breakdown: [
+                              { label: 'In Progress', count: ov.inProgressReturns || 0 },
+                              { label: 'Completed',   count: ov.completedReturns || 0 },
+                              { label: 'Received',    count: ov.receivedReturns || 0 },
+                              { label: 'Verified',    count: ov.verifiedReturns || 0 },
+                            ],
+                          },
+                          {
+                            name: 'Paid', value: paidTotal, color: '#516057',
+                            breakdown: [
+                              { label: 'Paid',           count: ov.paidReturns || 0 },
+                              { label: 'Partially Paid', count: ov.partiallyPaidReturns || 0 },
+                            ],
+                          },
+                          {
+                            name: 'Not Paid', value: notPaidTotal, color: '#ef4444',
+                            breakdown: null,
+                          },
+                        ].filter(d => d.value > 0);
+
+                        const PieTooltip = ({ active, payload }: any) => {
+                          if (!active || !payload?.length) return null;
+                          const slice = payload[0].payload;
+                          return (
+                            <div className="bg-white border border-gray-200 rounded-[4px] shadow-lg px-3 py-2 text-sm min-w-[160px]">
+                              <p className="font-semibold mb-1" style={{ color: slice.color }}>
+                                {slice.name}: {slice.value}
+                              </p>
+                              {slice.breakdown && (
+                                <div className="border-t border-gray-100 pt-1 space-y-0.5">
+                                  {slice.breakdown.filter((b: any) => b.count > 0).map((b: any) => (
+                                    <div key={b.label} className="flex justify-between gap-4 text-xs text-gray-600">
+                                      <span>{b.label}</span>
+                                      <span className="font-medium">{b.count} · {pct(b.count)}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        };
+
+                        return (
+                          <ResponsiveContainer width="100%" height={250}>
+                            <PieChart>
+                              <Pie
+                                data={slices}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                                outerRadius={90}
+                                dataKey="value"
+                              >
+                                {slices.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <Tooltip content={<PieTooltip />} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
 
@@ -651,17 +701,20 @@ export default function AnalyticsPage() {
                   <CardContent>
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                       <div className="p-4 bg-white rounded-[4px] border shadow-sm">
-                        <p className="text-xs font-medium text-muted-foreground mb-2">Completion Rate</p>
-                        <p className="text-xl font-bold text-[#516057] mb-2">
-                          {data.overview.totalReturns > 0 ? ((data.overview.completedReturns / data.overview.totalReturns) * 100).toFixed(1) : 0}%
-                        </p>
-                        <p className="text-xs text-muted-foreground mb-2">{data.overview.completedReturns} of {data.overview.totalReturns} completed</p>
-                        <div className="h-2 bg-[#e2e2e2] rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-[#f5f2f1]0 transition-all"
-                            style={{ width: `${data.overview.totalReturns > 0 ? (data.overview.completedReturns / data.overview.totalReturns) * 100 : 0}%` }}
-                          />
-                        </div>
+                        {(() => {
+                          const paidTotal = (data.overview.paidReturns || 0) + (data.overview.partiallyPaidReturns || 0);
+                          const paidRate = data.overview.totalReturns > 0 ? ((paidTotal / data.overview.totalReturns) * 100).toFixed(1) : '0';
+                          return (
+                            <>
+                              <p className="text-xs font-medium text-muted-foreground mb-2">Paid Rate</p>
+                              <p className="text-xl font-bold text-[#516057] mb-2">{paidRate}%</p>
+                              <p className="text-xs text-muted-foreground mb-2">{paidTotal} of {data.overview.totalReturns} paid</p>
+                              <div className="h-2 bg-[#e2e2e2] rounded-full overflow-hidden">
+                                <div className="h-full bg-[#516057] transition-all" style={{ width: `${paidRate}%` }} />
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
 
                       <div className="p-4 bg-white rounded-[4px] border shadow-sm">
@@ -701,12 +754,22 @@ export default function AnalyticsPage() {
                             <span className="font-bold">{data.overview.totalReturns}</span>
                           </div>
                           <div className="flex justify-between items-center p-2 bg-white rounded">
-                            <span className="text-sm text-muted-foreground">Completed</span>
-                            <span className="font-bold text-[#516057]">{data.overview.completedReturns}</span>
+                            <span className="text-sm text-muted-foreground">In Progress</span>
+                            <span className="font-bold text-[#3b82f6]">
+                              {(data.overview.inProgressReturns || 0) + (data.overview.completedReturns || 0) + (data.overview.receivedReturns || 0) + (data.overview.verifiedReturns || 0)}
+                            </span>
                           </div>
                           <div className="flex justify-between items-center p-2 bg-white rounded">
-                            <span className="text-sm text-muted-foreground">In Progress</span>
-                            <span className="font-bold text-[#516057]">{data.overview.inProgressReturns}</span>
+                            <span className="text-sm text-muted-foreground">Paid</span>
+                            <span className="font-bold text-[#516057]">{data.overview.paidReturns || 0}</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-white rounded">
+                            <span className="text-sm text-muted-foreground">Partially Paid</span>
+                            <span className="font-bold text-[#ad916a]">{data.overview.partiallyPaidReturns || 0}</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-white rounded">
+                            <span className="text-sm text-muted-foreground">Not Paid</span>
+                            <span className="font-bold text-[#ef4444]">{data.overview.notPaidReturns || 0}</span>
                           </div>
                         </div>
                         <div className="space-y-3">

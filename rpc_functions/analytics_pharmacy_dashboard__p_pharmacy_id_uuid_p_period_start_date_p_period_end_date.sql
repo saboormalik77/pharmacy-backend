@@ -31,9 +31,88 @@ BEGIN
     'totalItems',            COALESCE(SUM(rt.total_items), 0),
     'totalReturnableValue',  COALESCE(SUM(rt.total_returnable_value), 0),
     'totalNonReturnableValue', COALESCE(SUM(rt.total_non_returnable_value), 0),
-    'inProgressReturns',     COUNT(*) FILTER (WHERE rt.status = 'in_progress'),
-    'completedReturns',      COUNT(*) FILTER (WHERE rt.status IN ('completed','finalized','received','closed_out')),
-    'avgItemsPerReturn',     ROUND(COALESCE(AVG(rt.total_items), 0), 1)
+    'avgItemsPerReturn',     ROUND(COALESCE(AVG(rt.total_items), 0), 1),
+
+    -- 1. In Progress: pending + in_progress
+    'inProgressReturns',     COUNT(*) FILTER (WHERE rt.status IN ('pending', 'in_progress')),
+
+    -- 2. Verified: verified but NOT yet in a batch with debit memos
+    'verifiedReturns',       COUNT(*) FILTER (WHERE
+      rt.status = 'verified'
+      AND (
+        rt.batch_id IS NULL
+        OR NOT EXISTS (
+          SELECT 1 FROM debit_memos dm
+          WHERE dm.batch_id = rt.batch_id AND dm.pharmacy_id = rt.pharmacy_id
+        )
+      )
+    ),
+
+    -- 3. Completed: completed + finalized
+    'completedReturns',      COUNT(*) FILTER (WHERE rt.status IN ('completed', 'finalized')),
+
+    -- 4. Received
+    'receivedReturns',       COUNT(*) FILTER (WHERE rt.status = 'received'),
+
+    -- 5. Paid: all memos settled (paid/partial) with payout + check (mirrors _rt_to_json 'paid' branch)
+    'paidReturns',           COUNT(*) FILTER (WHERE
+      rt.status = 'verified'
+      AND rt.batch_id IS NOT NULL
+      AND EXISTS (
+        SELECT 1 FROM debit_memos dm
+        WHERE dm.batch_id = rt.batch_id AND dm.pharmacy_id = rt.pharmacy_id
+      )
+      AND NOT EXISTS (
+        SELECT 1 FROM debit_memos dm
+        LEFT JOIN pharmacy_payments pp ON pp.id = dm.pharmacy_payout_id
+        WHERE dm.batch_id = rt.batch_id
+          AND dm.pharmacy_id = rt.pharmacy_id
+          AND (
+            dm.payment_status NOT IN ('paid', 'partial')
+            OR dm.pharmacy_payout_id IS NULL
+            OR pp.check_number IS NULL
+          )
+      )
+    ),
+
+    -- 6. Partially Paid: at least one memo has check, but at least one is still unsettled (mirrors _rt_to_json 'partially_paid' branch)
+    'partiallyPaidReturns',  COUNT(*) FILTER (WHERE
+      rt.status = 'verified'
+      AND rt.batch_id IS NOT NULL
+      AND EXISTS (
+        SELECT 1 FROM debit_memos dm
+        JOIN pharmacy_payments pp ON pp.id = dm.pharmacy_payout_id
+        WHERE dm.batch_id = rt.batch_id
+          AND dm.pharmacy_id = rt.pharmacy_id
+          AND dm.payment_status IN ('paid', 'partial')
+          AND pp.check_number IS NOT NULL
+      )
+      AND EXISTS (
+        SELECT 1 FROM debit_memos dm
+        LEFT JOIN pharmacy_payments pp ON pp.id = dm.pharmacy_payout_id
+        WHERE dm.batch_id = rt.batch_id
+          AND dm.pharmacy_id = rt.pharmacy_id
+          AND (
+            dm.payment_status NOT IN ('paid', 'partial')
+            OR dm.pharmacy_payout_id IS NULL
+            OR pp.check_number IS NULL
+          )
+      )
+    ),
+
+    -- 7. Not Paid: verified + in batch + no memo has check issued yet (mirrors _rt_to_json 'not_paid' branch)
+    'notPaidReturns',        COUNT(*) FILTER (WHERE
+      rt.status = 'verified'
+      AND rt.batch_id IS NOT NULL
+      AND NOT EXISTS (
+        SELECT 1 FROM debit_memos dm
+        JOIN pharmacy_payments pp ON pp.id = dm.pharmacy_payout_id
+        WHERE dm.batch_id = rt.batch_id
+          AND dm.pharmacy_id = rt.pharmacy_id
+          AND dm.payment_status IN ('paid', 'partial')
+          AND pp.check_number IS NOT NULL
+      )
+    )
   )
   INTO v_overview
   FROM return_transactions rt
