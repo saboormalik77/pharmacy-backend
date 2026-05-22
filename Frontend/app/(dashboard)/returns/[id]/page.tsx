@@ -111,25 +111,20 @@ function normalizeStatus(status: string | null | undefined) {
     return (status || '').trim().toLowerCase();
 }
 
-function canDoAction(tx: ReturnTransaction, action: string): boolean {
-    // If return was created by processor, pharmacy can only view - no actions allowed
-    if (tx.processorId) {
-        return false;
-    }
+function canEditOrDelete(tx: ReturnTransaction) {
+    return ['in_progress', 'completed'].includes(normalizeStatus(tx.status));
+}
 
+function canDoAction(tx: ReturnTransaction, action: string): boolean {
     const status = normalizeStatus(tx.status);
-    const isFinalized = status === 'finalized' || Boolean(tx.finalizedAt);
-    if (isFinalized && (action === 'edit' || action === 'delete')) {
-        return false;
-    }
     
     switch (action) {
         case 'pause': return status === 'in_progress';
         case 'resume': return status === 'paused';
         case 'complete': return status === 'in_progress' || status === 'paused';
         case 'finalize': return status === 'completed';
-        case 'edit': return !['received', 'verified', 'closed_out'].includes(status);
-        case 'delete': return !['received', 'verified', 'closed_out'].includes(status);
+        case 'edit': return canEditOrDelete(tx);
+        case 'delete': return canEditOrDelete(tx);
         case 'add_items': return status === 'in_progress' || status === 'paused';
         default: return false;
     }
@@ -468,6 +463,11 @@ export default function ReturnDetailPage() {
 
     const handleUpdate = async () => {
         if (!tx) return;
+        if (!canEditOrDelete(tx)) {
+            showToast('Only in-progress or completed returns can be edited.', 'error');
+            setEditModal(false);
+            return;
+        }
         setIsActionLoading(true);
         try {
             const res = await apiClient.patch(`/return-transactions/${tx.id}`, editForm, true);

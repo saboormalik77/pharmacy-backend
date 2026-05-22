@@ -56,6 +56,14 @@ function formatCurrency(value: number): string {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 }
 
+function normalizeStatus(status: string | null | undefined) {
+    return (status || '').trim().toLowerCase();
+}
+
+function canEditOrDelete(tx: ReturnTransaction) {
+    return ['in_progress', 'completed'].includes(normalizeStatus(tx.status));
+}
+
 // ── Page ───────────────────────────────────────────────────────
 
 export default function ReturnsPage() {
@@ -175,6 +183,11 @@ export default function ReturnsPage() {
 
     const handleUpdate = async () => {
         if (!editModal) return;
+        if (!canEditOrDelete(editModal)) {
+            showToast('Only in-progress or completed returns can be edited.', 'error');
+            setEditModal(null);
+            return;
+        }
         const result = await dispatch(updateReturnTransaction({ id: editModal.id, payload: editForm }));
         if (updateReturnTransaction.fulfilled.match(result)) {
             showToast(`Return ${editModal.licensePlate} updated!`);
@@ -187,6 +200,11 @@ export default function ReturnsPage() {
 
     const handleDelete = async () => {
         if (!deleteModal) return;
+        if (!canEditOrDelete(deleteModal)) {
+            showToast('Only in-progress or completed returns can be deleted.', 'error');
+            setDeleteModal(null);
+            return;
+        }
         const result = await dispatch(deleteReturnTransaction(deleteModal.id));
         if (deleteReturnTransaction.fulfilled.match(result)) {
             showToast(`Return ${deleteModal.licensePlate} deleted!`);
@@ -199,13 +217,15 @@ export default function ReturnsPage() {
     };
 
     const canDoAction = (tx: ReturnTransaction, action: string): boolean => {
+        const status = normalizeStatus(tx.status);
+
         switch (action) {
-            case 'pause': return tx.status === 'in_progress';
-            case 'resume': return tx.status === 'paused';
-            case 'complete': return tx.status === 'in_progress' || tx.status === 'paused';
-            case 'finalize': return tx.status === 'completed';
-            case 'edit': return !['finalized', 'received', 'verified', 'closed_out'].includes(tx.status);
-            case 'delete': return !['finalized', 'received', 'verified', 'closed_out'].includes(tx.status);
+            case 'pause': return status === 'in_progress';
+            case 'resume': return status === 'paused';
+            case 'complete': return status === 'in_progress' || status === 'paused';
+            case 'finalize': return status === 'completed';
+            case 'edit': return canEditOrDelete(tx);
+            case 'delete': return canEditOrDelete(tx);
             default: return false;
         }
     };
