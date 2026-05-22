@@ -78,6 +78,12 @@ function formatLabel(item: ReportDropdownItem): string {
   return `${item.date} | ${item.refNum} | ${formatCurrency(item.amount)}`;
 }
 
+const HIDDEN_RETURN_STATUSES = new Set(['in_progress', 'complete', 'completed', 'finalized', 'received']);
+
+function isSelectableReturn(item: ReportDropdownItem): boolean {
+  return !HIDDEN_RETURN_STATUSES.has((item.status || '').trim().toLowerCase());
+}
+
 export default function ReportsHubPage() {
   const router = useRouter();
   const [returns, setReturns] = useState<ReportDropdownItem[]>([]);
@@ -95,11 +101,12 @@ export default function ReportsHubPage() {
     try {
       setError(null);
       const rows = await pharmacyReportsService.listReturns();
-      setReturns(rows);
-      if (rows.length > 0) {
+      const selectableRows = rows.filter(isSelectableReturn);
+      setReturns(selectableRows);
+      if (selectableRows.length > 0) {
         setSelectedRefNum((prev) => {
-          if (prev && rows.some((r) => r.refNum === prev)) return prev;
-          return rows[0].refNum;
+          if (prev && selectableRows.some((r) => r.refNum === prev)) return prev;
+          return selectableRows[0].refNum;
         });
       } else {
         setSelectedRefNum('');
@@ -137,7 +144,7 @@ export default function ReportsHubPage() {
   return (
     <PermissionGuard anyPermission={['returns:view', 'analytics:view', 'documents:view']}>
       <DashboardLayout>
-        <div className="p-4 lg:p-6 max-w-6xl mx-auto space-y-6">
+        <div className="w-full max-w-none space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
