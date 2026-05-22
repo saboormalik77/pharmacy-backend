@@ -2,6 +2,10 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { AuthState, User, LoginCredentials, LoginResponse } from '@/lib/types/auth';
 import { cookieUtils } from '@/lib/utils/cookies';
 
+interface AuthMeResponse {
+  user: User;
+}
+
 const initialState: AuthState = {
   user: null,
   token: null,
@@ -63,7 +67,7 @@ export const refreshPermissions = createAsyncThunk(
       if (!token) return rejectWithValue('No token');
 
       const { apiClient } = await import('@/lib/api/apiClient');
-      const data = await apiClient.get('/main-admin/auth/me');
+      const data = await apiClient.get<AuthMeResponse>('/main-admin/auth/me');
 
       const userData: User = data.user;
       cookieUtils.setUser(userData);
