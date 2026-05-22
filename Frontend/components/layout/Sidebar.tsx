@@ -66,7 +66,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       visible: hasPermission('credits:view'),
     },
     {
-      title: 'Analytics & Reports',
+      title: 'Analytics',
       href: '/analytics',
       icon: BarChart3,
       visible: hasPermission('analytics:view'),
