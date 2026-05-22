@@ -44,7 +44,7 @@ BEGIN
         COALESCE(rt.finalized_at, rt.time_out, rt.created_at) AS ordering
       FROM return_transactions rt
       WHERE rt.pharmacy_id = p_pharmacy_id
-        AND rt.status IN ('completed', 'finalized', 'received', 'verified', 'closed_out')
+        AND rt.status IN ('verified', 'closed_out')
       ORDER BY COALESCE(rt.finalized_at, rt.time_out, rt.created_at) DESC
       LIMIT GREATEST(LEAST(p_limit, 1000), 1)
     ) sub;

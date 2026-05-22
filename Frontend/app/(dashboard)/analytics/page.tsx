@@ -532,10 +532,10 @@ export default function AnalyticsPage() {
                           <span className="text-sm text-muted-foreground">Company Fee</span>
                           <span className="font-bold text-[#ad916a]">{formatCurrency(data.creditsSummary.totalCompanyFee)}</span>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-[#f5f2f1] rounded-[4px]">
+                        {/* <div className="flex justify-between items-center p-3 bg-[#f5f2f1] rounded-[4px]">
                           <span className="text-sm text-muted-foreground">GPO Share</span>
                           <span className="font-bold text-[#1d2222]">{formatCurrency(data.creditsSummary.totalGpoShare)}</span>
-                        </div>
+                        </div> */}
                         <div className="flex justify-between items-center p-3 bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2]">
                           <span className="text-sm font-medium text-[#000000]">Your Net Payout</span>
                           <span className="font-bold text-[#505454]">{formatCurrency(data.creditsSummary.totalPayout)}</span>
