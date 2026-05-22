@@ -195,9 +195,9 @@ export default function AnalyticsPage() {
                                                 width={50}
                                             />
                                             <Tooltip
-                                                formatter={(value: unknown, name?: string) => [
+                                                formatter={(value, name) => [
                                                     formatCurrency(toFiniteNumber(value)),
-                                                    name === 'value' ? 'Returns Value' : name,
+                                                    name === 'value' ? 'Returns Value' : String(name ?? ''),
                                                 ]}
                                                 contentStyle={{
                                                     backgroundColor: '#fff',
