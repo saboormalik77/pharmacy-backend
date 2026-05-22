@@ -262,7 +262,7 @@ function generateCheckHtml(data: CheckPdfData): string {
         </div>
         
         <div class="signature-line">
-            <strong>RETURN SOLUTIONS, INC.</strong> ${payment.checkNumber}
+            <strong>FCR </strong> ${payment.checkNumber}
         </div>
     </div>
     

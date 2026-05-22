@@ -37,7 +37,7 @@ export const mockDistributors: ReverseDistributor[] = [
   },
   {
     id: '3',
-    name: 'MedReturn Solutions',
+    name: 'FCR',
     code: 'MRS',
     contactEmail: 'contact@medreturn.com',
     contactPhone: '(555) 345-6789',

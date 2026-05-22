@@ -68,7 +68,7 @@ router.use(requirePermission('payments'));
  *           nullable: true
  *         distributorName:
  *           type: string
- *           example: "Return Solutions, Inc."
+ *           example: "FCR"
  *         distributorCode:
  *           type: string
  *           nullable: true

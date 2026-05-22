@@ -39,7 +39,7 @@ export const mockPricingData: PricingData[] = [
     id: '3',
     pharmacyId: 'pharm-1',
     reverseDistributorId: '3',
-    reverseDistributorName: 'MedReturn Solutions',
+    reverseDistributorName: 'FCR',
     ndc: '00093-2263-01',
     productName: 'Amoxicillin 500mg Capsule',
     manufacturer: 'Generic Pharma',
@@ -114,7 +114,7 @@ export const mockPriceComparisons: PriceComparison[] = [
       },
       {
         distributorId: '3',
-        distributorName: 'MedReturn Solutions',
+        distributorName: 'FCR',
         averagePricePerUnit: 0.7825,
         minPrice: 0.78,
         maxPrice: 0.79,

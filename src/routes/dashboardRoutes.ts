@@ -153,7 +153,7 @@ router.get('/summary', getDashboardSummaryHandler);
  *                             example: "2da2ca2e-c3c9-4ffa-9a06-a226631a9b4f"
  *                           distributorName:
  *                             type: string
- *                             example: "Return Solutions, Inc."
+ *                             example: "FCR"
  *                           totalEarnings:
  *                             type: number
  *                             example: 85000.00

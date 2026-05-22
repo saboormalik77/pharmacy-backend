@@ -28,7 +28,7 @@ export const mockOptimizationRecommendation: OptimizationRecommendation = {
           difference: -0.065,
         },
         {
-          name: 'MedReturn Solutions',
+          name: 'FCR',
           price: 0.7825,
           difference: -0.1375,
         },

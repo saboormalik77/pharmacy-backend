@@ -223,7 +223,7 @@ router.get('/packages/by-ndc', getPackageRecommendationsByNdcsHandler);
  *                         properties:
  *                           distributorName:
  *                             type: string
- *                             example: "Return Solutions, Inc."
+ *                             example: "FCR"
  *                           distributorId:
  *                             type: string
  *                             nullable: true
@@ -460,7 +460,7 @@ router.post('/packages/suggestions', getPackageSuggestionsByNdcsHandler);
  *                         properties:
  *                           distributorName:
  *                             type: string
- *                             example: "Return Solutions, Inc."
+ *                             example: "FCR"
  *                           distributorId:
  *                             type: string
  *                             example: "9b67ae57-b566-4819-9ec8-03df64965897"
@@ -658,7 +658,7 @@ router.post('/packages/distributor-suggestion', getDistributorPackageSuggestionH
  *                         properties:
  *                           distributorName:
  *                             type: string
- *                             example: "Return Solutions, Inc."
+ *                             example: "FCR"
  *                           distributorId:
  *                             type: string
  *                             nullable: true

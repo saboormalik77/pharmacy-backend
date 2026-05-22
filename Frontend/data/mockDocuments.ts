@@ -38,7 +38,7 @@ export const mockDocuments: UploadedDocument[] = [
     fileSize: 312450,
     fileType: 'application/pdf',
     reverseDistributorId: '3',
-    reverseDistributorName: 'MedReturn Solutions',
+    reverseDistributorName: 'FCR',
     source: 'portal_fetch',
     status: 'processing',
     uploadedAt: '2024-02-01T09:00:00Z',

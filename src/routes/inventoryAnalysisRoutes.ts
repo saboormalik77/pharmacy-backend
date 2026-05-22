@@ -86,7 +86,7 @@ router.use(authenticate);
  *               format: uuid
  *             name:
  *               type: string
- *               example: "Return Solutions, Inc."
+ *               example: "FCR"
  *             email:
  *               type: string
  *             phone:
@@ -112,7 +112,7 @@ router.use(authenticate);
  *           example: 85
  *         reason:
  *           type: string
- *           example: "High return value of $245.50 available from Return Solutions, Inc."
+ *           example: "High return value of $245.50 available from FCR"
  *     
  *     InventoryAnalysisResult:
  *       type: object
