@@ -729,13 +729,13 @@ export default function BuyingGroupsPage() {
       {/* Create / Edit Modal */}
       {(modalMode === 'create' || modalMode === 'edit') && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm overflow-y-auto py-6 px-4"
+          className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center backdrop-blur-sm overflow-y-auto py-6 px-4"
           style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
           onClick={closeModal}
           role="presentation"
         >
           <div
-            className="rounded-[4px] shadow-xl w-full max-w-xl max-h-[92vh] flex flex-col border min-h-0"
+            className="rounded-[4px] cursor-default shadow-xl w-full max-w-xl max-h-[92vh] flex flex-col border min-h-0"
             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
             onClick={e => e.stopPropagation()}
             role="dialog"
@@ -1329,13 +1329,13 @@ export default function BuyingGroupsPage() {
       {/* View Modal */}
       {modalMode === 'view' && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm overflow-y-auto py-6 px-4"
+          className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center backdrop-blur-sm overflow-y-auto py-6 px-4"
           style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
           onClick={closeModal}
           role="presentation"
         >
           <div
-            className="rounded-[4px] shadow-xl w-full max-w-xl max-h-[92vh] flex flex-col border min-h-0"
+            className="rounded-[4px] cursor-default shadow-xl w-full max-w-xl max-h-[92vh] flex flex-col border min-h-0"
             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
             onClick={e => e.stopPropagation()}
             role="dialog"

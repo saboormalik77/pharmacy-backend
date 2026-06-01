@@ -60,7 +60,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, siblingCount
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                     className={cn(
-                        'p-2 rounded-[4px] transition-colors',
+                        'cursor-pointer p-2 rounded-[4px] transition-colors',
                         'border border-[var(--outline-variant)]',
                         'disabled:opacity-40 disabled:cursor-not-allowed',
                         'hover:bg-white',
@@ -83,7 +83,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, siblingCount
                             type="button"
                             onClick={() => onPageChange(page as number)}
                             className={cn(
-                                'min-w-[36px] h-9 px-2 rounded-[4px] text-sm font-medium transition-colors',
+                                'min-w-[36px] h-9 cursor-pointer px-2 rounded-[4px] text-sm font-medium transition-colors',
                                 'border border-[var(--outline-variant)]',
                                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--secondary)] focus-visible:ring-offset-1'
                             )}
@@ -103,7 +103,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, siblingCount
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                     className={cn(
-                        'p-2 rounded-[4px] transition-colors',
+                        'cursor-pointer p-2 rounded-[4px] transition-colors',
                         'border border-[var(--outline-variant)]',
                         'disabled:opacity-40 disabled:cursor-not-allowed',
                         'hover:bg-white',

@@ -530,13 +530,13 @@ export default function PoliciesPage() {
             {/* ── Add Labeler Modal ─────────────────────────────────────── */}
             {addModal && (
                 <div
-                    className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[100] p-4 overflow-y-auto"
+                    className="fixed inset-0 backdrop-blur-sm flex cursor-pointer items-center justify-center z-[100] p-4 overflow-y-auto"
                     style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                     onClick={closeAddModal}
                     role="presentation"
                 >
                     <div
-                        className="rounded-[4px] max-w-3xl w-full shadow-xl max-h-[92vh] flex flex-col border min-h-0 my-auto"
+                        className="rounded-[4px] max-w-3xl w-full cursor-default shadow-xl max-h-[92vh] flex flex-col border min-h-0 my-auto"
                         style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                         onClick={e => e.stopPropagation()}
                         role="dialog"
@@ -1267,12 +1267,12 @@ export default function PoliciesPage() {
             {/* ── Delete Confirm Modal ──────────────────────────────────── */}
             {deleteModal && (
                 <div
-                    className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+                    className="fixed inset-0 backdrop-blur-sm flex cursor-pointer items-center justify-center z-[100] p-4"
                     style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                     onClick={() => setDeleteModal(null)}
                 >
                     <div
-                        className="rounded-[4px] max-w-md w-full shadow-xl border"
+                        className="rounded-[4px] max-w-md w-full cursor-default shadow-xl border"
                         style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                         onClick={e => e.stopPropagation()}
                     >

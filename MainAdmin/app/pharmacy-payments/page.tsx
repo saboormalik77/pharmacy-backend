@@ -1002,12 +1002,12 @@ function PharmacyPaymentsPageContent() {
       {/* View Payment Details Modal */}
       {viewModal && (
         <div
-          className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-auto"
+          className="fixed inset-0 backdrop-blur-sm flex cursor-pointer items-center justify-center z-50 p-4 overflow-auto"
           style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
           onClick={() => setViewModal(null)}
         >
             <div
-              className="rounded-xl shadow-xl w-full max-w-lg my-auto flex flex-col border"
+              className="rounded-xl cursor-default shadow-xl w-full max-w-lg my-auto flex flex-col border"
               style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
               onClick={(e) => e.stopPropagation()}
             >

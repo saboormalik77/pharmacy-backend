@@ -845,8 +845,8 @@ export default function VerificationSessionPage() {
 
                 {/* ── Batch Assignment Modal ──────────────────── */}
                 {batchModal && (
-                    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setBatchModal(false)}>
-                        <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setBatchModal(false)}>
+                        <div className="bg-white rounded-[4px] max-w-md w-full cursor-default shadow-xl" onClick={e => e.stopPropagation()}>
                             <div className="flex items-center justify-between p-5 border-b bg-gray-50">
                                 <h2 className="font-heading text-body font-semibold text-gray-900 flex items-center gap-2">
                                     <Layers className="w-5 h-5 text-primary-600" />
@@ -1650,8 +1650,8 @@ export default function VerificationSessionPage() {
 
                 {/* ── Batch Assignment Modal ──────────────────── */}
                 {batchModal && (
-                    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setBatchModal(false)}>
-                        <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setBatchModal(false)}>
+                        <div className="bg-white rounded-[4px] max-w-md w-full cursor-default shadow-xl" onClick={e => e.stopPropagation()}>
                             <div className="flex items-center justify-between p-5 border-b bg-gray-50">
                                 <h2 className="font-heading text-body font-semibold text-gray-900 flex items-center gap-2">
                                     <Layers className="w-5 h-5 text-primary-600" />
@@ -1774,8 +1774,8 @@ export default function VerificationSessionPage() {
 
                 {/* ── Wine Cellar Items Modal ─────────────────────── */}
                 {wcModal && (
-                    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setWcModal(false)}>
-                        <div className="bg-white rounded-[4px] max-w-4xl w-full max-h-[90vh] flex flex-col shadow-xl" onClick={e => e.stopPropagation()}>
+                    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setWcModal(false)}>
+                        <div className="bg-white rounded-[4px] max-w-4xl w-full max-h-[90vh] cursor-default flex flex-col shadow-xl" onClick={e => e.stopPropagation()}>
                             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
                                 <div>
                                     <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">

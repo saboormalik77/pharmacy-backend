@@ -515,8 +515,8 @@ export default function BatchDetailPage() {
 
             {/* ── Assign Returns Modal ──────────────────────────────── */}
             {showAssign && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowAssign(false)}>
-                    <div className="rounded-[4px] shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowAssign(false)}>
+                    <div className="rounded-[4px] cursor-default shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
                             <div className="flex items-center justify-between">
                                 <h2 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Assign Returns to Batch</h2>
@@ -614,8 +614,8 @@ export default function BatchDetailPage() {
 
             {/* ── Close Batch Confirm ──────────────────────────────── */}
             {showClose && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowClose(false)}>
-                    <div className="rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowClose(false)}>
+                    <div className="rounded-[4px] cursor-default shadow-xl max-w-sm w-full mx-4 p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2.5 mb-3">
                             <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--tertiary-fixed)' }}>
                                 <Lock className="w-4 h-4" style={{ color: 'var(--tertiary)' }} />
@@ -653,8 +653,8 @@ export default function BatchDetailPage() {
 
             {/* ── Submit Cardinal Confirm ──────────────────────────── */}
             {showSubmit && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowSubmit(false)}>
-                    <div className="rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowSubmit(false)}>
+                    <div className="rounded-[4px] cursor-default shadow-xl max-w-sm w-full mx-4 p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2.5 mb-3">
                             <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--secondary-container)' }}>
                                 <Send className="w-4 h-4" style={{ color: 'var(--secondary)' }} />
@@ -680,8 +680,8 @@ export default function BatchDetailPage() {
 
             {/* ── Delete Batch Confirm ──────────────────────────── */}
             {showDelete && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowDelete(false)}>
-                    <div className="rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowDelete(false)}>
+                    <div className="rounded-[4px] cursor-default shadow-xl max-w-sm w-full mx-4 p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2.5 mb-3">
                             <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--error-container)' }}>
                                 <Trash2 className="w-4 h-4" style={{ color: 'var(--error)' }} />
@@ -708,8 +708,8 @@ export default function BatchDetailPage() {
 
             {/* ── Unassign Returns Modal ──────────────────────────────── */}
             {showUnassign && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowUnassign(false)}>
-                    <div className="rounded-[4px] shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowUnassign(false)}>
+                    <div className="rounded-[4px] cursor-default shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
                             <div className="flex items-center justify-between">
                                 <h2 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Unassign Returns from Batch</h2>

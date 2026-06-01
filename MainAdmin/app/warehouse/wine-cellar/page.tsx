@@ -400,8 +400,8 @@ export default function WineCellarPage() {
 
             {/* ── Edit Modal ───────────────────────────────── */}
             {editModal && (
-                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setEditModal(null)}>
-                    <div className="rounded-[4px] max-w-lg w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setEditModal(null)}>
+                    <div className="rounded-[4px] max-w-lg w-full cursor-default shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h2 className="font-heading text-body font-semibold" style={{ color: 'var(--foreground)' }}>Edit Wine Cellar Item</h2>
                             <button onClick={() => setEditModal(null)} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>

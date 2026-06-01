@@ -416,8 +416,8 @@ export default function ReturnsPage() {
 
             {/* ── View Detail Modal ────────────────────────── */}
             {viewModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full cursor-default shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--outline-variant)] bg-[var(--surface-container-low)] sticky top-0">
                             <h2 className="text-sm font-semibold text-[var(--on-surface)]">Return Details</h2>
                             <button onClick={() => setViewModal(null)} className="text-[var(--outline)] hover:text-[var(--on-primary-container)]"><X className="w-4 h-4" /></button>
@@ -474,8 +474,8 @@ export default function ReturnsPage() {
 
             {/* ── Edit Modal ────────────────────────────────── */}
             {editModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setEditModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-md w-full cursor-default shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
                             <h2 className="text-sm font-semibold text-[var(--on-surface)]">Edit Return — {editModal.licensePlate}</h2>
                             <button onClick={() => setEditModal(null)} className="text-[var(--outline)] hover:text-[var(--on-primary-container)]"><X className="w-4 h-4" /></button>
@@ -506,8 +506,8 @@ export default function ReturnsPage() {
 
             {/* ── Status Action Modal ──────────── */}
             {actionModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-sm w-full cursor-default shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
                             <h2 className="text-sm font-semibold text-[var(--on-surface)]">
                                 {actionModal.action === 'pause' && 'Pause Return'}
@@ -533,8 +533,8 @@ export default function ReturnsPage() {
 
             {/* ── Delete Modal ─────────────────── */}
             {deleteModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setDeleteModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-sm w-full cursor-default shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
                             <h2 className="text-sm font-semibold text-[var(--on-surface)]">Delete Return</h2>
                             <button onClick={() => setDeleteModal(null)} className="text-[var(--outline)] hover:text-[var(--on-primary-container)]"><X className="w-4 h-4" /></button>
