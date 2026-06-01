@@ -470,13 +470,13 @@ export default function NDCPricingPage() {
             {/* ── Add / Edit Modal (same shell as Labeler Info / distributors) ── */}
             {formModal && (
                 <div
-                    className="fixed inset-0 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto"
+                    className="fixed inset-0 backdrop-blur-sm z-[100] flex cursor-pointer items-center justify-center p-4 overflow-y-auto"
                     style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                     onClick={() => setFormModal(false)}
                     role="presentation"
                 >
                     <div
-                        className="rounded-[4px] w-full max-w-2xl max-h-[92vh] my-auto flex flex-col border min-h-0 shadow-xl"
+                        className="rounded-[4px] w-full max-w-2xl max-h-[92vh] cursor-default my-auto flex flex-col border min-h-0 shadow-xl"
                         style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                         onClick={e => e.stopPropagation()}
                         role="dialog"
@@ -813,11 +813,11 @@ export default function NDCPricingPage() {
             {/* ── Delete Confirmation Modal ─────────────────── */}
             {deleteModal && (
                 <div
-                    className="fixed inset-0 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+                    className="fixed inset-0 backdrop-blur-sm z-[100] flex cursor-pointer items-center justify-center p-4"
                     style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                     onClick={() => setDeleteModal(null)}
                 >
-                    <div className="rounded-[4px] max-w-sm w-full shadow-2xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div className="rounded-[4px] max-w-sm w-full cursor-default shadow-2xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b rounded-t-lg" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h3 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Delete NDC Pricing</h3>
                             <button onClick={() => setDeleteModal(null)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>

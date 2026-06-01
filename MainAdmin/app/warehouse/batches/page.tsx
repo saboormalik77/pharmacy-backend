@@ -305,8 +305,8 @@ export default function BatchesPage() {
 
             {/* Create Batch Modal */}
             {showCreate && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowCreate(false)}>
-                    <div className="rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-5 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowCreate(false)}>
+                    <div className="rounded-[4px] cursor-default shadow-xl max-w-sm w-full mx-4 p-5 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <h2 className="font-heading text-body font-bold mb-3" style={{ color: 'var(--foreground)' }}>Create New Batch</h2>
 
                         <div className="space-y-3">

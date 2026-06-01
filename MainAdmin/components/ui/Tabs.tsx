@@ -47,7 +47,7 @@ export function Tabs({ tabs, defaultTab, onChange }: TabsProps) {
                         onClick={() => !tab.disabled && handleTabChange(tab.id)}
                         disabled={tab.disabled}
                         className={cn(
-                            'px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-[2px]',
+                            'cursor-pointer px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-[2px]',
                             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--secondary)] focus-visible:ring-offset-[-1px]',
                             tab.disabled && 'opacity-40 cursor-not-allowed'
                         )}

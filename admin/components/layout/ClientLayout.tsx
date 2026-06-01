@@ -59,7 +59,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                             />
                             {sidebarOpen && (
                                 <div
-                                    className="fixed top-0 left-0 right-0 bottom-0 z-40 sm:hidden"
+                                    className="fixed top-0 left-0 right-0 bottom-0 z-40 cursor-pointer sm:hidden"
                                     onClick={handleCloseSidebar}
                                 />
                             )}

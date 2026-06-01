@@ -600,8 +600,8 @@ function PharmaciesPageContent() {
 
             {/* View Modal */}
             {viewModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-3" onClick={() => setViewModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-3" onClick={() => setViewModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-2xl w-full cursor-default shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-gray-50">
                             <h2 className="text-xs font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Pharmacy Details</h2>
                             <button onClick={() => setViewModal(null)} className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-[4px] transition-all">
@@ -728,8 +728,8 @@ function PharmaciesPageContent() {
 
             {/* Edit Modal */}
             {editModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-3" onClick={() => { setEditModal(null); setEditFormData({}); setEditErrors({}); }}>
-                    <div className="bg-white rounded-[4px] max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-3" onClick={() => { setEditModal(null); setEditFormData({}); setEditErrors({}); }}>
+                    <div className="bg-white rounded-[4px] max-w-2xl w-full cursor-default shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-6 py-5 border-b border-[#e2e2e2] bg-gray-50">
                             <h2 className="text-xs font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Edit Pharmacy</h2>
                             <button onClick={() => { setEditModal(null); setEditFormData({}); setEditErrors({}); }} className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-[4px] transition-all">
@@ -865,8 +865,8 @@ function PharmaciesPageContent() {
 
             {/* Blacklist Confirmation Modal */}
             {blacklistModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-3" onClick={() => setBlacklistModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-3" onClick={() => setBlacklistModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-md w-full cursor-default shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-6 py-5 border-b border-[#e2e2e2] bg-gray-50">
                             <h2 className="text-xs font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Blacklist Pharmacy</h2>
                             <button onClick={() => setBlacklistModal(null)} className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-[4px] transition-all">
@@ -886,8 +886,8 @@ function PharmaciesPageContent() {
 
             {/* Restore Confirmation Modal */}
             {restoreModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-3" onClick={() => setRestoreModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-3" onClick={() => setRestoreModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-md w-full cursor-default shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-6 py-5 border-b border-[#e2e2e2] bg-gray-50">
                             <h2 className="text-xs font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Restore Pharmacy</h2>
                             <button onClick={() => setRestoreModal(null)} className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-[4px] transition-all">
@@ -907,8 +907,8 @@ function PharmaciesPageContent() {
 
             {/* Suspend Confirmation Modal */}
             {suspendModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-3" onClick={() => setSuspendModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-3" onClick={() => setSuspendModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-md w-full cursor-default shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-6 py-5 border-b border-[#e2e2e2] bg-gray-50">
                             <h2 className="text-xs font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Suspend Pharmacy</h2>
                             <button onClick={() => setSuspendModal(null)} className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-[4px] transition-all">
@@ -928,8 +928,8 @@ function PharmaciesPageContent() {
 
             {/* Create Pharmacy Modal */}
             {createModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-3" onClick={() => !isCreating && setCreateModal(false)}>
-                    <div className="bg-white rounded-[4px] max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-3" onClick={() => !isCreating && setCreateModal(false)}>
+                    <div className="bg-white rounded-[4px] max-w-2xl w-full cursor-default shadow-2xl max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-6 py-5 border-b border-[#e2e2e2] bg-gray-50">
                             <h2 className="text-xs font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Add New Pharmacy</h2>
                             <button onClick={() => !isCreating && setCreateModal(false)} className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-[4px] transition-all">

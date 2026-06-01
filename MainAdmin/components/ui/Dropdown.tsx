@@ -54,7 +54,7 @@ export function Dropdown({
                 onClick={() => !disabled && setIsOpen(!isOpen)}
                 disabled={disabled}
                 className={cn(
-                    'w-full flex items-center justify-between gap-2 px-3 py-2 rounded-[4px] border transition-colors',
+                    'w-full flex cursor-pointer items-center justify-between gap-2 px-3 py-2 rounded-[4px] border transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[var(--secondary)]',
                     disabled && 'opacity-50 cursor-not-allowed'
                 )}
@@ -96,7 +96,7 @@ export function Dropdown({
                             }}
                             disabled={option.disabled}
                             className={cn(
-                                'w-full flex items-center gap-2 px-4 py-2 text-sm text-left transition-colors',
+                                'w-full flex cursor-pointer items-center gap-2 px-4 py-2 text-sm text-left transition-colors',
                                 option.disabled
                                     ? 'opacity-40 cursor-not-allowed'
                                     : 'hover:bg-gray-100',

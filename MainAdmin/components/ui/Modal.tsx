@@ -52,13 +52,13 @@ export function Modal({ isOpen, onClose, title, children, footer, size = 'md', c
     return (
         <div
             ref={overlayRef}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center p-4"
             style={{ backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)' }}
             onClick={(e) => e.target === overlayRef.current && onClose()}
         >
             <div
                 className={cn(
-                    'w-full rounded-[4px] shadow-2xl flex flex-col',
+                    'w-full cursor-default rounded-[4px] shadow-2xl flex flex-col',
                     sizeMap[size],
                     className
                 )}

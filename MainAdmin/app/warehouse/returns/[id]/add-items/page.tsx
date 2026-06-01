@@ -1336,8 +1336,8 @@ export default function AddItemsPage() {
 
             {/* ── Policy Modal ─────────────────────────────── */}
             {policyModalOpen && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setPolicyModalOpen(false)}>
-                    <div className="bg-[var(--surface-container-lowest)] rounded-[4px] max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setPolicyModalOpen(false)}>
+                    <div className="bg-[var(--surface-container-lowest)] rounded-[4px] max-w-md w-full cursor-default shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b bg-[var(--surface-container-low)] rounded-t-lg">
                             <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
                                 <ShieldCheck className="w-4 h-4 text-blue-600" /> Manufacturer Return Policy

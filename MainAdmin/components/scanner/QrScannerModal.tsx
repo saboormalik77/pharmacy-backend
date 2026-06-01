@@ -193,12 +193,12 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
 
     return (
         <div
-            className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+            className="fixed inset-0 backdrop-blur-sm flex cursor-pointer items-center justify-center z-[100] p-4"
             onClick={onClose}
             style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 80%, transparent)' }}
         >
             <div
-                className="rounded-2xl w-full max-w-sm shadow-2xl flex flex-col overflow-hidden"
+                className="rounded-2xl w-full max-w-sm cursor-default shadow-2xl flex flex-col overflow-hidden"
                 onClick={e => e.stopPropagation()}
                 style={{ backgroundColor: 'var(--surface-container-lowest)' }}
             >

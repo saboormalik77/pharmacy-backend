@@ -27,7 +27,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         return (
             <button
                 className={cn(
-                    'inline-flex items-center justify-center rounded-[4px] font-medium transition-all',
+                    'inline-flex cursor-pointer items-center justify-center rounded-[4px] font-medium transition-all',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#516057] focus-visible:ring-offset-2',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
                     variantStyles[variant],

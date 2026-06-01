@@ -1364,8 +1364,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Edit Item Modal ───────────────────────────── */}
             {editItemModal && (
-                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setEditItemModal(null)}>
-                    <div className="rounded-[4px] max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setEditItemModal(null)}>
+                    <div className="rounded-[4px] max-w-sm w-full cursor-default shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Edit Item</h2>
                             <button onClick={() => setEditItemModal(null)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
@@ -1441,8 +1441,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Delete Item Modal ────────────────────────── */}
             {deleteItemModal && (
-                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setDeleteItemModal(null)}>
-                    <div className="rounded-[4px] max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setDeleteItemModal(null)}>
+                    <div className="rounded-[4px] max-w-sm w-full cursor-default shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Delete Item</h2>
                             <button onClick={() => setDeleteItemModal(null)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
@@ -1465,8 +1465,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Edit Modal ────────────────────────────────── */}
             {editModal && (
-                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setEditModal(false)}>
-                    <div className="rounded-[4px] max-w-md w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setEditModal(false)}>
+                    <div className="rounded-[4px] max-w-md w-full cursor-default shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Edit Return — {tx.licensePlate}</h2>
                             <button onClick={() => setEditModal(false)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
@@ -1502,8 +1502,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Status Action Modal ──────────────────────── */}
             {actionModal && (
-                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setActionModal(null)}>
-                    <div className="rounded-[4px] max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setActionModal(null)}>
+                    <div className="rounded-[4px] max-w-sm w-full cursor-default shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
                                 {actionModal === 'pause' && 'Pause Return'}
@@ -1529,8 +1529,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Delete Modal ─────────────────────────────── */}
             {deleteModal && (
-                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setDeleteModal(false)}>
-                    <div className="rounded-[4px] max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setDeleteModal(false)}>
+                    <div className="rounded-[4px] max-w-sm w-full cursor-default shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Delete Return</h2>
                             <button onClick={() => setDeleteModal(false)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
@@ -1552,8 +1552,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Finalize Return Modal ──────────────────── */}
             {finalizeModal && (
-                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setFinalizeModal(false)}>
-                    <div className="rounded-[4px] max-w-xl w-full shadow-xl max-h-[90vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setFinalizeModal(false)}>
+                    <div className="rounded-[4px] max-w-xl w-full cursor-default shadow-xl max-h-[90vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
 
                         {/* Header */}
                         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
@@ -1824,8 +1824,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Wine Cellar Modal ────────────────────────── */}
             {wcModal && (
-                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setWcModal(false)}>
-                    <div className="rounded-[4px] max-w-2xl w-full shadow-xl max-h-[80vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 backdrop-blur-md flex cursor-pointer items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setWcModal(false)}>
+                    <div className="rounded-[4px] max-w-2xl w-full cursor-default shadow-xl max-h-[80vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h2 className="font-heading text-body font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
                                 <Archive className="w-5 h-5" style={{ color: 'var(--tertiary)' }} /> Add Wine Cellar Items
@@ -1926,8 +1926,8 @@ export default function ReturnDetailPage() {
 
             {/* ── FedEx / USPS Tracking Sub-Modal ─────────── */}
             {fedexSubModal && (
-                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-[60] p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => { if (!fedexApiLoading && !pickupLoading) setFedexSubModal(false); }}>
-                    <div className="rounded-[4px] max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 backdrop-blur-md flex cursor-pointer items-center justify-center z-[60] p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => { if (!fedexApiLoading && !pickupLoading) setFedexSubModal(false); }}>
+                    <div className="rounded-[4px] max-w-2xl w-full cursor-default shadow-xl max-h-[90vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
 
                         {/* Header */}
                         <div className="p-4 rounded-t-lg" style={{ backgroundColor: fedexMode === 'api' ? 'var(--primary)' : 'var(--tertiary-fixed)' }}>

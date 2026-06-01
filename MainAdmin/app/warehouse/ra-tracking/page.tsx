@@ -1162,13 +1162,13 @@ export default function RATrackingPage() {
             {/* ── Request RA Modal — same shell as warehouse/batches modals ── */}
             {activeModal === 'request' && selectedMemo && (
                 <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm overflow-y-auto p-4"
+                    className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center backdrop-blur-sm overflow-y-auto p-4"
                     style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                     onClick={closeModal}
                     role="presentation"
                 >
                     <div
-                        className="rounded-[4px] shadow-xl max-w-lg w-full max-h-[92vh] my-auto flex flex-col border min-h-0"
+                        className="rounded-[4px] cursor-default shadow-xl max-w-lg w-full max-h-[92vh] my-auto flex flex-col border min-h-0"
                         style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                         onClick={e => e.stopPropagation()}
                         role="dialog"
@@ -1266,8 +1266,8 @@ export default function RATrackingPage() {
 
             {/* ── Resend RA Modal — same shell as warehouse/batches ── */}
             {activeModal === 'resend' && selectedMemo && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm overflow-y-auto p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={closeModal} role="presentation">
-                    <div className="rounded-[4px] shadow-xl max-w-lg w-full max-h-[92vh] my-auto flex flex-col border min-h-0" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="ra-resend-modal-title">
+                <div className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center backdrop-blur-sm overflow-y-auto p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={closeModal} role="presentation">
+                    <div className="rounded-[4px] cursor-default shadow-xl max-w-lg w-full max-h-[92vh] my-auto flex flex-col border min-h-0" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="ra-resend-modal-title">
                         <div className="px-4 py-3 border-b shrink-0" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <div className="flex items-center justify-between gap-2">
                                 <div className="min-w-0 pr-2">
@@ -1338,8 +1338,8 @@ export default function RATrackingPage() {
 
             {/* ── Receive RA Modal — same shell as warehouse/batches ── */}
             {activeModal === 'receive' && selectedMemo && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm overflow-y-auto p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={closeModal} role="presentation">
-                    <div className="rounded-[4px] shadow-xl max-w-md w-full max-h-[92vh] my-auto flex flex-col border min-h-0" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="ra-receive-modal-title">
+                <div className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center backdrop-blur-sm overflow-y-auto p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={closeModal} role="presentation">
+                    <div className="rounded-[4px] cursor-default shadow-xl max-w-md w-full max-h-[92vh] my-auto flex flex-col border min-h-0" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="ra-receive-modal-title">
                         <div className="px-4 py-3 border-b shrink-0" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <div className="flex items-center justify-between gap-2">
                                 <div className="min-w-0 pr-2">
@@ -1408,7 +1408,7 @@ export default function RATrackingPage() {
             {/* ── Ship Modal (FedEx + Manual) — same shell as warehouse/batches ── */}
             {activeModal === 'ship' && selectedMemo && (
                 <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm overflow-y-auto p-4"
+                    className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center backdrop-blur-sm overflow-y-auto p-4"
                     style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                     onClick={() => {
                         if (!fedexLoading && !groupFedexLoading) closeModal();
@@ -1416,7 +1416,7 @@ export default function RATrackingPage() {
                     role="presentation"
                 >
                     <div
-                        className="rounded-[4px] shadow-xl max-w-2xl w-full max-h-[92vh] my-auto flex flex-col overflow-hidden relative border min-h-0"
+                        className="rounded-[4px] cursor-default shadow-xl max-w-2xl w-full max-h-[92vh] my-auto flex flex-col overflow-hidden relative border min-h-0"
                         style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                         onClick={e => e.stopPropagation()}
                         role="dialog"

@@ -164,8 +164,8 @@ export default function CreateReturnPage() {
 
             {/* Confirmation Modal */}
             {confirmModal && selectedStore && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setConfirmModal(false)}>
-                    <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setConfirmModal(false)}>
+                    <div className="bg-white rounded-[4px] max-w-md w-full cursor-default shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
                             <h2 className="font-heading text-sm font-semibold text-[var(--on-surface)]">Confirm Return Creation</h2>
                             <button onClick={() => setConfirmModal(false)} className="text-[var(--outline)] hover:text-[var(--on-primary-container)]"><X className="w-4 h-4" /></button>

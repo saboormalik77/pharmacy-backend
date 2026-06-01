@@ -286,13 +286,13 @@ export default function DestructionPage() {
 
       {selected && (
         <div
-          className="fixed inset-0 z-[100] backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-[100] backdrop-blur-sm flex cursor-pointer items-center justify-center p-4 overflow-y-auto"
           style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
           onClick={() => setSelected(null)}
           role="presentation"
         >
           <div
-            className="rounded-[4px] w-full max-w-lg max-h-[92vh] my-auto flex flex-col border min-h-0 shadow-xl"
+            className="rounded-[4px] w-full max-w-lg max-h-[92vh] cursor-default my-auto flex flex-col border min-h-0 shadow-xl"
             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
             onClick={(e) => e.stopPropagation()}
             role="dialog"

@@ -368,13 +368,13 @@ export default function DistributorsPage() {
                 {/* View Modal */}
                 {viewModal && (
                     <div
-                        className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto"
+                        className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center backdrop-blur-sm p-4 overflow-y-auto"
                         style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                         onClick={() => setViewModal(null)}
                         role="presentation"
                     >
                         <div
-                            className="rounded-[4px] shadow-xl w-full max-w-lg max-h-[92vh] my-auto flex flex-col border min-h-0"
+                            className="rounded-[4px] cursor-default shadow-xl w-full max-w-lg max-h-[92vh] my-auto flex flex-col border min-h-0"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             onClick={(e) => e.stopPropagation()}
                             role="dialog"
@@ -422,13 +422,13 @@ export default function DistributorsPage() {
                 {/* Add Modal */}
                 {addModal && (
                     <div
-                        className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto"
+                        className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center backdrop-blur-sm p-4 overflow-y-auto"
                         style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                         onClick={() => setAddModal(false)}
                         role="presentation"
                     >
                         <div
-                            className="rounded-[4px] shadow-xl w-full max-w-xl max-h-[92vh] my-auto flex flex-col border min-h-0"
+                            className="rounded-[4px] cursor-default shadow-xl w-full max-w-xl max-h-[92vh] my-auto flex flex-col border min-h-0"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             onClick={(e) => e.stopPropagation()}
                             role="dialog"
@@ -505,13 +505,13 @@ export default function DistributorsPage() {
                 {/* Edit Modal */}
                 {editModal && (
                     <div
-                        className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto"
+                        className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center backdrop-blur-sm p-4 overflow-y-auto"
                         style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                         onClick={() => { setEditModal(null); setEditFormData({}); }}
                         role="presentation"
                     >
                         <div
-                            className="rounded-[4px] shadow-xl w-full max-w-xl max-h-[92vh] my-auto flex flex-col border min-h-0"
+                            className="rounded-[4px] cursor-default shadow-xl w-full max-w-xl max-h-[92vh] my-auto flex flex-col border min-h-0"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             onClick={(e) => e.stopPropagation()}
                             role="dialog"
@@ -581,12 +581,12 @@ export default function DistributorsPage() {
                 {/* Deactivate Confirm */}
                 {deactivateModal && (
                     <div
-                        className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm px-4"
+                        className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center backdrop-blur-sm px-4"
                         style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                         onClick={() => setDeactivateModal(null)}
                     >
                         <div
-                            className="rounded-[4px] shadow-xl max-w-sm w-full border"
+                            className="rounded-[4px] cursor-default shadow-xl max-w-sm w-full border"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -612,12 +612,12 @@ export default function DistributorsPage() {
                 {/* Activate Confirm */}
                 {activateModal && (
                     <div
-                        className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm px-4"
+                        className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center backdrop-blur-sm px-4"
                         style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                         onClick={() => setActivateModal(null)}
                     >
                         <div
-                            className="rounded-[4px] shadow-xl max-w-sm w-full border"
+                            className="rounded-[4px] cursor-default shadow-xl max-w-sm w-full border"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             onClick={(e) => e.stopPropagation()}
                         >

@@ -1011,8 +1011,8 @@ export default function BatchDetailPage() {
 
             {/* ── Assign Returns Modal ──────────────────────────────── */}
             {showAssign && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowAssign(false)}>
-                    <div className="bg-white rounded-[4px] shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/50" onClick={() => setShowAssign(false)}>
+                    <div className="bg-white rounded-[4px] cursor-default shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
                         <div className="px-4 py-3 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-sm font-bold text-gray-900">Assign Returns to Batch</h2>
@@ -1078,8 +1078,8 @@ export default function BatchDetailPage() {
 
             {/* ── Close Batch Confirm ──────────────────────────────── */}
             {showClose && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowClose(false)}>
-                    <div className="bg-white rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/50" onClick={() => setShowClose(false)}>
+                    <div className="bg-white rounded-[4px] cursor-default shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2.5 mb-3">
                             <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Lock className="w-4 h-4 text-yellow-600" />
@@ -1110,8 +1110,8 @@ export default function BatchDetailPage() {
 
             {/* ── Submit Cardinal Confirm ──────────────────────────── */}
             {showSubmit && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowSubmit(false)}>
-                    <div className="bg-white rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/50" onClick={() => setShowSubmit(false)}>
+                    <div className="bg-white rounded-[4px] cursor-default shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2.5 mb-3">
                             <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Send className="w-4 h-4 text-green-600" />
@@ -1137,8 +1137,8 @@ export default function BatchDetailPage() {
 
             {/* ── Delete Batch Confirm ──────────────────────────── */}
             {showDelete && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowDelete(false)}>
-                    <div className="bg-white rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/50" onClick={() => setShowDelete(false)}>
+                    <div className="bg-white rounded-[4px] cursor-default shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2.5 mb-3">
                             <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Trash2 className="w-4 h-4 text-red-600" />
@@ -1165,8 +1165,8 @@ export default function BatchDetailPage() {
 
             {/* ── Unassign Returns Modal ──────────────────────────────── */}
             {showUnassign && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowUnassign(false)}>
-                    <div className="bg-white rounded-[4px] shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/50" onClick={() => setShowUnassign(false)}>
+                    <div className="bg-white rounded-[4px] cursor-default shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
                         <div className="px-4 py-3 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-sm font-bold text-gray-900">Unassign Returns from Batch</h2>

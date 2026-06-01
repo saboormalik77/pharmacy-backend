@@ -575,8 +575,8 @@ export default function ReturnsPage() {
 
             {/* ── View Detail Modal ────────────────────────── */}
             {viewModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto border border-[#e2e2e2]" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full cursor-default shadow-xl max-h-[88vh] overflow-y-auto border border-[#e2e2e2]" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-[#f5f2f1] sticky top-0">
                             <h2 className="text-sm font-semibold text-[#000000] font-serif">Return Details</h2>
                             <button onClick={() => setViewModal(null)} className="text-[#9ca3af] hover:text-[#505454]"><X className="w-4 h-4" /></button>
@@ -672,8 +672,8 @@ export default function ReturnsPage() {
 
             {/* ── Delete Modal ─────────────────── */}
             {deleteModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-sm w-full shadow-xl border border-[#e2e2e2]" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setDeleteModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-sm w-full cursor-default shadow-xl border border-[#e2e2e2]" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-[#f5f2f1]">
                             <h2 className="text-sm font-semibold text-[#000000] font-serif">Delete Return</h2>
                             <button onClick={() => setDeleteModal(null)} className="text-[#9ca3af] hover:text-[#505454]"><X className="w-4 h-4" /></button>

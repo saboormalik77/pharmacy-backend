@@ -473,8 +473,8 @@ export default function ReturnsPage() {
 
             {/* ── View Detail Modal ────────────────────────── */}
             {viewModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full cursor-default shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-gray-50 sticky top-0">
                             <h2 className="text-sm font-semibold text-gray-900">Return Details</h2>
                             <button onClick={() => setViewModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -560,8 +560,8 @@ export default function ReturnsPage() {
 
             {/* ── Edit Modal ────────────────────────────────── */}
             {editModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setEditModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full cursor-default shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Edit Return — {editModal.licensePlate}</h2>
                             <button onClick={() => setEditModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -592,8 +592,8 @@ export default function ReturnsPage() {
 
             {/* ── Status Action Modal ──────────── */}
             {actionModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-sm w-full cursor-default shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">
                                 {actionModal.action === 'pause' && 'Pause Return'}
@@ -619,8 +619,8 @@ export default function ReturnsPage() {
 
             {/* ── Delete Modal ─────────────────── */}
             {deleteModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setDeleteModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-sm w-full cursor-default shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Delete Return</h2>
                             <button onClick={() => setDeleteModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>

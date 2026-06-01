@@ -112,6 +112,9 @@ export default function RATrackingPage() {
     const [shippedGroupsPage, setShippedGroupsPage] = useState(1);
     const [expandedShippedGroupId, setExpandedShippedGroupId] = useState<string | null>(null);
     const [toasts, setToasts] = useState<Toast[]>([]);
+    const addToast = useCallback((message: string, type: Toast['type'] = 'success') => {
+        setToasts(prev => [...prev, { id: Date.now().toString(), message, type }]);
+    }, []);
 
     const [activeModal, setActiveModal] = useState<ModalType>(null);
     const [selectedMemo, setSelectedMemo] = useState<DebitMemo | null>(null);
@@ -968,8 +971,8 @@ export default function RATrackingPage() {
 
             {/* ── Request RA Modal (Task 11.6) ──────────────────── */}
             {activeModal === 'request' && selectedMemo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
-                    <div className="bg-white rounded-[4px] shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/50" onClick={closeModal}>
+                    <div className="bg-white rounded-[4px] cursor-default shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-lg font-bold text-gray-900">Send RA Request</h2>
@@ -1032,8 +1035,8 @@ export default function RATrackingPage() {
 
             {/* ── Resend RA Modal ────────────────────────────────── */}
             {activeModal === 'resend' && selectedMemo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
-                    <div className="bg-white rounded-[4px] shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/50" onClick={closeModal}>
+                    <div className="bg-white rounded-[4px] cursor-default shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-lg font-bold text-gray-900">Resend RA Reminder</h2>
@@ -1088,8 +1091,8 @@ export default function RATrackingPage() {
 
             {/* ── Receive RA Modal (Task 11.7) ──────────────────── */}
             {activeModal === 'receive' && selectedMemo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
-                    <div className="bg-white rounded-[4px] shadow-xl max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/50" onClick={closeModal}>
+                    <div className="bg-white rounded-[4px] cursor-default shadow-xl max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-lg font-bold text-gray-900">Record RA Received</h2>
