@@ -180,8 +180,9 @@ async function extractRAFromEmail(
 
 function extractMemoNumber(subject: string): string | null {
   // New format: DEL + MMYY (4 digits) + 3 alpha chars + labeler_id (3-10 digits)
-  // e.g. DEL0127AAA29300
-  const newFmt = subject.match(/\bDEL\d{4}[A-Z]{3}\d{3,10}\b/i);
+  // Optional trailing dash is captured so the extracted value matches whatever is stored in the DB.
+  // e.g. DEL0127AAA29300 or DEL0928AAB6571-
+  const newFmt = subject.match(/\bDEL\d{4}[A-Z]{3}\d{3,10}-?/i);
   if (newFmt) return newFmt[0].toUpperCase();
   // Legacy format: DM-XXXX-XXXX
   const oldFmt = subject.match(/DM-\d{4}-\d{4}/i);
@@ -386,7 +387,7 @@ async function processEmailsWithTimeout(maxEmails = 10, markAsRead = true): Prom
           if (!result.memoNumber) {
             // Try to find memo number in the email body
             const bodyText = parsed.text || (parsed.html ? htmlToText(parsed.html) : '');
-            const bodyNewFmt = bodyText.match(/\bDEL\d{4}[A-Z]{3}\d{3,10}\b/i);
+            const bodyNewFmt = bodyText.match(/\bDEL\d{4}[A-Z]{3}\d{3,10}-?/i);
             const bodyOldFmt = bodyText.match(/DM-\d{4}-\d{4}/i);
             const bodyMatch = bodyNewFmt ?? bodyOldFmt;
             result.memoNumber = bodyMatch ? bodyMatch[0].toUpperCase() : null;

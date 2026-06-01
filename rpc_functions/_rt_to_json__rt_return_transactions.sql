@@ -189,6 +189,18 @@ BEGIN
                                         WHEN rt.pieces_received IS NOT NULL THEN 'in_progress'
                                         ELSE 'not_started'
                                      END,
+        'pendingVerifyItemsCount',   (
+                                        SELECT COUNT(*)::int
+                                        FROM return_transaction_items rti
+                                        WHERE rti.transaction_id = rt.id
+                                          AND rti.verification_status IS NULL
+                                     ),
+        'verifiedItemsCount',        (
+                                        SELECT COUNT(*)::int
+                                        FROM return_transaction_items rti
+                                        WHERE rti.transaction_id = rt.id
+                                          AND rti.verification_status IS NOT NULL
+                                     ),
         'createdAt',                 rt.created_at,
         'updatedAt',                 rt.updated_at
     );

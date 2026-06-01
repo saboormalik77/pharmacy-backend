@@ -1083,7 +1083,7 @@ export default function VerificationSessionPage() {
                 <div className="flex gap-1 rounded-[4px] p-1" style={{ backgroundColor: 'var(--surface-container)' }}>
                     {([
                         { key: 'items' as ActiveTab, label: 'Items', count: counts.totalItems },
-                        { key: 'surplus' as ActiveTab, label: 'Surplus', count: surplus.length },
+                        // { key: 'surplus' as ActiveTab, label: 'Surplus', count: surplus.length },
                         { key: 'discrepancies' as ActiveTab, label: 'Discrepancies', count: discrepancyCounts.open },
                     ]).map(tab => (
                         <button

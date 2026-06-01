@@ -384,7 +384,7 @@ export default function WarehouseReceivingPage() {
                                         { label: 'Pharmacy', value: scannedReturn.pharmacyName },
                                         { label: 'Total Items', value: scannedReturn.totalItems },
                                         { label: 'Box Count', value: scannedReturn.boxCount ?? scanProgress.totalPackages },
-                                        { label: 'Returnable Value', value: <span className="text-green-700">${Number(scannedReturn.totalReturnableValue || 0).toFixed(2)}</span> },
+                                        // { label: 'Returnable Value', value: <span className="text-green-700">${Number(scannedReturn.totalReturnableValue || 0).toFixed(2)}</span> },
                                         { label: 'Status', value: (
                                             <Badge variant={scanProgress.allScanned ? 'success' : 'warning'}>
                                                 <span className="text-[10px]">{scanProgress.allScanned ? 'Received' : 'Scanning'}</span>
@@ -689,7 +689,9 @@ export default function WarehouseReceivingPage() {
                                     <tr className="bg-gray-50 border-b border-gray-200">
                                         <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">License Plate</th>
                                         <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pharmacy</th>
-                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Items</th>
+                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Total Items</th>
+                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pending Items</th>
+                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Verified Items</th>
                                         <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Received</th>
                                         <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Verified</th>
                                         <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
@@ -701,6 +703,8 @@ export default function WarehouseReceivingPage() {
                                             <td className="px-3 py-1.5 text-xs font-mono font-semibold text-gray-900">{r.licensePlate}</td>
                                             <td className="px-3 py-1.5 text-xs text-gray-700">{r.pharmacyName}</td>
                                             <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.totalItems}</td>
+                                            <td className="px-3 py-1.5 text-xs text-center font-medium" style={{ color: (r.pendingVerifyItemsCount ?? 0) > 0 ? '#111827' : '#9ca3af' }}>{r.pendingVerifyItemsCount ?? 0}</td>
+                                            <td className="px-3 py-1.5 text-xs text-center font-medium" style={{ color: (r.verifiedItemsCount ?? 0) > 0 ? '#111827' : '#9ca3af' }}>{r.verifiedItemsCount ?? 0}</td>
                                             <td className="px-3 py-1.5 text-[11px] text-gray-500">{r.receivedInWarehouseDate ? formatDateTime(r.receivedInWarehouseDate) : '—'}</td>
                                             <td className="px-3 py-1.5 text-center">
                                                 {r.verifiedIntegrity ? (

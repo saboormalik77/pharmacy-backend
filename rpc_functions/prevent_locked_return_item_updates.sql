@@ -27,6 +27,10 @@ BEGIN
   END IF;
 
   IF TG_OP = 'INSERT' THEN
+    -- Wine cellar items are explicitly returned into a locked/received transaction — allow it.
+    IF NEW.wine_cellar_id IS NOT NULL THEN
+      RETURN NEW;
+    END IF;
     RAISE EXCEPTION 'Cannot add items to a "%" return. Return is locked.', v_return_status;
   END IF;
 

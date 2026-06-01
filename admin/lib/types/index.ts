@@ -649,6 +649,8 @@ export interface ReturnTransaction {
     verificationCompletedAt?: string | null;
     /** FCR-49: derived in _rt_to_json for warehouse verification UI tabs */
     verificationStatus?: 'not_started' | 'in_progress' | 'completed' | null;
+    pendingVerifyItemsCount?: number;
+    verifiedItemsCount?: number;
     paidMemoCount?: number;
     unpaidMemoCount?: number;
     totalAskValue?: number;

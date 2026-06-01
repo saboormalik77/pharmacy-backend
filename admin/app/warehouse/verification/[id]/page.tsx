@@ -525,7 +525,7 @@ export default function VerificationSessionPage() {
                                 { label: 'Damaged', value: completedSummary.damagedItems, color: 'text-red-700' },
                                 { label: 'Missing', value: completedSummary.missingItems, color: 'text-gray-500' },
                                 { label: 'Wrong Items', value: completedSummary.wrongItems, color: 'text-orange-700' },
-                                { label: 'Surplus', value: completedSummary.surplusItems, color: 'text-blue-700' },
+                                // { label: 'Surplus', value: completedSummary.surplusItems, color: 'text-blue-700' },
                             ]).map(s => (
                                 <div key={s.label} className="p-3 rounded-[4px] border border-gray-200 bg-gray-50">
                                     <p className="text-[10px] text-gray-500">{s.label}</p>
@@ -787,7 +787,7 @@ export default function VerificationSessionPage() {
                 <div className="flex gap-1 bg-gray-100 rounded-[4px] p-1">
                     {([
                         { key: 'items' as ActiveTab, label: 'Items', count: counts.totalItems },
-                        { key: 'surplus' as ActiveTab, label: 'Surplus', count: surplus.length },
+                        // { key: 'surplus' as ActiveTab, label: 'Surplus', count: surplus.length },
                         { key: 'discrepancies' as ActiveTab, label: 'Discrepancies', count: discrepancyCounts.open },
                     ]).map(tab => (
                         <button

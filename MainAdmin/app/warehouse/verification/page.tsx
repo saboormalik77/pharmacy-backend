@@ -195,7 +195,9 @@ export default function WarehouseVerificationListPage() {
                                         <tr className="bg-[var(--surface-container-low)]">
                                             <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">License Plate</th>
                                             <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Pharmacy</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Items</th>
+                                            <th className="text-center text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Total Items</th>
+                                            <th className="text-center text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Pending Items</th>
+                                            <th className="text-center text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Verified Items</th>
                                             <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Received</th>
                                             <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Verification</th>
                                             <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Action</th>
@@ -208,10 +210,16 @@ export default function WarehouseVerificationListPage() {
                                             <tr key={r.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                                 <td className="px-3 py-3 text-sm font-semibold" style={{ color: 'var(--primary)' }}>{r.licensePlate}</td>
                                                 <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{r.pharmacyName || '—'}</td>
-                                                <td className="px-3 py-3">
+                                                <td className="px-3 py-3 text-center">
                                                     <span className="inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium" style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)' }}>
                                                         {r.totalItems ?? '—'}
                                                     </span>
+                                                </td>
+                                                <td className="px-3 py-3 text-sm text-center font-medium" style={{ color: (r.pendingVerifyItemsCount ?? 0) > 0 ? 'var(--foreground)' : 'var(--on-surface-variant)' }}>
+                                                    {r.pendingVerifyItemsCount ?? 0}
+                                                </td>
+                                                <td className="px-3 py-3 text-sm text-center font-medium" style={{ color: (r.verifiedItemsCount ?? 0) > 0 ? 'var(--foreground)' : 'var(--on-surface-variant)' }}>
+                                                    {r.verifiedItemsCount ?? 0}
                                                 </td>
                                                 <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>
                                                     {formatDate(r.receivedInWarehouseDate || r.createdAt)}

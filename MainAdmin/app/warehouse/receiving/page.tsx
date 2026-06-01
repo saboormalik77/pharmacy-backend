@@ -419,7 +419,7 @@ export default function WarehouseReceivingPage() {
                                         { label: 'Pharmacy', value: <span className="text-xs font-medium" style={{ color: 'var(--on-secondary-fixed)' }}>{scannedReturn.pharmacyName}</span> },
                                         { label: 'Total Items', value: <span className="text-xs font-medium" style={{ color: 'var(--on-secondary-fixed)' }}>{scannedReturn.totalItems}</span> },
                                         { label: 'Box Count', value: <span className="text-xs font-medium" style={{ color: 'var(--on-secondary-fixed)' }}>{scannedReturn.boxCount ?? scanProgress.totalPackages}</span> },
-                                        { label: 'Returnable Value', value: <span className="text-xs font-bold" style={{ color: 'var(--on-secondary-fixed)' }}>${Number(scannedReturn.totalReturnableValue || 0).toFixed(2)}</span> },
+                                        // { label: 'Returnable Value', value: <span className="text-xs font-bold" style={{ color: 'var(--on-secondary-fixed)' }}>${Number(scannedReturn.totalReturnableValue || 0).toFixed(2)}</span> },
                                         {
                                             label: 'Status',
                                             value: (
@@ -561,9 +561,11 @@ export default function WarehouseReceivingPage() {
                                         <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">License Plate</th>
                                         <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Pharmacy</th>
                                         <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">FedEx Tracking</th>
-                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Items</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Total Items</th>
                                         <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Boxes</th>
                                         <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Scan Status</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Pending Items</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Verified Items</th>
                                         <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Finalized</th>
                                     </tr>
                                 </thead>
@@ -648,6 +650,12 @@ export default function WarehouseReceivingPage() {
                                                             <span className="text-[10px]">Not scanned</span>
                                                         </Badge>
                                                     )}
+                                                </td>
+                                                <td className="px-3 py-3 text-sm text-center font-medium" style={{ color: (r.pendingVerifyItemsCount ?? 0) > 0 ? 'var(--foreground)' : 'var(--on-surface-variant)' }}>
+                                                    {r.pendingVerifyItemsCount ?? 0}
+                                                </td>
+                                                <td className="px-3 py-3 text-sm text-center font-medium" style={{ color: (r.verifiedItemsCount ?? 0) > 0 ? 'var(--foreground)' : 'var(--on-surface-variant)' }}>
+                                                    {r.verifiedItemsCount ?? 0}
                                                 </td>
                                                 <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{r.finalizedAt ? formatDate(r.finalizedAt) : '—'}</td>
                                             </tr>
@@ -766,31 +774,37 @@ export default function WarehouseReceivingPage() {
                                     <tr className="bg-[var(--surface-container-low)]">
                                         <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">License Plate</th>
                                         <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Pharmacy</th>
-                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Items</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Total Items</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Pending Items</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Verified Items</th>
                                         <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Received</th>
                                         <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Verified</th>
                                         <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
-                                    {receivedReturns.map(r => (
+                                    {receivedReturns.map(r => {
+                                        const isVerified = r.verificationStatus === 'completed' || !!r.verificationCompletedAt;
+                                        return (
                                         <tr key={r.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                             <td className="px-3 py-3 text-sm font-mono font-semibold" style={{ color: 'var(--foreground)' }}>{r.licensePlate}</td>
                                             <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{r.pharmacyName}</td>
                                             <td className="px-3 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{r.totalItems}</td>
+                                            <td className="px-3 py-3 text-sm text-center font-medium" style={{ color: (r.pendingVerifyItemsCount ?? 0) > 0 ? 'var(--foreground)' : 'var(--on-surface-variant)' }}>{r.pendingVerifyItemsCount ?? 0}</td>
+                                            <td className="px-3 py-3 text-sm text-center font-medium" style={{ color: (r.verifiedItemsCount ?? 0) > 0 ? 'var(--foreground)' : 'var(--on-surface-variant)' }}>{r.verifiedItemsCount ?? 0}</td>
                                             <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{r.receivedInWarehouseDate ? formatDateTime(r.receivedInWarehouseDate) : '—'}</td>
                                             <td className="px-3 py-3 text-center">
-                                                {r.verifiedIntegrity ? (
+                                                {isVerified ? (
                                                     <Badge variant="success"><span className="text-[10px]">Verified</span></Badge>
                                                 ) : (
                                                     <Badge variant="warning"><span className="text-[10px]">Pending</span></Badge>
                                                 )}
                                             </td>
                                             <td className="px-3 py-3 text-right">
-                                                {r.verifiedIntegrity ? (
+                                                {isVerified ? (
                                                     <button
                                                         type="button"
-                                                        onClick={() => router.push(`/warehouse/returns/${r.id}`)}
+                                                        onClick={() => router.push(`/warehouse/verification/${r.id}`)}
                                                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40"
                                                         style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                                     >
@@ -807,7 +821,8 @@ export default function WarehouseReceivingPage() {
                                                 )}
                                             </td>
                                         </tr>
-                                    ))}
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                             {receivedPagination && receivedPagination.totalPages > 1 && (
