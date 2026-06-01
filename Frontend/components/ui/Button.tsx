@@ -11,9 +11,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         className={cn(
-          'inline-flex items-center justify-center rounded-[4px] font-medium transition-all duration-200',
+          'inline-flex cursor-pointer items-center justify-center rounded-[4px] font-medium transition-all duration-200',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#516057]/20 focus-visible:ring-offset-2',
-          'disabled:pointer-events-none disabled:opacity-50',
+          'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
           {
             // Primary: Sage Green (#516057)
             'bg-[#516057] text-white hover:opacity-90 active:scale-[0.95]': variant === 'primary',

@@ -261,7 +261,7 @@ export default function BranchesPage() {
         {/* Dropdown Menu - Rendered outside table */}
         {actionMenuId && (
           <>
-            <div className="fixed inset-0 z-40" onClick={() => setActionMenuId(null)} />
+            <div className="fixed inset-0 z-40 cursor-pointer" onClick={() => setActionMenuId(null)} />
             <div 
               className="fixed w-40 bg-white border border-[#e2e2e2] rounded-[4px] shadow-xl z-50"
               style={{

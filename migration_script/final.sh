@@ -2,8 +2,9 @@ pip install psycopg2-binary -q && python3 << 'PYEOF'
 import re, sys, psycopg2, psycopg2.extras
 
 PASSWORD = "Rx!Portal%239QmL7%40eV2"
-SOURCE = f"postgresql://postgres.zggtgjbokgfsbenazzpx:{PASSWORD}@aws-1-us-west-1.pooler.supabase.com:5432/postgres?sslmode=require"
-DEST   = f"postgresql://postgres.mxdzmfgkjktbvjeonwiq:{PASSWORD}@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require"
+SOURCE = f"postgresql://postgres.mxdzmfgkjktbvjeonwiq:{PASSWORD}@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require"
+DEST =f"postgresql://postgres.zggtgjbokgfsbenazzpx:{PASSWORD}@aws-1-us-west-1.pooler.supabase.com:5432/postgres?sslmode=require"
+ 
 
 BATCH = 500
 
@@ -15,7 +16,8 @@ print("=" * 60)
 # ── CONNECT ──────────────────────────────────────────────────
 print("\n[1/6] Connecting...")
 src = psycopg2.connect(SOURCE)
-src.set_session(readonly=True, autocommit=True)
+# Server-side/named cursors need an open transaction. Keep SOURCE read-only.
+src.set_session(readonly=True, autocommit=False)
 dst = psycopg2.connect(DEST)
 dst.autocommit = True
 sc = src.cursor()

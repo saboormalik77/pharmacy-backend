@@ -1302,8 +1302,8 @@ export default function AddItemsPage() {
 
                 {/* Edit session item modal */}
                 {editItemModal && (
-                    <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditItemModal(null)}>
-                        <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                    <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setEditItemModal(null)}>
+                        <div className="bg-white rounded-[4px] max-w-md w-full cursor-default shadow-xl" onClick={e => e.stopPropagation()}>
                             <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-[#f5f2f1]">
                                 <h2 className="text-sm font-semibold text-[#000000]">Edit Item — {editItemModal.ndc}</h2>
                                 <button type="button" onClick={() => setEditItemModal(null)} className="text-[#9ca3af] hover:text-[#505454]"><X className="w-4 h-4" /></button>
