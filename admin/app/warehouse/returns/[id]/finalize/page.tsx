@@ -611,8 +611,8 @@ export default function FinalizeReturnPage() {
 
             {/* ── FedEx / USPS Tracking Sub-Modal ─────────── */}
             {fedexSubModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-[60] p-4" onClick={() => { if (!fedexApiLoading && !pickupLoading) setFedexSubModal(false); }}>
-                    <div className="bg-white rounded-[4px] max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex cursor-pointer items-center justify-center z-[60] p-4" onClick={() => { if (!fedexApiLoading && !pickupLoading) setFedexSubModal(false); }}>
+                    <div className="bg-white rounded-[4px] max-w-2xl w-full cursor-default shadow-xl max-h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
 
                         {/* Header */}
                         <div className="p-4 rounded-t-[4px]" style={{ backgroundColor: fedexMode === 'api' ? 'var(--primary-action)' : 'var(--accent)' }}>

@@ -635,8 +635,8 @@ export default function ProcessorsPage() {
 
             {/* ── View Modal ─────────────────────────────────── */}
             {viewModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full cursor-default shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-base font-semibold text-gray-900">Processor Details</h2>
                             <button onClick={() => setViewModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
@@ -704,12 +704,12 @@ export default function ProcessorsPage() {
 
             {/* ── Add Processor Modal ────────────────────────── */}
             {addModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => { 
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => {
                     setAddModal(false); 
                     setShowPassword(false); 
                     setNewProcessor({ name: '', email: '', password: '', phone: '', notes: '', permissions: [] });
                 }}>
-                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full cursor-default shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Add New Processor</h2>
                             <button onClick={() => { 
@@ -806,8 +806,8 @@ export default function ProcessorsPage() {
 
             {/* ── Edit Processor Modal ───────────────────────── */}
             {editModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setEditModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full cursor-default shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-xs font-semibold text-gray-900">Edit Processor</h2>
                             <button onClick={() => setEditModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
@@ -880,8 +880,8 @@ export default function ProcessorsPage() {
 
             {/* ── Assigned Stores Modal ──────────────────────── */}
             {storesModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => { setStoresModal(null); dispatch(clearSelectedStores()); }}>
-                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => { setStoresModal(null); dispatch(clearSelectedStores()); }}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full cursor-default shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50">
                             <div>
                                 <h2 className="text-xs font-semibold text-gray-900">Assigned Stores</h2>
@@ -949,8 +949,8 @@ export default function ProcessorsPage() {
 
             {/* ── Assign Stores Modal ────────────────────────── */}
             {assignModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setAssignModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setAssignModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full cursor-default shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50">
                             <div>
                                 <h2 className="text-xs font-semibold text-gray-900">Manage Store Assignments</h2>
@@ -1082,8 +1082,8 @@ export default function ProcessorsPage() {
 
             {/* ── Deactivate Confirmation Modal ──────────────── */}
             {deactivateModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeactivateModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setDeactivateModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full cursor-default shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-xs font-semibold text-gray-900">Deactivate Processor</h2>
                             <button onClick={() => setDeactivateModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
@@ -1113,8 +1113,8 @@ export default function ProcessorsPage() {
 
             {/* ── Activate Confirmation Modal ─────────────────── */}
             {activateModal && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setActivateModal(null)}>
-                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex cursor-pointer items-center justify-center z-50 p-4" onClick={() => setActivateModal(null)}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full cursor-default shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-xs font-semibold text-gray-900">Activate Processor</h2>
                             <button onClick={() => setActivateModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>

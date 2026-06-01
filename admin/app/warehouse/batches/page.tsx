@@ -268,8 +268,8 @@ export default function BatchesPage() {
 
             {/* Create Batch Modal */}
             {showCreate && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowCreate(false)}>
-                    <div className="bg-white rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-5" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/50" onClick={() => setShowCreate(false)}>
+                    <div className="bg-white rounded-[4px] cursor-default shadow-xl max-w-sm w-full mx-4 p-5" onClick={e => e.stopPropagation()}>
                         <h2 className="text-sm font-bold text-gray-900 mb-3">Create New Batch</h2>
 
                         <div className="space-y-3">
