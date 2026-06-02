@@ -266,6 +266,7 @@ function generateCheckHtml(data: CheckPdfData): string {
         </div>
     </div>
     
+    
     <!-- Credit Breakdown Section -->
     <div class="credit-breakdown">
         <div><strong>Ref # ${payment.returnReferenceNumber || payment.checkNumber || 'N/A'}</strong> - These manufacturer credits are included in this check. Account # ${displayAccountNumber} Service Date:${serviceDate || 'N/A'} Check Date:${checkDate}</div>
