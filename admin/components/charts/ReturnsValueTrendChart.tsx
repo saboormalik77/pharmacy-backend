@@ -28,7 +28,10 @@ export function ReturnsValueTrendChart() {
                     tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
                 />
                 <Tooltip
-                    formatter={(value: number | undefined) => value ? formatCurrency(value) : '$0'}
+                    formatter={(value) => {
+                        const numericValue = typeof value === 'number' ? value : Number(value);
+                        return Number.isFinite(numericValue) ? formatCurrency(numericValue) : '$0';
+                    }}
                     contentStyle={{
                         backgroundColor: '#fff',
                         border: '1px solid #e5e7eb',
